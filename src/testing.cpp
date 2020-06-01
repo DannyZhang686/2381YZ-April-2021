@@ -179,7 +179,7 @@ void gui_switch(void) {
   lv_obj_set_free_num(sw1, 1);                  /*Set a unique number for the object*/
   set_switch_style(sw1);  // style is in separate function for cleaner code
   lv_obj_align(sw1, NULL, LV_ALIGN_IN_LEFT_MID, 50, 0);
-
+  
   lv_obj_t * sw2 = lv_sw_create(g_btn_region, sw1); // copy sw1 to sw2
   lv_obj_set_free_num(sw2, 2);                  /*Set a unique number for the object*/
   lv_obj_align(sw2, NULL, LV_ALIGN_IN_RIGHT_MID, -50, 0);
@@ -189,10 +189,8 @@ void gui_switch(void) {
   lv_sw_set_action(sw2, switch_action);
 }
 
-uint8_t demo_id = 0;
-
 static lv_res_t demo_click_action(lv_obj_t * btn) {
-   demo_id = lv_obj_get_free_num(btn);
+   int demo_id = lv_obj_get_free_num(btn);
 
    g_btn_region = lv_obj_create(lv_scr_act(), NULL);
    lv_obj_set_size(g_btn_region, lv_obj_get_width(lv_scr_act()),
@@ -200,7 +198,6 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
    lv_obj_align(g_btn_region, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
    lv_obj_set_style(g_btn_region, &lv_style_pretty_color);
 
-   //
    g_sb_region = lv_obj_create(lv_scr_act(), NULL);
    lv_obj_set_size(g_sb_region, lv_obj_get_width(lv_scr_act()),
        lv_obj_get_height(lv_scr_act()) * 0.2);
