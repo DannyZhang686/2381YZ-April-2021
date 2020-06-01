@@ -179,7 +179,7 @@ void gui_switch(void) {
   lv_obj_set_free_num(sw1, 1);                  /*Set a unique number for the object*/
   set_switch_style(sw1);  // style is in separate function for cleaner code
   lv_obj_align(sw1, NULL, LV_ALIGN_IN_LEFT_MID, 50, 0);
-  
+
   lv_obj_t * sw2 = lv_sw_create(g_btn_region, sw1); // copy sw1 to sw2
   lv_obj_set_free_num(sw2, 2);                  /*Set a unique number for the object*/
   lv_obj_align(sw2, NULL, LV_ALIGN_IN_RIGHT_MID, -50, 0);
@@ -205,16 +205,18 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
    lv_obj_set_style(g_sb_region, &lv_style_pretty_color);
 
    g_sb_label = lv_label_create(g_sb_region, NULL);
+   lv_label_set_text(g_sb_label, "");
    lv_obj_set_style(g_sb_label, &lv_style_pretty_color);
    lv_obj_align(g_sb_label, NULL, LV_ALIGN_CENTER, 0, 0);
 
-   if (demo_id==1) {
-    gui_btnm();
-  } else if (demo_id==2) {
-    gui_3btn();
-  } else if (demo_id==3) {
-    gui_switch();
-  }
+   if (demo_id == 1) {
+     gui_btnm();
+   } else if (demo_id == 2) {
+     gui_3btn();
+   } else if (demo_id == 3) {
+     gui_switch();
+   } else if (demo_id == 4) {
+   }
 
    return LV_RES_OK; /*Return OK if the button is not deleted*/
 }
