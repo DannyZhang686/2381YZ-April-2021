@@ -1,4 +1,5 @@
 #include "main.h"
+#include "motors.h"
 
 static lv_obj_t *g_btn_region; //tab view region of the screen
 static lv_obj_t *g_sb_region; //status bar region of the screen
@@ -13,30 +14,30 @@ static lv_res_t btnm_action(lv_obj_t * btnm, const char *txt) {
   int btnm_num = atoi(txt);
 
   switch (btnm_num) {
-  case 1:
-    lv_label_set_text(g_sb_label, "Red Right Auton");
-    auton_sel = 1;
+    case 1:
+      lv_label_set_text(g_sb_label, "Red Right Auton");
+      auton_sel = 1;
+      break;
+    case 2:
+      lv_label_set_text(g_sb_label, "Red Left Auton");
+      auton_sel = 2;
+      break;
+    case 3:
+      lv_label_set_text(g_sb_label, "Blue Right Auton");
+      auton_sel = 3;
     break;
-  case 2:
-    lv_label_set_text(g_sb_label, "Red Left Auton");
-    auton_sel = 2;
+      case 4:
+        lv_label_set_text(g_sb_label, "Blue Left Auton");
+        auton_sel = 4;
     break;
-  case 3:
-    lv_label_set_text(g_sb_label, "Blue Right Auton");
-    auton_sel = 3;
-break;
-  case 4:
-    lv_label_set_text(g_sb_label, "Blue Left Auton");
-    auton_sel = 4;
-break;
-  case 5:
-    lv_label_set_text(g_sb_label, "Skills Auton1");
-    auton_sel = 5;
-break;
-  case 6:
-    lv_label_set_text(g_sb_label, "Skills Auton2");
-    auton_sel = 6;
-break;
+      case 5:
+        lv_label_set_text(g_sb_label, "Skills Auton1");
+        auton_sel = 5;
+    break;
+      case 6:
+        lv_label_set_text(g_sb_label, "Skills Auton2");
+        auton_sel = 6;
+    break;
   }
 
   lv_obj_align(g_sb_label, NULL, LV_ALIGN_CENTER, 0, 0); // must be after set_text
@@ -169,24 +170,56 @@ void set_switch_style (lv_obj_t * sw) {
 
 //function 6
 
-void gui_switch(void) {
-  /*Create a title label*/
-  lv_obj_t * label = lv_label_create(g_btn_region, NULL);
-  lv_label_set_text(label, "Flip Switches");
-  lv_obj_align(label, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
+void status(void) {
+  std::string printString = "Battery: " + std::to_string((int) pros::battery::get_capacity()) + "%";
+  char printChar[1024];
+  strcpy(printChar, printString.c_str());
 
-  lv_obj_t * sw1 = lv_sw_create(g_btn_region, NULL);
-  lv_obj_set_free_num(sw1, 1);                  /*Set a unique number for the object*/
-  set_switch_style(sw1);  // style is in separate function for cleaner code
-  lv_obj_align(sw1, NULL, LV_ALIGN_IN_LEFT_MID, 50, 0);
+  lv_obj_t * label_1 = lv_label_create(g_btn_region, NULL);
+  lv_label_set_array_text(label_1, printChar, 1024);
+  lv_obj_align(label_1, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
 
-  lv_obj_t * sw2 = lv_sw_create(g_btn_region, sw1); // copy sw1 to sw2
-  lv_obj_set_free_num(sw2, 2);                  /*Set a unique number for the object*/
-  lv_obj_align(sw2, NULL, LV_ALIGN_IN_RIGHT_MID, -50, 0);
+  printString = "Motor Temps: " + std::to_string((int) leftFront.get_temperature());
+  strcpy(printChar, printString.c_str());
 
-  // both switches use the same call back function
-  lv_sw_set_action(sw1, switch_action);
-  lv_sw_set_action(sw2, switch_action);
+  lv_obj_t * label_2 = lv_label_create(g_btn_region, NULL);
+  lv_label_set_array_text(label_2, printChar, 1024);
+  lv_obj_align(label_2, NULL, LV_ALIGN_IN_TOP_MID, 0, 20);
+
+  printString = "OSE values: " + std::to_string((int) 56/*pros::c::encoderGet(left)*/);
+  strcpy(printChar, printString.c_str());
+
+  lv_obj_t * label_3 = lv_label_create(g_btn_region, NULL);
+  lv_label_set_array_text(label_3, printChar, 1024);
+  lv_obj_align(label_3, NULL, LV_ALIGN_IN_TOP_MID, 0, 35);
+
+  printString = "Motor values: " + std::to_string((int) leftFront.get_position());
+  strcpy(printChar, printString.c_str());
+
+  lv_obj_t * label_4 = lv_label_create(g_btn_region, NULL);
+  lv_label_set_array_text(label_4, printChar, 1024);
+  lv_obj_align(label_4, NULL, LV_ALIGN_IN_TOP_MID, 0, 55);
+
+  // lv_obj_t * label = lv_label_create(g_btn_region, NULL);
+  // lv_label_set_text(label, "Flip Switches");
+  // lv_obj_align(label, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
+  //
+  // lv_obj_t * label = lv_label_create(g_btn_region, NULL);
+  // lv_label_set_text(label, "Flip Switches");
+  // lv_obj_align(label, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
+  //
+  // lv_obj_t * sw1 = lv_sw_create(g_btn_region, NULL);
+  // lv_obj_set_free_num(sw1, 1);                  /*Set a unique number for the object*/
+  // set_switch_style(sw1);  // style is in separate function for cleaner code
+  // lv_obj_align(sw1, NULL, LV_ALIGN_IN_LEFT_MID, 50, 0);
+  //
+  // lv_obj_t * sw2 = lv_sw_create(g_btn_region, sw1); // copy sw1 to sw2
+  // lv_obj_set_free_num(sw2, 2);                  /*Set a unique number for the object*/
+  // lv_obj_align(sw2, NULL, LV_ALIGN_IN_RIGHT_MID, -50, 0);
+  //
+  // // both switches use the same call back function
+  // lv_sw_set_action(sw1, switch_action);
+  // lv_sw_set_action(sw2, switch_action);
 }
 
 static lv_res_t demo_click_action(lv_obj_t * btn) {
@@ -214,7 +247,7 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
    } else if (demo_id == 2) {
      gui_3btn();
    } else if (demo_id == 3) {
-     gui_switch();
+     status();
    } else if (demo_id == 4) {
    }
 
@@ -222,7 +255,10 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
 }
 
 void gui(void) {
-// select demo
+  lv_obj_t * logo;
+  lv_img_set_src(logo, &2381-small_map);
+  lv_obj_align(logo, NULL, LV_ALIGN_IN_TOP_MID, -20, 50);
+
   /*Create a title label*/
   lv_obj_t * label = lv_label_create(lv_scr_act(), NULL);
   lv_label_set_text(label, "2381Z Robotics");
