@@ -256,7 +256,7 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
 
 void gui(void) {
   lv_obj_t * logo;
-  lv_img_set_src(logo, &logo2381_map);
+  lv_img_set_src(logo, &logo2381);
   lv_obj_align(logo, NULL, LV_ALIGN_IN_TOP_MID, -20, 50);
 
   /*Create a title label*/
