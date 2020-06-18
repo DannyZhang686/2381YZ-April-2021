@@ -1,5 +1,5 @@
-#ifndef TESTING_H
-#define TESTING_H
+#ifndef GUI_H
+#define GUI_H
 
 extern int auton_sel;
 void gui(void);
