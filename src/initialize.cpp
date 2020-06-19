@@ -1,7 +1,7 @@
 //File with stuff that's probably not going to be used
 
 #include "main.h"
-#include "testing.h"
+#include "gui.h"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.

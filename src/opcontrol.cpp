@@ -4,10 +4,13 @@
 
 void opcontrol() {
 	//this is how to pass variables; it probably won't actually be used though, except in auton
-	std::pair<int, int>* driveValues = new std::pair(std::make_pair((int) master.get_analog(ANALOG_LEFT_Y), (int) master.get_analog(ANALOG_RIGHT_X)));
-	pros::Task splitArcadeDrive(splitArcade, (void*)(&driveValues), TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
-	delete driveValues;
-	pros::Task flywheelSpin(flywheel, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Flywheel");
+	// std::pair<int, int>* driveValues = new std::pair(std::make_pair((int) master.get_analog(ANALOG_LEFT_Y), (int) master.get_analog(ANALOG_RIGHT_X)));
+	// pros::Task drive(splitArcade, (void*)(&driveValues), TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
+	// delete driveValues;
+	pros::Task drive(splitArcade, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
+	pros::Task shooter(flywheelSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Flywheel");
+	pros::Task intake(intakeSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake");
+	pros::Task indexer(indexerSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Indexer");
 }
 
 /**
