@@ -7,4 +7,7 @@
 void trackPosition(void*);
 void moveForward(int);
 
+//auton selection variable
+extern int autonPick;
+
 #endif

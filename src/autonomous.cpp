@@ -3,14 +3,13 @@
 
 #include "main.h"
 #include "autonomous.h"
-#define AUTON 0
 
 //0 = no auton
 //1 = ...
 
 void autonomous() {
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
-  if (AUTON == 1) {
+  if (autonPick == 1) {
     // moveForward(100);
     //do stuff
   }

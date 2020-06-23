@@ -7,7 +7,7 @@ extern pros::Motor rightBack;
 extern pros::Motor leftIntake;
 extern pros::Motor rightIntake;
 extern pros::Motor indexer;
-extern pros::Motor flywheel;
+extern pros::Motor shooter;
 
 extern pros::Controller master;
 

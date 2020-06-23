@@ -1,11 +1,10 @@
 #include "main.h"
 #include "motors.h"
+#include "autonomous.h"
 
 static lv_obj_t *g_btn_region; //tab view region of the screen
 static lv_obj_t *g_sb_region; //status bar region of the screen
 static lv_obj_t *g_sb_label;  // sb text label
-
-int auton_sel = 0;
 
 //function 1
 
@@ -16,28 +15,28 @@ static lv_res_t btnm_action(lv_obj_t * btnm, const char *txt) {
   switch (btnm_num) {
     case 1:
       lv_label_set_text(g_sb_label, "Red Right Auton");
-      auton_sel = 1;
+      // autonPick = 1;
       break;
     case 2:
       lv_label_set_text(g_sb_label, "Red Left Auton");
-      auton_sel = 2;
+      // autonPick = 2;
       break;
     case 3:
       lv_label_set_text(g_sb_label, "Blue Right Auton");
-      auton_sel = 3;
-    break;
-      case 4:
-        lv_label_set_text(g_sb_label, "Blue Left Auton");
-        auton_sel = 4;
-    break;
-      case 5:
-        lv_label_set_text(g_sb_label, "Skills Auton1");
-        auton_sel = 5;
-    break;
-      case 6:
-        lv_label_set_text(g_sb_label, "Skills Auton2");
-        auton_sel = 6;
-    break;
+      // autonPick = 3;
+      break;
+    case 4:
+      lv_label_set_text(g_sb_label, "Blue Left Auton");
+      // autonPick = 4;
+      break;
+    case 5:
+      lv_label_set_text(g_sb_label, "Skills Auton1");
+      // autonPick = 5;
+      break;
+    case 6:
+      lv_label_set_text(g_sb_label, "Skills Auton2");
+      // autonPick = 6;
+      break;
   }
 
   lv_obj_align(g_sb_label, NULL, LV_ALIGN_CENTER, 0, 0); // must be after set_text
@@ -65,7 +64,6 @@ void gui_btnm(void) {
 static lv_res_t btn_click_action(lv_obj_t * btn) {
    uint8_t id = lv_obj_get_free_num(btn);
    static char buffer[32];
-   auton_sel = id;
 
    snprintf(buffer, 32, "Selection is %d \n", id);
    lv_label_set_text(g_sb_label, buffer);
