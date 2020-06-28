@@ -1,6 +1,7 @@
 #include "main.h"
 #include "motors.h"
 
+//Ports
 #define LF_PORT 9
 #define RF_PORT 6
 #define LB_PORT 5

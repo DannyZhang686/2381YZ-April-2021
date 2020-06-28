@@ -5,9 +5,21 @@
 
 //auton function declarations
 void trackPosition(void*);
-void moveForward(int);
+void moveShort(double, double);
+void moveLong(double, double);
+void turnToFace(double);
 
-//auton selection variable
+//Position tracking struct and variable
+struct Position {
+  double x;
+  double y;
+  double angle;
+  void reset() {
+    x = y = angle = 0;
+  }
+} extern robotPos;
+
+//extern variables
 extern int autonPick;
 
-#endif
+#endif //_PROS_AUTONOMOUS_H_

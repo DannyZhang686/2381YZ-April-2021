@@ -13,6 +13,7 @@
 void initialize() {
 	// pros::lcd::initialize();
 	gui();
+	pros::delay(1000); //encoder garbage time
 }
 
 /**

@@ -1,30 +1,44 @@
 #include "main.h"
 #include "opcontrol.h"
 #include "motors.h"
+#include "utilities.h"
 
 void splitArcade(void*) {
   // std::pair<int, int> stuff = *static_cast<std::pair<int, int>*> (driveValues);
-  int power, turn, left, right;
+  double power, turn, left, right;
   while (true) {
     //Standard split arcade drive implementation
     power = master.get_analog(ANALOG_LEFT_Y);
     turn = master.get_analog(ANALOG_RIGHT_X);
-    left = power + turn;
-    right = power - turn;
+
+    //left and right represent percentages of max speed
+    left = (power + turn) * 100.0 / 127;
+    left = std::max(-100.0, std::min(left, 100.0));
+    right = (power - turn) * 100.0 / 127;
+    right = std::max(-100.0, std::min(right, 100.0));
+
+    //Each of left and right are now mapped to a value between
+    //0 and 200 using a custom exponential curve to ensure precise
+    //micro movement (especially turns) while maintaining high max speed.
+    //See bit.ly/vexjoystickmap for a graph of input vs. output.
+
+    left = sgn(left) * (std::floor(1.045 * std::exp(std::fabs(left) / 19.0)) - 1);
+    right = sgn(right) * (std::floor(1.045 * std::exp(std::fabs(right) / 19.0)) - 1);
+
     if ((abs(left) > 10) || (abs(right) > 10)) {
-      //don't move if there's very little input
-      leftFront.move_velocity(left);
-      leftBack.move_velocity(left);
-      rightFront.move_velocity(right);
-      rightBack.move_velocity(right);
+      leftFront.move_velocity((int) left);
+      leftBack.move_velocity((int) left);
+      rightFront.move_velocity((int) right);
+      rightBack.move_velocity((int) right);
     }
     else {
+      //don't move if there's very little input
       leftFront.move_velocity(0);
       leftBack.move_velocity(0);
       rightFront.move_velocity(0);
       rightBack.move_velocity(0);
     }
-    pros::delay(10);
+    pros::delay(20);
   }
 }
 
@@ -54,7 +68,7 @@ void shooterSpin(void*) {
         shooter.move_velocity(0);
       }
     }
-    pros::delay(10);
+    pros::delay(20);
   }
 }
 
@@ -81,7 +95,7 @@ void intakeSpin(void*) {
         rightIntake.move_velocity(0);
       }
     }
-    pros::delay(10);
+    pros::delay(20);
   }
 }
 
@@ -104,6 +118,6 @@ void indexerSpin(void*) {
         indexer.move_velocity(0);
       }
     }
-    pros::delay(10);
+    pros::delay(20);
   }
 }

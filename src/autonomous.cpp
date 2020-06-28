@@ -3,12 +3,12 @@
 
 #include "main.h"
 #include "autonomous.h"
-
-//0 = no auton
-//1 = ...
+#include "utilities.h"
 
 void autonomous() {
+	Position robotPos;
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
+	robotPos.reset();
   if (autonPick == 1) {
     // moveForward(100);
     //do stuff

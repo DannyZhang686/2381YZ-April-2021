@@ -3,10 +3,17 @@
 #include "motors.h"
 
 void trackPosition(void*) {
-  //tracking and stuff
+  //tracking algorithms
 }
 
-void moveForward(int speed) {
-  //moves forward
-  leftFront.move_velocity(speed);
+void moveShort(double targetX, double targetY) {
+  //moves with a full PID
+}
+
+void moveLong(double targetX, double targetY) {
+  //moves with position tracking and ends with PID
+}
+
+void turnToFace(double angle) {
+  //turns with full PID
 }
