@@ -14,6 +14,15 @@ extern pros::Motor rightIntake;
 extern pros::Motor indexer;
 extern pros::Motor shooter;
 
+extern pros::Imu leftIMU;
+extern pros::Imu rightIMU;
+
+extern pros::ADIEncoder rightTracking;
+extern pros::ADIEncoder backTracking;
+extern pros::ADIEncoder leftTracking;
+
+extern pros::ADIAnalogIn lineSensor;
+
 extern pros::Controller master;
 
 

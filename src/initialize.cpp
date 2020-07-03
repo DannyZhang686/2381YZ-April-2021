@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "gui.h"
+#include "motors.h"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -13,7 +14,9 @@
 void initialize() {
 	// pros::lcd::initialize();
 	gui();
-	pros::delay(1000); //encoder garbage time
+	leftIMU.reset();
+	rightIMU.reset();
+	pros::delay(2000); //let everything init properly
 }
 
 /**
