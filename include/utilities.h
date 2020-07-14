@@ -1,11 +1,12 @@
 #include "main.h"
 
-#ifndef _PROS_UTILITIES_H_
-#define _PROS_UTILITIES_H_
+#ifndef _UTILITIES_H_
+#define _UTILITIES_H_
 
 int sgn(int);
 int sgn(float);
 int sgn(double);
 int sgn(bool);
+double encToInches(int);
 
-#endif //_PROS_UTILITIES_H_
+#endif //_UTILITIES_H_

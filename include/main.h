@@ -15,6 +15,17 @@
 #ifndef _PROS_MAIN_H_
 #define _PROS_MAIN_H_
 
+//#defines that are more or less global
+#define PI 3.1415926535897932384626 //...
+#define TRACKING_WHEEL_DIAMETER 2.75 //inches
+#define L_TO_MID 3.0 //perpendicular distance from tracking wheel to center (needs to be a float)
+#define R_TO_MID 3.0
+#define B_TO_MID 3.0
+
+//Shortcuts for less typing that can be used in all files
+#define t_s std::to_string
+#define s_t pros::lcd::set_text
+
 /**
  * If defined, some commonly used enums will have preprocessor macros which give
  * a shorter, more convenient naming pattern. If this isn't desired, simply

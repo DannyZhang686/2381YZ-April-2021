@@ -6,7 +6,7 @@ static lv_obj_t *g_btn_region; //tab view region of the screen
 static lv_obj_t *g_sb_region; //status bar region of the screen
 static lv_obj_t *g_sb_label;  // sb text label
 
-//function 1
+int autonPick;
 
 static lv_res_t btnm_action(lv_obj_t * btnm, const char *txt) {
 
@@ -15,27 +15,27 @@ static lv_res_t btnm_action(lv_obj_t * btnm, const char *txt) {
   switch (btnm_num) {
     case 1:
       lv_label_set_text(g_sb_label, "Red Right Auton");
-      // autonPick = 1;
+      autonPick = 1;
       break;
     case 2:
       lv_label_set_text(g_sb_label, "Red Left Auton");
-      // autonPick = 2;
+      autonPick = 2;
       break;
     case 3:
       lv_label_set_text(g_sb_label, "Blue Right Auton");
-      // autonPick = 3;
+      autonPick = 3;
       break;
     case 4:
       lv_label_set_text(g_sb_label, "Blue Left Auton");
-      // autonPick = 4;
+      autonPick = 4;
       break;
     case 5:
       lv_label_set_text(g_sb_label, "Skills Auton1");
-      // autonPick = 5;
+      autonPick = 5;
       break;
     case 6:
       lv_label_set_text(g_sb_label, "Skills Auton2");
-      // autonPick = 6;
+      autonPick = 6;
       break;
   }
 
@@ -252,7 +252,7 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
    return LV_RES_OK; /*Return OK if the button is not deleted*/
 }
 
-void gui(void) {
+void gui(void*) {
   lv_obj_t * logo = lv_img_create(lv_scr_act(), NULL);
   lv_img_set_src(logo, "C:\\Shared Files\\2381Z-Robotics\\2381Z-2020-2021\\assets\\logo2381.cpp");
   lv_obj_align(logo, NULL, LV_ALIGN_IN_TOP_MID, -20, 50);

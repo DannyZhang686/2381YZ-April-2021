@@ -30,27 +30,27 @@
 // pros::Motor::Motor (int port, motor_gearset_e_t gearset, bool reverse)
 //Drive
 //Motor reversing accounts for the way the drive is built
-pros::Motor leftFront (LF_PORT, MOTOR_GEARSET_18, false);
-pros::Motor rightFront (RF_PORT, MOTOR_GEARSET_18, true);
-pros::Motor leftBack (LB_PORT, MOTOR_GEARSET_18, true);
-pros::Motor rightBack (RB_PORT, MOTOR_GEARSET_18, false);
+pros::Motor leftFront (LF_PORT, false);
+pros::Motor rightFront (RF_PORT, true);
+pros::Motor leftBack (LB_PORT, true);
+pros::Motor rightBack (RB_PORT, false);
 
 //Intakes
-pros::Motor leftIntake (LI_PORT, MOTOR_GEARSET_18, false);
-pros::Motor rightIntake (RI_PORT, MOTOR_GEARSET_18, false);
+pros::Motor leftIntake (LI_PORT, false);
+pros::Motor rightIntake (RI_PORT, false);
 
 //Other
-pros::Motor indexer (INDEXER_PORT, MOTOR_GEARSET_06, false);
-pros::Motor shooter (SHOOTER_PORT, MOTOR_GEARSET_18, false);
+pros::Motor indexer (INDEXER_PORT, false);
+pros::Motor shooter (SHOOTER_PORT, false);
 
 //IMUs
 pros::Imu leftIMU (L_IMU_PORT);
 pros::Imu rightIMU (R_IMU_PORT);
 
 //ADI (Encoders and line sensors)
+pros::ADIEncoder leftTracking (LEFT_IN, LEFT_OUT, false);
 pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
 pros::ADIEncoder backTracking (BACK_IN, BACK_OUT, false);
-pros::ADIEncoder leftTracking (LEFT_IN, LEFT_OUT, false);
 
 pros::ADIAnalogIn lineSensor (LINE_PORT);
 

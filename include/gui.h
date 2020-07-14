@@ -1,8 +1,8 @@
 #include "main.h"
 
-#ifndef _PROS_GUI_H_
-#define _PROS_GUI_H_
+#ifndef _GUI_H_
+#define _GUI_H_
 
-void gui(void);
+void gui(void*);
 
-#endif //_PROS_GUI_H_
+#endif //_GUI_H_

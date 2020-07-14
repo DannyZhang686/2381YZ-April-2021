@@ -33,10 +33,10 @@ void splitArcade(void*) {
     }
     else {
       //don't move if there's very little input
-      leftFront.move_velocity(0);
-      leftBack.move_velocity(0);
-      rightFront.move_velocity(0);
-      rightBack.move_velocity(0);
+      leftFront.move_voltage(0);
+      leftBack.move_voltage(0);
+      rightFront.move_voltage(0);
+      rightBack.move_voltage(0);
     }
     pros::delay(20);
   }
@@ -57,7 +57,7 @@ void shooterSpin(void*) {
         shooter.move_voltage(-SHOOTER_SPEED);
       }
       else {
-        shooter.move_velocity(0);
+        shooter.move_voltage(0);
       }
     }
     else {
@@ -65,7 +65,7 @@ void shooterSpin(void*) {
         shooter.move_voltage(SHOOTER_SPEED);
       }
       else {
-        shooter.move_velocity(0);
+        shooter.move_voltage(0);
       }
     }
     pros::delay(20);
@@ -81,8 +81,8 @@ void intakeSpin(void*) {
         rightIntake.move_voltage(INTAKE_SPEED);
       }
       else {
-        leftIntake.move_velocity(0);
-        rightIntake.move_velocity(0);
+        leftIntake.move_voltage(0);
+        rightIntake.move_voltage(0);
       }
     }
     else {
@@ -91,8 +91,8 @@ void intakeSpin(void*) {
         rightIntake.move_voltage(-INTAKE_SPEED);
       }
       else {
-        leftIntake.move_velocity(0);
-        rightIntake.move_velocity(0);
+        leftIntake.move_voltage(0);
+        rightIntake.move_voltage(0);
       }
     }
     pros::delay(20);
@@ -107,7 +107,7 @@ void indexerSpin(void*) {
         indexer.move_voltage(-INDEXER_SPEED);
       }
       else {
-        indexer.move_velocity(0);
+        indexer.move_voltage(0);
       }
     }
     else {
@@ -115,7 +115,7 @@ void indexerSpin(void*) {
         indexer.move_voltage(INDEXER_SPEED);
       }
       else {
-        indexer.move_velocity(0);
+        indexer.move_voltage(0);
       }
     }
     pros::delay(20);

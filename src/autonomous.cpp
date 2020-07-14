@@ -6,9 +6,11 @@
 #include "utilities.h"
 
 void autonomous() {
-	Position robotPos;
+	// Position robotPos;
+	// EncoderVal currentVal, lastVal;
+	// DeltaVal deltaVal;
+
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
-	robotPos.reset();
   if (autonPick == 1) {
     // moveForward(100);
     //do stuff

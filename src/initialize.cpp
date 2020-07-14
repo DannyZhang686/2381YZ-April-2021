@@ -1,6 +1,5 @@
-//File with stuff that's probably not going to be used
-
 #include "main.h"
+#include "autonomous.h"
 #include "gui.h"
 #include "motors.h"
 
@@ -13,9 +12,12 @@
 
 void initialize() {
 	// pros::lcd::initialize();
-	gui();
-	leftIMU.reset();
+	//initialize GUI task (for refreshes)
+	//need to test this to see if it carries over
+	pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Gui");
+	leftIMU.reset(); //Non-blocking, but takes around 2000 ms to init
 	rightIMU.reset();
+
 	pros::delay(2000); //let everything init properly
 }
 
