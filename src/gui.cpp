@@ -1,6 +1,7 @@
 #include "main.h"
 #include "motors.h"
 #include "autonomous.h"
+#include "gui.h"
 
 static lv_obj_t *g_btn_region; //tab view region of the screen
 static lv_obj_t *g_sb_region; //status bar region of the screen

@@ -3,11 +3,17 @@
 #ifndef _AUTONOMOUS_H_
 #define _AUTONOMOUS_H_
 
-//auton function declarations
+//General function declarations
 void trackPosition(void*);
 void moveShort(double, double);
 void moveLong(double, double);
 void turnToFace(double);
+
+//Auton routines
+void movementOne(void*);
+void snailOne(void*);
+void movementTwo(void*);
+void snailTwo(void*);
 
 //Position tracking struct and variable
 //Units: inches and radians
@@ -40,7 +46,23 @@ struct DeltaVal {
   DeltaVal(): left(0), right(0), back(0) {}
 } extern deltaVal;
 
-//Other extern variables
+//Struct defining a point on the field
+//Units: inches
+struct Point {
+  double x, y;
+  void resetValues() {
+    x = y = 0;
+  }
+  void setValues(int newX, int newY) {
+    x = newX;
+    y = newY;
+  }
+  Point(): x(0), y(0) {}
+  Point(int initX, int initY): x(initX), y(initY) {}
+};
+
+//Extern variables
+extern pros::Mutex driveCommand;
 extern int autonPick;
 
 #endif //_AUTONOMOUS_H_

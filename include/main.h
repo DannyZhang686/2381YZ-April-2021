@@ -23,8 +23,8 @@
 #define B_TO_MID 3.0
 
 //Shortcuts for less typing that can be used in all files
-#define t_s std::to_string
-#define s_t pros::lcd::set_text
+#define t__s std::to_string
+#define s__t pros::lcd::set_text
 
 /**
  * If defined, some commonly used enums will have preprocessor macros which give

@@ -1,20 +1,20 @@
-//This file should ONLY contain auto routines,
-//and calls for functions/tasks.
+//This file should ONLY contain calls for functions/tasks.
+//Everything else of relevance is in autonomous_calls.cpp.
 
 #include "main.h"
 #include "autonomous.h"
 #include "utilities.h"
 
 void autonomous() {
-	// Position robotPos;
-	// EncoderVal currentVal, lastVal;
-	// DeltaVal deltaVal;
-
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
   if (autonPick == 1) {
-    // moveForward(100);
-    //do stuff
+		pros::Task auto1a(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto1Move");
+		pros::Task auto1b(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto1Snail");
   }
+	else if (autonPick == 2) {
+		pros::Task auto2a(movementTwo, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto2Move");
+		pros::Task auto2b(snailTwo, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto2Snail");
+	}
 }
 
 /**

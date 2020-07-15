@@ -1,8 +1,11 @@
 #include "main.h"
+#include "autonomous.h"
 
 #ifndef _UTILITIES_H_
 #define _UTILITIES_H_
 
+void setDriveSafe(double, double);
+double findDistance(Point, Point);
 int sgn(int);
 int sgn(float);
 int sgn(double);
