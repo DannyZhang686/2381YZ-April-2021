@@ -20,16 +20,16 @@ void splitArcade(void*) {
     //Each of left and right are now mapped to a value between
     //0 and 200 using a custom exponential curve to ensure precise
     //micro movement (especially turns) while maintaining high max speed.
-    //See bit.ly/vexjoystickmap for a graph of input vs. output.
+    //See https://bit.ly/inputtopower for a graph of input vs. output.
 
-    left = sgn(left) * (std::floor(1.045 * std::exp(std::fabs(left) / 19.0)) - 1);
-    right = sgn(right) * (std::floor(1.045 * std::exp(std::fabs(right) / 19.0)) - 1);
+    left = sgn(left) * (floor(62.7 * exp(fabs(left) / 19.0)) - 62);
+    right = sgn(right) * (floor(62.7 * exp(fabs(right) / 19.0)) - 62);
 
     if ((abs(left) > 10) || (abs(right) > 10)) {
-      leftFront.move_velocity((int) left);
-      leftBack.move_velocity((int) left);
-      rightFront.move_velocity((int) right);
-      rightBack.move_velocity((int) right);
+      leftFront.move_voltage((int) left);
+      leftBack.move_voltage((int) left);
+      rightFront.move_voltage((int) right);
+      rightBack.move_voltage((int) right);
     }
     else {
       //don't move if there's very little input

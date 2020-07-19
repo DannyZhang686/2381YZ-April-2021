@@ -254,14 +254,16 @@ static lv_res_t demo_click_action(lv_obj_t * btn) {
 }
 
 void gui(void*) {
-  lv_obj_t * logo = lv_img_create(lv_scr_act(), NULL);
-  lv_img_set_src(logo, "C:\\Shared Files\\2381Z-Robotics\\2381Z-2020-2021\\assets\\logo2381.cpp");
-  lv_obj_align(logo, NULL, LV_ALIGN_IN_TOP_MID, -20, 50);
-
   /*Create a title label*/
   lv_obj_t * label = lv_label_create(lv_scr_act(), NULL);
   lv_label_set_text(label, "2381Z Robotics");
-  lv_obj_align(label, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
+  lv_obj_align(label, NULL, LV_ALIGN_IN_LEFT_MID, 50, 0);
+
+  //Create an image (covering the title label)
+  LV_IMG_DECLARE(logo2381);
+  lv_obj_t * logo = lv_img_create(lv_scr_act(), NULL);
+  lv_img_set_src(logo, &logo2381);
+  lv_obj_align(logo, NULL, LV_ALIGN_IN_LEFT_MID, 35, 0);
 
   lv_coord_t btn_width = 175;
   lv_coord_t btn_height = 35;
