@@ -2,16 +2,27 @@
 #include "autonomous.h"
 #include "motors.h"
 #include "utilities.h"
-
-//Extern variable declarations
+#include "pid.h"
 
 //Robot position and encoder values structs
 Position robotPos;
 EncoderVal currentVal, lastVal;
 DeltaVal deltaVal;
 
+//PD controllers for the drive, including tuned kP and kD values
+//There are two controllers per side to account for both linear and angular error
+//They are tuned to the same kP and kD values, but will concurrently have different error values
+double leftkP = 0, leftkD = 0;
+double rightkP = 0, rightkD = 0;
+
+Pd leftStraight(leftkP, leftkD);
+Pd leftTurn(leftkP, leftkD);
+Pd rightStraight(rightkP, rightkD);
+Pd rightTurn(rightkP, rightkD);
+
 //Mutexes
 pros::Mutex driveCommand;
+pros::Mutex pdGetOutput;
 
 void trackPosition(void*) {
   //This runs in a Task and thus requires an infinite loop.
@@ -57,7 +68,14 @@ void trackPosition(void*) {
   	}
 
   	robotPos.angle += angleTravelled; //Calculate the updated angle value
-    double sinTheta = sin(robotPos.angle); //Precalculate the sine and cosine of the final angle to avoid redundancy
+    //Adjust such that the angle is between 0 and 2π at all times
+    if (robotPos.angle > 2 * PI) {
+      robotPos.angle -= 2 * PI;
+    }
+    if (robotPos.angle < 0) {
+      robotPos.angle += 2 * PI;
+    }
+    double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
     double cosTheta = cos(robotPos.angle);
 
   	//Calculate updated absolute position values
@@ -68,24 +86,43 @@ void trackPosition(void*) {
     robotPos.y += dist * cosTheta - dist2 * sinTheta;
 
     //Print the tracking values to the brain screen for debugging
-    // s__t(1, "");
     pros::delay(10);
   }
 }
 
-void moveShort(double targetX, double targetY) {
-  //Moves with a full PID
+void moveShort(double targetX, double targetY, double maxError) {
+  //Moves and turns with a full PD
+  //Note: this is meant for small turns, big turns are handled by turnToFace
   Point current; //Current coordinates as per tracking
   Point target(targetX, targetY); //Target coordinates
+  double distance, targetAngle; //Distance/Angle between current and target
+  double travellingAngle; //The angle (-π to π, though -π/4 to π/4 works much better) that it is necessary to travel to face the target
+  double tAngleInches; //travellingAngle converted to a value in inches
 
   //Movement loop
   do {
+    //Update distance and angle variables
     current.setValues(robotPos.x, robotPos.y);
-  } while (false);
+    distance = findDistance(current, target);
+    targetAngle = findAngle(current, target);
+    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    tAngleInches = angleToInches(travellingAngle);
+    if (pdGetOutput.take(0)) { //Access to PID
+      double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
+      //Calculate new drive values, adding together linear and angular values for a final number
+      leftOutput += leftStraight.getOutput(0, distance); //The setpoint is this far away
+      rightOutput += rightStraight.getOutput(0, distance);
+      leftOutput += leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+      rightOutput += rightTurn.getOutput(0, tAngleInches);
+      setDriveSafe(leftOutput, rightOutput);
+      pdGetOutput.give();
+    }
+  } while (distance < maxError);
+  //setDriveSafe(0, 0); //May add depending on whether this is necessary
 }
 
 void moveLong(double targetX, double targetY, double moveShortDistance) {
-  //Moves with position tracking and ends with PID
+  //Moves with position tracking and ends with PD
   Point current; //Current coordinates as per tracking
   Point target(targetX, targetY); //Target coordinates
 
@@ -99,7 +136,7 @@ void moveLong(double targetX, double targetY, double moveShortDistance) {
 }
 
 void turnToFace(double angle) {
-  //turns with full PID
+  //Complete turn (no simultaneous drive) with full PD
 }
 
 //Autonomous routines

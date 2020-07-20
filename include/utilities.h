@@ -6,6 +6,10 @@
 
 void setDriveSafe(double, double);
 double findDistance(Point, Point);
+double findAngle(Point, Point);
+double smallestAngle(double, double);
+double angleToInches(double);
+
 int sgn(int);
 int sgn(float);
 int sgn(double);

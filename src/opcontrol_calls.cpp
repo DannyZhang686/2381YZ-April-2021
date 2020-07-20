@@ -25,7 +25,7 @@ void splitArcade(void*) {
     left = sgn(left) * (floor(62.7 * exp(fabs(left) / 19.0)) - 62);
     right = sgn(right) * (floor(62.7 * exp(fabs(right) / 19.0)) - 62);
 
-    if ((abs(left) > 10) || (abs(right) > 10)) {
+    if ((abs(left) > 100) || (abs(right) > 100)) {
       leftFront.move_voltage((int) left);
       leftBack.move_voltage((int) left);
       rightFront.move_voltage((int) right);
