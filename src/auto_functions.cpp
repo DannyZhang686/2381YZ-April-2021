@@ -19,11 +19,13 @@ Pd leftStraight(leftkP, leftkD);
 Pd leftTurn(leftkP, leftkD);
 Pd rightStraight(rightkP, rightkD);
 Pd rightTurn(rightkP, rightkD);
+//Possible future addition: holding PDs for the 0.5s or so after completing movement
 
 //Mutexes
 pros::Mutex driveCommand;
 pros::Mutex pdGetOutput;
 
+//Tracking algorithms
 void trackPosition(void*) {
   //This runs in a Task and thus requires an infinite loop.
   while (true) {
@@ -86,18 +88,22 @@ void trackPosition(void*) {
     robotPos.y += dist * cosTheta - dist2 * sinTheta;
 
     //Print the tracking values to the brain screen for debugging
+    //s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
     pros::delay(10);
   }
 }
 
-void moveShort(double targetX, double targetY, double maxError) {
+//Movement algorithms
+void moveShort(double targetX, double targetY, double maxError, bool forceForward) {
   //Moves and turns with a full PD
   //Note: this is meant for small turns, big turns are handled by turnToFace
   Point current; //Current coordinates as per tracking
   Point target(targetX, targetY); //Target coordinates
   double distance, targetAngle; //Distance/Angle between current and target
-  double travellingAngle; //The angle (-π to π, though -π/4 to π/4 works much better) that it is necessary to travel to face the target
-  double tAngleInches; //travellingAngle converted to a value in inches
+  double travellingAngle; //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the target
+  double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
+  double lastLeftOutput = 0, lastRightOutput = 0; //The wheel output to be used in case the mutex is unavailable
+  bool goBackward = false; //Whether to move backward instead of forward to the target
 
   //Movement loop
   do {
@@ -106,22 +112,41 @@ void moveShort(double targetX, double targetY, double maxError) {
     distance = findDistance(current, target);
     targetAngle = findAngle(current, target);
     travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    if (!forceForward) { //Consider moving backward to get to the target
+      if (fabs(travellingAngle) > PI / 2) { //Moving backward is better (smaller turn)
+        goBackward = true;
+        distance = -distance; //PD will give negative values
+        travellingAngle = smallestAngle(rotatePi(robotPos.angle), targetAngle); //Recalculation considering backward movement
+      }
+    }
     tAngleInches = angleToInches(travellingAngle);
     if (pdGetOutput.take(0)) { //Access to PID
       double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
       //Calculate new drive values, adding together linear and angular values for a final number
       leftOutput += leftStraight.getOutput(0, distance); //The setpoint is this far away
       rightOutput += rightStraight.getOutput(0, distance);
-      leftOutput += leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
-      rightOutput += rightTurn.getOutput(0, tAngleInches);
+      if (goBackward) { //Different signs for backward turning
+        leftOutput -= leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+        rightOutput += rightTurn.getOutput(0, tAngleInches);
+      }
+      else {
+        leftOutput += leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+        rightOutput -= rightTurn.getOutput(0, tAngleInches);
+      }
+      lastLeftOutput = leftOutput; //Update the latest available values
+      lastRightOutput = rightOutput;
       setDriveSafe(leftOutput, rightOutput);
       pdGetOutput.give();
+    }
+    else { //Something else is using the PID
+      setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
     }
   } while (distance < maxError);
   //setDriveSafe(0, 0); //May add depending on whether this is necessary
 }
 
-void moveLong(double targetX, double targetY, double moveShortDistance) {
+//This function might not be necessary if moveShort works well enough
+void moveLong(double targetX, double targetY, double moveShortDistance, double maxError) {
   //Moves with position tracking and ends with PD
   Point current; //Current coordinates as per tracking
   Point target(targetX, targetY); //Target coordinates
@@ -132,19 +157,47 @@ void moveLong(double targetX, double targetY, double moveShortDistance) {
   } while (findDistance(current, target) > moveShortDistance);
 
   //Break the loop when sufficiently close to target, and use moveShort for the rest.
-  moveShort(target.x, target.y);
+  moveShort(target.x, target.y, maxError, false);
 }
 
-void turnToFace(double angle) {
+void turnToFace(double targetAngle, double maxError) {
   //Complete turn (no simultaneous drive) with full PD
+  double travellingAngle; //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the final angle
+  double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
+  double lastLeftOutput = 0, lastRightOutput = 0; //The wheel output to be used in case the mutex is unavailable
+
+  do {
+    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    tAngleInches = angleToInches(travellingAngle);
+    if (pdGetOutput.take(0)) { //Access to PID
+      double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
+      leftOutput = leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+      rightOutput = -rightTurn.getOutput(0, tAngleInches);
+      lastLeftOutput = leftOutput; //Update the latest available values
+      lastRightOutput = rightOutput;
+      setDriveSafe(leftOutput, rightOutput);
+      pdGetOutput.give();
+    }
+    else { //Something else is using the PID
+      setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
+    }
+  } while (travellingAngle > maxError);
 }
 
-//Autonomous routines
+//Ball manipulation (snail) functions
 
-void movementOne(void*) {}
+void intakeShoot(int numBalls) {
+  //Intake, index, and shoot the given number of balls (ex. cycling a tower)
+}
 
-void snailOne(void*) {}
+void intakeNoShoot() {
+  //Intake and index, running shooter backward to avoid shooting (ex. collecting balls)
+}
 
-void movementTwo(void*) {}
+void discard(int numBalls) {
+  //Run everything backward (ex. to discard opponent balls)
+}
 
-void snailTwo(void*) {}
+void pushAway() {
+  //Run intakes backwards so balls are pushed away and not intaked
+}

@@ -3,17 +3,7 @@
 #ifndef _AUTONOMOUS_H_
 #define _AUTONOMOUS_H_
 
-//General function declarations
-void trackPosition(void*);
-void moveShort(double, double);
-void moveLong(double, double);
-void turnToFace(double);
-
-//Auton routines
-void movementOne(void*);
-void snailOne(void*);
-void movementTwo(void*);
-void snailTwo(void*);
+//Struct definitions
 
 //Position tracking struct and variable
 //Units: inches and radians
@@ -70,5 +60,23 @@ extern DeltaVal deltaVal;
 extern pros::Mutex driveCommand;
 extern pros::Mutex pdGetOutput;
 extern int autonPick;
+
+//General function declarations
+void trackPosition(void*);
+void moveShort(double, double, double, bool);
+void moveLong(double, double);
+void turnToFace(double);
+
+void setDriveSafe(double, double);
+double findDistance(Point, Point);
+double findAngle(Point, Point);
+double smallestAngle(double, double);
+double angleToInches(double);
+
+//Auton routines
+void movementOne(void*);
+void snailOne(void*);
+void movementTwo(void*);
+void snailTwo(void*);
 
 #endif //_AUTONOMOUS_H_
