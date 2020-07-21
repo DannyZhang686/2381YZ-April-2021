@@ -78,7 +78,7 @@ void intakeSpin(void*) {
     if (master.get_digital(DIGITAL_L2)) {
       if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A))) {
         leftIntake.move_voltage(-INTAKE_SPEED);
-        rightIntake.move_voltage(INTAKE_SPEED);
+        rightIntake.move_voltage(-INTAKE_SPEED);
       }
       else {
         leftIntake.move_voltage(0);
@@ -88,7 +88,7 @@ void intakeSpin(void*) {
     else {
       if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A))) {
         leftIntake.move_voltage(INTAKE_SPEED);
-        rightIntake.move_voltage(-INTAKE_SPEED);
+        rightIntake.move_voltage(INTAKE_SPEED);
       }
       else {
         leftIntake.move_voltage(0);

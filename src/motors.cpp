@@ -27,9 +27,8 @@
 
 #define LINE_PORT 0
 
-// pros::Motor::Motor (int port, motor_gearset_e_t gearset, bool reverse)
 //Drive
-//Motor reversing accounts for the way the drive is built
+//Motor reversing accounts for the way the robot is built
 pros::Motor leftFront (LF_PORT, false);
 pros::Motor rightFront (RF_PORT, true);
 pros::Motor leftBack (LB_PORT, true);
@@ -37,7 +36,7 @@ pros::Motor rightBack (RB_PORT, false);
 
 //Intakes
 pros::Motor leftIntake (LI_PORT, false);
-pros::Motor rightIntake (RI_PORT, false);
+pros::Motor rightIntake (RI_PORT, true);
 
 //Other
 pros::Motor indexer (INDEXER_PORT, false);

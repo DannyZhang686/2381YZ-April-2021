@@ -3,6 +3,7 @@
 #ifndef _MOTORS_H_
 #define _MOTORS_H_
 
+//Extern declarations for motors (and other electronics)
 extern pros::Motor leftFront;
 extern pros::Motor rightFront;
 extern pros::Motor leftBack;

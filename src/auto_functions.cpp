@@ -19,11 +19,13 @@ Pd leftStraight(leftkP, leftkD);
 Pd leftTurn(leftkP, leftkD);
 Pd rightStraight(rightkP, rightkD);
 Pd rightTurn(rightkP, rightkD);
-//Possible future addition: holding PDs for the 0.5s or so after completing movement
+//Possible future addition: holding PD for the 0.5s or so after completing movement
 
 //Mutexes
-pros::Mutex driveCommand;
 pros::Mutex pdGetOutput;
+
+//Counting the number of balls shot from the robot
+int numBallsShot = 0;
 
 //Tracking algorithms
 void trackPosition(void*) {
@@ -142,7 +144,7 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
       setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
     }
   } while (distance < maxError);
-  //setDriveSafe(0, 0); //May add depending on whether this is necessary
+  //Consider setting motors to a small opposite value for a short time to stop better
 }
 
 //This function might not be necessary if moveShort works well enough
@@ -186,18 +188,101 @@ void turnToFace(double targetAngle, double maxError) {
 
 //Ball manipulation (snail) functions
 
+void countBalls(void*) {
+  //Counts the number of balls shot out of the top of the robot
+  //PROS API: "Line Trackers return a value between 0 and 4095, with 0 being the lightest reading and 4095 the darkest"
+  //Logically, larger return values indicate the presence of a ball (and vice versa)
+
+  int minOutput = 2047; //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
+  int currentOutput; //The output of the line sensor
+  bool isBall = false; //Based on line sensor return values, is there a ball currently being shot?
+  int buffer, maxBuffer = 3; //To filter out noise, (maxBuffer) outputs in a row must agree before modifying isBall
+  while (true) {
+    currentOutput = lineSensor.get_value_calibrated(); //Or, eventually the average of two LS readings
+    if ((currentOutput > minOutput) == isBall) {
+      //Nothing needs to be done, as the sensor output agrees with isBall
+      buffer = maxBuffer; //Reset the buffer value
+    }
+    else {
+      //There is a disagreement
+      buffer --;
+      if (buffer == 0) {
+        //Switch isBall (it is likely that this is correct)
+        isBall = !isBall;
+        if (!isBall) { //Went from true to false (ball finished shooting)
+          numBallsShot ++;
+        }
+        buffer = maxBuffer; //Reset the buffer value
+      }
+    }
+    pros::delay(10);
+  }
+}
+
+//The speed at which the motors will run
+#define AUTO_INTAKE_VEL 200
+#define AUTO_INDEXER_VEL 200
+#define AUTO_SHOOTER_VEL 200
+
 void intakeShoot(int numBalls) {
   //Intake, index, and shoot the given number of balls (ex. cycling a tower)
+  int initNumBalls = numBallsShot; //Number of balls shot at the start of this function
+  setIntakesSafe(AUTO_INTAKE_VEL);
+  setIndexerSafe(AUTO_INDEXER_VEL);
+  setShooterSafe(AUTO_SHOOTER_VEL);
+  while (numBallsShot - initNumBalls < numBalls) {
+    //Continue delaying until numBallsShot updates to the correct amount greater than initNumBalls
+    pros::delay(10);
+  }
+}
+
+void intakeNoShoot(int time) {
+  //Intake and index, running shooter backward to avoid shooting (ex. collecting balls)
+  int endTime = pros::millis() + time;
+  setIntakesSafe(AUTO_INTAKE_VEL);
+  setIndexerSafe(AUTO_INDEXER_VEL);
+  setShooterSafe(-AUTO_SHOOTER_VEL);
+  while (pros::millis() < endTime) {
+    pros::delay(10);
+  }
 }
 
 void intakeNoShoot() {
-  //Intake and index, running shooter backward to avoid shooting (ex. collecting balls)
+  //Non-blocking version of above function
+  intakeNoShoot(0);
 }
 
-void discard(int numBalls) {
-  //Run everything backward (ex. to discard opponent balls)
+void discard(int time) {
+  //Run everything backward
+  int endTime = pros::millis() + time;
+  setIntakesSafe(-AUTO_INTAKE_VEL);
+  setIndexerSafe(-AUTO_INDEXER_VEL);
+  setShooterSafe(-AUTO_SHOOTER_VEL);
+  while (pros::millis() < endTime) {
+    pros::delay(10);
+  }
+}
+
+void discard() {
+  discard(0);
+}
+
+void pushAway(int time) {
+  //Run intakes backwards so balls are pushed away and not intaked
+  int endTime = pros::millis() + time;
+  setIntakesSafe(-AUTO_INTAKE_VEL);
+  while (pros::millis() < endTime) {
+    pros::delay(10);
+  }
 }
 
 void pushAway() {
-  //Run intakes backwards so balls are pushed away and not intaked
+  pushAway(0);
+}
+
+void stopMotors() {
+  //Stop everything
+  setIntakesSafe(0);
+  setIndexerSafe(0);
+  setShooterSafe(0);
 }

@@ -3,6 +3,12 @@
 #ifndef _AUTONOMOUS_H_
 #define _AUTONOMOUS_H_
 
+//Tracking constants
+#define TRACKING_WHEEL_DIAMETER 2.75 //inches
+#define L_TO_MID 3.0 //perpendicular distance from tracking wheel to center
+#define R_TO_MID 3.0
+#define B_TO_MID 3.0
+
 //Struct definitions
 
 //Position tracking struct and variable
@@ -57,26 +63,43 @@ extern EncoderVal currentVal, lastVal;
 extern DeltaVal deltaVal;
 
 //Other extern variables
-extern pros::Mutex driveCommand;
+extern pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 extern pros::Mutex pdGetOutput;
+extern int numBallsShot;
 extern int autonPick;
 
-//General function declarations
+//Auto function declarations
+//auto_functions.cpp
 void trackPosition(void*);
 void moveShort(double, double, double, bool);
-void moveLong(double, double);
-void turnToFace(double);
+void moveLong(double, double, double, double);
+void turnToFace(double, double);
 
-void setDriveSafe(double, double);
-double findDistance(Point, Point);
-double findAngle(Point, Point);
-double smallestAngle(double, double);
-double angleToInches(double);
+void countBalls(void*);
+void intakeShoot(int);
+void intakeNoShoot(int);
+void intakeNoShoot(void);
+void discard(int);
+void discard(void);
+void pushAway(int);
+void pushAway(void);
+void stopMotors(void);
 
-//Auton routines
+//auto_routines.cpp
 void movementOne(void*);
 void snailOne(void*);
 void movementTwo(void*);
 void snailTwo(void*);
+
+//auto_utilities.cpp
+bool setDriveSafe(double, double);
+bool setIntakesSafe(double);
+bool setIndexerSafe(double);
+bool setShooterSafe(double);
+
+double findDistance(Point, Point);
+double findAngle(Point, Point);
+double smallestAngle(double, double);
+double angleToInches(double);
 
 #endif //_AUTONOMOUS_H_

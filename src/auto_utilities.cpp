@@ -2,23 +2,60 @@
 #include "motors.h"
 #include "autonomous.h"
 
+//Mutex declarations
+pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
+
 //"Utility" functions for use in autonomous
 //These functions go under autonomous.h, not utilities.h
 
-void setDriveSafe(double leftVelocity, double rightVelocity) {
+bool setDriveSafe(double leftVelocity, double rightVelocity) {
   //Scale velocity (0-200) to a voltage value (0-12000 mV)
   int leftVoltage = (int) (leftVelocity * 60);
   int rightVoltage = (int) (rightVelocity * 60);
   //Take the mutex to make sure this is the only auton code setting voltages
   //Being unsuccessful is okay because drive values are continually set at each PID refresh
-  if (driveCommand.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
+  if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
     leftFront.move_voltage(leftVoltage);
     leftBack.move_voltage(leftVoltage);
     rightFront.move_voltage(rightVoltage);
     rightBack.move_voltage(rightVoltage);
     //Release the mutex
-    driveCommand.give();
+    driveControl.give();
+    return true; //success
   }
+  return false; //Could not set value
+}
+
+//Similar functions to setDriveSafe, for different parts of the robot
+bool setIntakesSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (intakeControl.take(0)) {
+    leftIntake.move_voltage(voltage);
+    rightIntake.move_voltage(voltage);
+    intakeControl.give();
+    return true;
+  }
+  return false;
+}
+
+bool setIndexerSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (indexerControl.take(0)) {
+    indexer.move_voltage(voltage);
+    indexerControl.give();
+    return true;
+  }
+  return false;
+}
+
+bool setShooterSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (shooterControl.take(0)) {
+    shooter.move_voltage(voltage);
+    shooterControl.give();
+    return true;
+  }
+  return false;
 }
 
 double findDistance(Point a, Point b) {

@@ -5,7 +5,9 @@
 
 void movementOne(void*) {}
 
-void snailOne(void*) {}
+void snailOne(void*) {
+  intakeNoShoot();
+}
 
 void movementTwo(void*) {}
 

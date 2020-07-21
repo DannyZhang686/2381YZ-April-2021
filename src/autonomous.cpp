@@ -6,12 +6,17 @@
 #include "utilities.h"
 
 void autonomous() {
+	//Initialize tracking and ball-counting tasks (used across all autons)
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
+	pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");
+
   if (autonPick == 1) {
+		//RTL home row
 		pros::Task auto1a(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto1Move");
 		pros::Task auto1b(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto1Snail");
   }
 	else if (autonPick == 2) {
+		//LTR home row
 		pros::Task auto2a(movementTwo, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto2Move");
 		pros::Task auto2b(snailTwo, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Auto2Snail");
 	}
