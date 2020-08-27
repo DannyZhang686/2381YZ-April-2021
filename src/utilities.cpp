@@ -43,3 +43,13 @@ double rotatePi(double angle) {
   }
   return angle;
 }
+
+double degToRad (double deg) {
+  //Converts an angle from a degree value to a radian value
+  return deg * PI / 180.0;
+}
+
+double radToDeg (double rad) {
+  //Converts an angle from a radian value to a degree value
+  return rad * 180.0 / PI;
+}

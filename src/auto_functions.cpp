@@ -14,6 +14,8 @@ DeltaVal deltaVal;
 //They are tuned to the same kP and kD values, but will concurrently have different error values
 double leftkP = 0, leftkD = 0;
 double rightkP = 0, rightkD = 0;
+// double leftP = 15.6, leftD = 0.5335; //speculative tuned values
+// double rightP = 15.6, rightD = 0.5335;
 
 Pd leftStraight(leftkP, leftkD);
 Pd leftTurn(leftkP, leftkD);
@@ -89,8 +91,17 @@ void trackPosition(void*) {
     robotPos.x += dist * sinTheta + dist2 * cosTheta;
     robotPos.y += dist * cosTheta - dist2 * sinTheta;
 
+    double imuAngle = degToRad(0.5*(leftIMU.get_yaw() + rightIMU.get_yaw()));
+    if (imuAngle > 2 * PI) {
+      imuAngle -= 2 * PI;
+    }
+    if (robotPos.angle < 0) {
+      imuAngle += 2 * PI;
+    }
     //Print the tracking values to the brain screen for debugging
-    //s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
+    s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.right) + " " + t__s(currentVal.back));
+    s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
+    s__t(2, t__s(imuAngle);
     pros::delay(10);
   }
 }

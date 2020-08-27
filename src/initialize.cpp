@@ -11,10 +11,10 @@
  */
 
 void initialize() {
-	// pros::lcd::initialize();
+	pros::lcd::initialize();
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over
-	pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
+	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
 	leftIMU.reset(); //Non-blocking but takes around 2000 ms
 	rightIMU.reset();
 	lineSensor.calibrate(); //Blocking, takes around 500 ms

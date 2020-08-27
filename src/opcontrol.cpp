@@ -2,6 +2,7 @@
 #include "opcontrol.h"
 #include "autonomous.h"
 #include "motors.h"
+#include "pid.h"
 
 void opcontrol() {
 	//this is how to pass variables; it probably won't actually be used though, except in auton
@@ -16,7 +17,7 @@ void opcontrol() {
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
 
 	while (true) {
-		pros::delay(20);
+		pros::delay(10);
 	}
 }
 

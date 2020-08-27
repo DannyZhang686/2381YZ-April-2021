@@ -3,27 +3,27 @@
 
 //Motor ports
 #define LF_PORT 9
-#define RF_PORT 6
-#define LB_PORT 5
-#define RB_PORT 3
+#define RF_PORT 19
+#define LB_PORT 6
+#define RB_PORT 18
 #define LI_PORT 10
 #define RI_PORT 20
 #define INDEXER_PORT 2
 #define SHOOTER_PORT 1
 
 //IMU ports
-#define L_IMU_PORT 0
-#define R_IMU_PORT 0
+#define L_IMU_PORT 4
+#define R_IMU_PORT 11
 
 //Encoder and line sensor ports
 //In encoder ports, the "out" port is always
 //the port immediately following the "in" port
-#define RIGHT_IN 0
-#define RIGHT_OUT RIGHT_IN+1
-#define BACK_IN 0
-#define BACK_OUT BACK_IN+1
-#define LEFT_IN 0
-#define LEFT_OUT LEFT_IN+1
+#define RIGHT_IN 7
+#define RIGHT_OUT 8
+#define BACK_IN 3
+#define BACK_OUT 4
+#define LEFT_IN 5
+#define LEFT_OUT 6
 
 #define LINE_PORT 0
 
