@@ -4,7 +4,7 @@
 #include "utilities.h"
 
 #define DEAD_ZONE 20 //The joystick deadzone in percent of half the joystick range
-#define MAX_DELTA_SPEED 500 //The maximum permitted change in target speed in the drive in the equivalent of mV/20 ms
+#define MAX_DELTA_SPEED 5000 //The maximum permitted change in target speed
 
 void splitArcade(void*) {
   double power, turn, left, right; //Part of the split arcade implementation

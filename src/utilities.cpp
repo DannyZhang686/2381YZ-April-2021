@@ -22,7 +22,7 @@ int sgn(double d) {
 
 int sgn(bool b) {
   if (b) return 1;
-  else if (!b) return -1;
+  else return -1;
 }
 
 double encToInches(int encoderValue) {

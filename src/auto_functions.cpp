@@ -63,11 +63,11 @@ void trackPosition(void*) {
   	if (angleTravelled != 0) {
   		rRadius = deltaVal.right / angleTravelled; //Calculate the radius
   		dist = (rRadius + R_TO_MID) * sinAngle; //Calculate the distance (from the center of the robot) using simple trigonometry
-  		bRadius = deltaVal.back / angleTravelled; //Repeat the previous lines using the back tracking wheel
+  		bRadius = deltaVal.back / angleTravelled; //Repeat the previous lines using the back tracking wheel (for horizontal error)
   		dist2 = (bRadius + B_TO_MID) * sinAngle;
   	}
     else {
-      //Robot went straight or didn't move; note that this happens when deltaVal.right == deltaVal.left
+      //Robot went straight or didn't move; note that this happens when angleTravelled == 0
       //Values for distance travelled can be set directly to encoder values, as there is no arc
   		dist = deltaVal.right;
   		dist2 = deltaVal.back;
@@ -101,7 +101,7 @@ void trackPosition(void*) {
     //Print the tracking values to the brain screen for debugging
     s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.right) + " " + t__s(currentVal.back));
     s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
-    s__t(2, t__s(imuAngle);
+    s__t(2, t__s(imuAngle));
     pros::delay(10);
   }
 }
@@ -202,30 +202,32 @@ void turnToFace(double targetAngle, double maxError) {
 void countBalls(void*) {
   //Counts the number of balls shot out of the top of the robot
   //PROS API: "Line Trackers return a value between 0 and 4095, with 0 being the lightest reading and 4095 the darkest"
-  //Logically, larger return values indicate the presence of a ball (and vice versa)
+  //Thus larger return values indicate the presence of a ball (and vice versa)
 
   int minOutput = 2047; //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
-  int currentOutput; //The output of the line sensor
-  bool isBall = false; //Based on line sensor return values, is there a ball currently being shot?
-  int buffer, maxBuffer = 3; //To filter out noise, (maxBuffer) outputs in a row must agree before modifying isBall
+  std::queue<int> lastOutput; //The last several outputs of the line sensor, stored in order
+  int numOutputs = 5; //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
+  int sumOutputs = 0; //The current sum of all elements in lastOutputs
+  bool isBall = false; //Whether or not the program believes there is a ball in front of the sensor
+  //Initialization of lastOutputs (there is presumably no ball at the start)
+  for (int i = 0; i < numOutputs; i++) lastOutput.push(0);
   while (true) {
-    currentOutput = lineSensor.get_value_calibrated(); //Or, eventually the average of two LS readings
-    if ((currentOutput > minOutput) == isBall) {
+    //Update variables
+    // lastOutput.push(rLineSensor.get_value_calibrated());
+    lastOutput.push(rLineSensor.get_value());
+    sumOutputs += lastOutput.back() - lastOutput.front();
+    lastOutput.pop();
+    if ((sumOutputs / numOutputs > minOutput) == isBall) {
       //Nothing needs to be done, as the sensor output agrees with isBall
-      buffer = maxBuffer; //Reset the buffer value
     }
     else {
-      //There is a disagreement
-      buffer --;
-      if (buffer == 0) {
-        //Switch isBall (it is likely that this is correct)
-        isBall = !isBall;
-        if (!isBall) { //Went from true to false (ball finished shooting)
-          numBallsShot ++;
-        }
-        buffer = maxBuffer; //Reset the buffer value
+      //There is a disagreement; switch isBall
+      isBall = !isBall;
+      if (!isBall) { //Went from true to false (ball finished shooting)
+        numBallsShot ++;
       }
     }
+    s__t(4, t__s(rLineSensor.get_value()) + " " + t__s(lLineSensor.get_value()) + " " + t__s(numBallsShot));
     pros::delay(10);
   }
 }

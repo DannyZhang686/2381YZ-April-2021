@@ -5,9 +5,9 @@
 
 //Tracking constants
 #define TRACKING_WHEEL_DIAMETER 2.75 //inches
-#define L_TO_MID 3.0 //perpendicular distance from tracking wheel to center
-#define R_TO_MID 3.0
-#define B_TO_MID 3.0
+#define L_TO_MID 1.0 //perpendicular distance from tracking wheel to center
+#define R_TO_MID 1.5
+#define B_TO_MID 4.625
 
 //Struct definitions
 
