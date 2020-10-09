@@ -17,8 +17,8 @@ void initialize() {
 	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
 	leftIMU.reset(); //Non-blocking but takes around 2000 ms
 	rightIMU.reset();
-	lLineSensor.calibrate(); //Blocking, takes around 500 ms
-	rLineSensor.calibrate();
+	tLineSensor.calibrate(); //Blocking, takes around 500 ms
+	bLineSensor.calibrate();
 	pros::delay(2000); //Let everything init properly
 }
 

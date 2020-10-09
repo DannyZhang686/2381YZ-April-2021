@@ -3,7 +3,11 @@
 
 //Autonomous routines
 
-void movementOne(void*) {}
+void movementOne(void*) {
+  // moveShort(0, 20, 3, true);
+  // pros::delay(5000);
+  turnToFace(1.57, 0.1);
+}
 
 void snailOne(void*) {
   intakeNoShoot();

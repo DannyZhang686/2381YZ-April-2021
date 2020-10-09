@@ -10,17 +10,19 @@ pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 
 bool setDriveSafe(double leftVelocity, double rightVelocity) {
   //Scale velocity (0-200) to a voltage value (0-12000 mV)
-  int leftVoltage = (int) (leftVelocity * 60);
-  int rightVoltage = (int) (rightVelocity * 60);
-  //Take the mutex to make sure this is the only auton code setting voltages
-  //Being unsuccessful is okay because drive values are continually set at each PID refresh
-  if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
+  // int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 12000), -12000);
+  // int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 12000), -12000);
+  int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 8000), -8000);
+  int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 8000), -8000);
+  //Take the mutex to avoid writing to the same location twice
+  // if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
+  if (true) {
     leftFront.move_voltage(leftVoltage);
     leftBack.move_voltage(leftVoltage);
     rightFront.move_voltage(rightVoltage);
     rightBack.move_voltage(rightVoltage);
     //Release the mutex
-    driveControl.give();
+    // driveControl.give();
     return true; //success
   }
   return false; //Could not set value
@@ -116,8 +118,8 @@ double smallestAngle(double current, double target) {
 
 double angleToInches(double angle) {
   //Function to convert an angular measurement to a value (in inches) to be travelled by the drivebase
-  //This should be unique to each robot and depend on the positioning of the wheels
+  //This is unique to each robot and depend on the positioning of the wheels
   //Note that there is a simple linear correlation between angle and return value
-  double coefficient = 0; //TBD with testing
+  double coefficient = 10;
   return angle * coefficient;
 }

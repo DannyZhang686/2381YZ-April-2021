@@ -12,22 +12,13 @@ DeltaVal deltaVal;
 //PD controllers for the drive, including tuned kP and kD values
 //There are two controllers per side to account for both linear and angular error
 //They are tuned to the same kP and kD values, but will concurrently have different error values
-double leftkP = 0, leftkD = 0;
-double rightkP = 0, rightkD = 0;
-// double leftP = 15.6, leftD = 0.5335; //speculative tuned values
-// double rightP = 15.6, rightD = 0.5335;
-
-Pd leftStraight(leftkP, leftkD);
-Pd leftTurn(leftkP, leftkD);
-Pd rightStraight(rightkP, rightkD);
-Pd rightTurn(rightkP, rightkD);
-//Possible future addition: holding PD for the 0.5s or so after completing movement
+// double leftkP = 0, leftkD = 0;
+// double rightkP = 0, rightkD = 0;
+double leftkP = 15.6, leftkD = 0.5335; //speculative tuned values
+double rightkP = 15.6, rightkD = 0.5335;
 
 //Mutexes
 pros::Mutex pdGetOutput;
-
-//Counting the number of balls shot from the robot
-int numBallsShot = 0;
 
 //Tracking algorithms
 void trackPosition(void*) {
@@ -37,17 +28,23 @@ void trackPosition(void*) {
     currentVal.left = leftTracking.get_value();
     currentVal.right = rightTracking.get_value();
     currentVal.back = backTracking.get_value();
+    currentVal.angle = degToRad(0.5*(leftIMU.get_yaw() + rightIMU.get_yaw()));
+    if (currentVal.angle > 2 * PI) currentVal.angle -= 2 * PI;
+    if (currentVal.angle < 0) currentVal.angle += 2 * PI;
 
-    //Calculate the change since previous time
+    //Find the change since the previous calculation
     //Note that deltaVal is in inches and not encoder units, hence the conversion.
     deltaVal.left = encToInches(currentVal.left - lastVal.left);
     deltaVal.right = encToInches(currentVal.right - lastVal.right);
     deltaVal.back = encToInches(currentVal.back - lastVal.back);
+    deltaVal.angle = currentVal.angle - lastVal.angle;
+    // deltaVal.angle = smallestAngle(currentVal.angle, lastVal.angle);
 
   	//Update the previous values (for use the next time)
     lastVal.left = currentVal.left;
     lastVal.right = currentVal.right;
   	lastVal.back = currentVal.back;
+    lastVal.angle = currentVal.angle;
 
     //Consider the tracking center at the last calculation and the current
     //calculation: due to the frequency at which they are recalculated, they
@@ -57,30 +54,22 @@ void trackPosition(void*) {
     double bRadius; //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
     double dist; //The distance travelled by the tracking center
     double dist2; //dist calculated using the back tracking wheel
-    double angleTravelled = (deltaVal.left - deltaVal.right) / (L_TO_MID + R_TO_MID); //Radian angle travelled (clockwise is positive)
-    double sinAngle = sin(angleTravelled); //The sine of the angle (used to avoid multiple redundant calculations)
+    double sinAngle = sin(deltaVal.angle); //The sine of the angle travelled (used to avoid multiple redundant calculations)
 
-  	if (angleTravelled != 0) {
-  		rRadius = deltaVal.right / angleTravelled; //Calculate the radius
+  	if (deltaVal.angle != 0) {
+  		rRadius = deltaVal.right / deltaVal.angle; //Calculate the radius
   		dist = (rRadius + R_TO_MID) * sinAngle; //Calculate the distance (from the center of the robot) using simple trigonometry
-  		bRadius = deltaVal.back / angleTravelled; //Repeat the previous lines using the back tracking wheel (for horizontal error)
+  		bRadius = deltaVal.back / deltaVal.angle; //Repeat the previous lines using the back tracking wheel (for horizontal error)
   		dist2 = (bRadius + B_TO_MID) * sinAngle;
   	}
     else {
-      //Robot went straight or didn't move; note that this happens when angleTravelled == 0
+      //Robot went straight or didn't move; note that this happens when deltaVal.angle == 0
       //Values for distance travelled can be set directly to encoder values, as there is no arc
   		dist = deltaVal.right;
   		dist2 = deltaVal.back;
   	}
 
-  	robotPos.angle += angleTravelled; //Calculate the updated angle value
-    //Adjust such that the angle is between 0 and 2π at all times
-    if (robotPos.angle > 2 * PI) {
-      robotPos.angle -= 2 * PI;
-    }
-    if (robotPos.angle < 0) {
-      robotPos.angle += 2 * PI;
-    }
+  	robotPos.angle = currentVal.angle; //Update the angle value
     double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
     double cosTheta = cos(robotPos.angle);
 
@@ -91,17 +80,9 @@ void trackPosition(void*) {
     robotPos.x += dist * sinTheta + dist2 * cosTheta;
     robotPos.y += dist * cosTheta - dist2 * sinTheta;
 
-    double imuAngle = degToRad(0.5*(leftIMU.get_yaw() + rightIMU.get_yaw()));
-    if (imuAngle > 2 * PI) {
-      imuAngle -= 2 * PI;
-    }
-    if (robotPos.angle < 0) {
-      imuAngle += 2 * PI;
-    }
     //Print the tracking values to the brain screen for debugging
     s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.right) + " " + t__s(currentVal.back));
     s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
-    s__t(2, t__s(imuAngle));
     pros::delay(10);
   }
 }
@@ -110,6 +91,10 @@ void trackPosition(void*) {
 void moveShort(double targetX, double targetY, double maxError, bool forceForward) {
   //Moves and turns with a full PD
   //Note: this is meant for small turns, big turns are handled by turnToFace
+  Pd leftStraight(leftkP, leftkD);
+  Pd leftTurn(leftkP, leftkD);
+  Pd rightStraight(rightkP, rightkD);
+  Pd rightTurn(rightkP, rightkD);
   Point current; //Current coordinates as per tracking
   Point target(targetX, targetY); //Target coordinates
   double distance, targetAngle; //Distance/Angle between current and target
@@ -129,14 +114,14 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
       if (fabs(travellingAngle) > PI / 2) { //Moving backward is better (smaller turn)
         goBackward = true;
         distance = -distance; //PD will give negative values
-        travellingAngle = smallestAngle(rotatePi(robotPos.angle), targetAngle); //Recalculation considering backward movement
+        travellingAngle = smallestAngle(rotatePi(robotPos.angle), targetAngle); //Consider the possibility of backward movement
       }
     }
     tAngleInches = angleToInches(travellingAngle);
     if (pdGetOutput.take(0)) { //Access to PID
       double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
       //Calculate new drive values, adding together linear and angular values for a final number
-      leftOutput += leftStraight.getOutput(0, distance); //The setpoint is this far away
+      leftOutput += leftStraight.getOutput(0, distance); //Call to PID to find velocity
       rightOutput += rightStraight.getOutput(0, distance);
       if (goBackward) { //Different signs for backward turning
         leftOutput -= leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
@@ -148,14 +133,20 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
       }
       lastLeftOutput = leftOutput; //Update the latest available values
       lastRightOutput = rightOutput;
+      s__t(2, t__s(leftOutput) + " " + t__s(rightOutput));
+      s__t(3, t__s(distance) + " " + t__s(current.x) + " " + t__s(current.y));
       setDriveSafe(leftOutput, rightOutput);
       pdGetOutput.give();
     }
     else { //Something else is using the PID
       setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
     }
-  } while (distance < maxError);
-  //Consider setting motors to a small opposite value for a short time to stop better
+    pros::delay(20);
+  } while (distance > maxError);
+  //Set motors to a small opposite value for a short time to stop on the spot
+  setDriveSafe(-lastLeftOutput*1.2, -lastRightOutput*1.2);
+  pros::delay(250);
+  setDriveSafe(0, 0);
 }
 
 //This function might not be necessary if moveShort works well enough
@@ -175,12 +166,17 @@ void moveLong(double targetX, double targetY, double moveShortDistance, double m
 
 void turnToFace(double targetAngle, double maxError) {
   //Complete turn (no simultaneous drive) with full PD
-  double travellingAngle; //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the final angle
+
+  Pd leftTurn(leftkP, leftkD);
+  Pd rightTurn(rightkP, rightkD);
+
+  double travellingAngle; //The angle (-π to π) to travel to face the final angle
   double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
   double lastLeftOutput = 0, lastRightOutput = 0; //The wheel output to be used in case the mutex is unavailable
 
   do {
-    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    travellingAngle = targetAngle - ((robotPos.angle > 3) ? 0 : robotPos.angle);
+    // travellingAngle = smallestAngle(robotPos.angle, targetAngle);
     tAngleInches = angleToInches(travellingAngle);
     if (pdGetOutput.take(0)) { //Access to PID
       double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
@@ -189,15 +185,26 @@ void turnToFace(double targetAngle, double maxError) {
       lastLeftOutput = leftOutput; //Update the latest available values
       lastRightOutput = rightOutput;
       setDriveSafe(leftOutput, rightOutput);
+      s__t(2, t__s(leftOutput) + " " + t__s(rightOutput));
+      s__t(3, t__s(tAngleInches) + " " + t__s(robotPos.angle) + " " + t__s(travellingAngle));
       pdGetOutput.give();
+      pros::delay(20);
     }
     else { //Something else is using the PID
       setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
     }
-  } while (travellingAngle > maxError);
+  } while (fabs(travellingAngle) > maxError);
+  //Set motors to a small opposite value for a short time to stop on the spot
+  setDriveSafe(-lastLeftOutput*1.2, -lastRightOutput*1.2);
+  pros::delay(250);
+  setDriveSafe(0, 0);
 }
 
 //Ball manipulation (snail) functions
+
+//Counting the number of balls shot from and intaken by the robot
+//Starts at -0.5 due to initial addition of 0.5
+double numBallsShot = -0.5, numBallsIntaken = -0.5;
 
 void countBalls(void*) {
   //Counts the number of balls shot out of the top of the robot
@@ -205,29 +212,40 @@ void countBalls(void*) {
   //Thus larger return values indicate the presence of a ball (and vice versa)
 
   int minOutput = 2047; //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
-  std::queue<int> lastOutput; //The last several outputs of the line sensor, stored in order
+  std::queue<int> tLastOutput, bLastOutput; //The last several outputs of each line sensor, stored in order
   int numOutputs = 5; //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
-  int sumOutputs = 0; //The current sum of all elements in lastOutputs
-  bool isBall = false; //Whether or not the program believes there is a ball in front of the sensor
-  //Initialization of lastOutputs (there is presumably no ball at the start)
-  for (int i = 0; i < numOutputs; i++) lastOutput.push(0);
+  int tSumOutputs = 0, bSumOutputs = 0; //The current sum of all elements in each lastOutput variable
+  bool tIsBall = false, bIsBall = false; //Whether or not the program believes there is a ball in front of each sensor
+  //Initialization of lastOutput (there is no ball at the start)
+  for (int i = 0; i < numOutputs; i++) {
+    tLastOutput.push(0);
+    bLastOutput.push(0);
+  }
   while (true) {
     //Update variables
-    // lastOutput.push(rLineSensor.get_value_calibrated());
-    lastOutput.push(rLineSensor.get_value());
-    sumOutputs += lastOutput.back() - lastOutput.front();
-    lastOutput.pop();
-    if ((sumOutputs / numOutputs > minOutput) == isBall) {
+    tLastOutput.push(tLineSensor.get_value_calibrated());
+    bLastOutput.push(bLineSensor.get_value_calibrated());
+    // tLastOutput.push(tLineSensor.get_value());
+    // bLastOutput.push(bLineSensor.get_value());
+    tSumOutputs += tLastOutput.back() - tLastOutput.front();
+    bSumOutputs += bLastOutput.back() - bLastOutput.front();
+    tLastOutput.pop(); bLastOutput.pop();
+    if ((tSumOutputs / numOutputs > minOutput) == tIsBall) {
       //Nothing needs to be done, as the sensor output agrees with isBall
     }
     else {
-      //There is a disagreement; switch isBall
-      isBall = !isBall;
-      if (!isBall) { //Went from true to false (ball finished shooting)
-        numBallsShot ++;
-      }
+      //There is a disagreement; switch tIsBall
+      tIsBall = !tIsBall;
+      numBallsShot += 0.5; //Adding 0.5 when the ball starts being shot and creating a total of 1 when the ball finishes shooting
     }
-    s__t(4, t__s(rLineSensor.get_value()) + " " + t__s(lLineSensor.get_value()) + " " + t__s(numBallsShot));
+    //Same thing with the other line sensor
+    if ((bSumOutputs / numOutputs > minOutput) == bIsBall) {}
+    else {
+      bIsBall = !bIsBall;
+      numBallsIntaken += 0.5;
+    }
+    s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()));
+    s__t(5, t__s(numBallsShot) + " " + t__s(numBallsIntaken));
     pros::delay(10);
   }
 }
@@ -261,7 +279,7 @@ void intakeNoShoot(int time) {
 }
 
 void intakeNoShoot() {
-  //Non-blocking version of above function
+  //Non-blocking version of above function, defaulting to 10
   intakeNoShoot(0);
 }
 

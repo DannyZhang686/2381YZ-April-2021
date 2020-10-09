@@ -20,8 +20,8 @@ extern pros::ADIEncoder rightTracking;
 extern pros::ADIEncoder backTracking;
 extern pros::ADIEncoder leftTracking;
 
-extern pros::ADIAnalogIn rLineSensor;
-extern pros::ADIAnalogIn lLineSensor;
+extern pros::ADIAnalogIn tLineSensor;
+extern pros::ADIAnalogIn bLineSensor;
 
 extern pros::Controller master;
 

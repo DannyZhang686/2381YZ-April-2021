@@ -20,14 +20,11 @@ void splitArcade(void*) {
     right = (power - turn) * 100.0 / 127;
     right = std::max(-100.0, std::min(right, 100.0));
 
-    if ((abs(left) > DEAD_ZONE) || (abs(right) > DEAD_ZONE)) {
+    if ((fabs(left) > DEAD_ZONE) || (fabs(right) > DEAD_ZONE)) {
       //Each of left and right are now mapped to a value between
       //0 and 12000 using a custom exponential curve to ensure precise
       //micro movement (especially turns) while maintaining high max speed.
       //See http://bit.ly/voltagecurve for a graph of input vs. output.
-
-      // left = sgn(left) * (floor(62.7 * exp(fabs(left) / 19.0)) - 62);
-      // right = sgn(right) * (floor(62.7 * exp(fabs(right) / 19.0)) - 62);
 
       left = sgn(left) * (floor(52.5 * exp(fabs(left) / 19.0)) + 1862);
       right = sgn(right) * (floor(52.5 * exp(fabs(right) / 19.0)) + 1862);
@@ -40,7 +37,7 @@ void splitArcade(void*) {
     //Limit the maximum change in motor speed to prevent tipping and chain snapping
     actualLeftSpeed = (leftFront.get_actual_velocity() + leftBack.get_actual_velocity()) * 30; //Multiplied by 0.5 * 60 for average and conversion from rpm (0-200) to equivalent mV (0-12000)
     actualRightSpeed = (rightFront.get_actual_velocity() + rightBack.get_actual_velocity()) * 30;
-    if (abs(left - actualLeftSpeed) > MAX_DELTA_SPEED) {
+    if (fabs(left - actualLeftSpeed) > MAX_DELTA_SPEED) {
       //Outside the allowable range; set speed as appropriate
       if (left > actualLeftSpeed) {
         left = actualLeftSpeed + MAX_DELTA_SPEED;
@@ -49,7 +46,7 @@ void splitArcade(void*) {
         left = actualLeftSpeed - MAX_DELTA_SPEED;
       }
     }
-    if (abs(right - actualRightSpeed) > MAX_DELTA_SPEED) {
+    if (fabs(right - actualRightSpeed) > MAX_DELTA_SPEED) {
       if (right > actualRightSpeed) {
         right = actualRightSpeed + MAX_DELTA_SPEED;
       }

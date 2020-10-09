@@ -25,8 +25,8 @@
 #define LEFT_IN 5
 #define LEFT_OUT 6
 
-#define RIGHT_LINE 2
-#define LEFT_LINE 1
+#define TOP_LINE 2
+#define BOTTOM_LINE 1
 
 //Drive
 //Motor reversing accounts for the way the robot is built
@@ -52,8 +52,8 @@ pros::ADIEncoder leftTracking (LEFT_IN, LEFT_OUT, false);
 pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
 pros::ADIEncoder backTracking (BACK_IN, BACK_OUT, false);
 
-pros::ADIAnalogIn rLineSensor (RIGHT_LINE);
-pros::ADIAnalogIn lLineSensor (LEFT_LINE);
+pros::ADIAnalogIn tLineSensor (TOP_LINE);
+pros::ADIAnalogIn bLineSensor (BOTTOM_LINE);
 
 // pros::Controller::Controller (id_e_t id)
 pros::Controller master (CONTROLLER_MASTER);

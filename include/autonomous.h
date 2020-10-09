@@ -26,20 +26,21 @@ typedef struct Position {
 //Units: encoder units
 typedef struct EncoderVal {
   int left, right, back;
+  double angle;
   void resetValues() {
-    left = right = back = 0;
+    left = right = back = angle = 0;
   }
-  EncoderVal(): left(0), right(0), back(0) {}
+  EncoderVal(): left(0), right(0), back(0), angle(0) {}
 } EncoderVal;
 
 //Change in values struct
 //Units: inches
 typedef struct DeltaVal {
-  double left, right, back;
+  double left, right, back, angle;
   void resetValues() {
-    left = right = back = 0;
+    left = right = back = angle = 0;
   }
-  DeltaVal(): left(0), right(0), back(0) {}
+  DeltaVal(): left(0), right(0), back(0), angle(0) {}
 } DeltaVal;
 
 //Struct defining a point on the field
@@ -65,7 +66,7 @@ extern DeltaVal deltaVal;
 //Other extern variables
 extern pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 extern pros::Mutex pdGetOutput;
-extern int numBallsShot;
+extern double numBallsShot, numBallsIntaken;
 extern int autonPick;
 
 //Auto function declarations
