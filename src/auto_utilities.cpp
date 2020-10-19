@@ -109,11 +109,18 @@ double smallestAngle(double current, double target) {
   //Note that the maximum difference between two angles in the range of 0-2π is 2π,
   //and the minimum is -2π; thus, simply adding or subtracting 2π from one of the
   //angles (which maintains rotation) is sufficient to guarantee the smallest answer
+
+  //Previous function (Danny)
+  // if ((diff <= PI) && (diff >= -PI)) return diff;
+  // diff += 2 * PI;
+  // if ((diff <= PI) && (diff >= -PI)) return diff;
+  // diff -= 4 * PI; //-2π from two lines ago and -2π again
+  // return diff; //Guaranteed to be correct
+
   if ((diff <= PI) && (diff >= -PI)) return diff;
-  diff += 2 * PI;
-  if ((diff <= PI) && (diff >= -PI)) return diff;
-  diff -= 4 * PI; //-2π from two lines ago and -2π again
-  return diff; //Guaranteed to be correct
+  if (diff > 0) return (diff - 2 * PI);
+  return (2 * PI + diff);
+
 }
 
 double angleToInches(double angle) {
