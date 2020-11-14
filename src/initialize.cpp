@@ -19,7 +19,7 @@ void initialize() {
 	rightIMU.reset();
 	tLineSensor.calibrate(); //Blocking, takes around 500 ms
 	bLineSensor.calibrate();
-	pros::delay(2000); //Let everything init properly
+	pros::delay(3000); //Let everything init properly
 }
 
 /**

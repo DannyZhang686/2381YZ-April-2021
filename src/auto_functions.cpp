@@ -56,7 +56,7 @@ void trackPosition(void*) {
     double dist2; //dist calculated using the back tracking wheel
     double sinAngle = sin(deltaVal.angle); //The sine of the angle travelled (used to avoid multiple redundant calculations)
 
-  	if (deltaVal.angle != 0) {
+  	if (fabs(deltaVal.angle) >= 0.002) {
   		rRadius = deltaVal.right / deltaVal.angle; //Calculate the radius
   		dist = (rRadius + R_TO_MID) * sinAngle; //Calculate the distance (from the center of the robot) using simple trigonometry
   		bRadius = deltaVal.back / deltaVal.angle; //Repeat the previous lines using the back tracking wheel (for horizontal error)
@@ -67,6 +67,7 @@ void trackPosition(void*) {
       //Values for distance travelled can be set directly to encoder values, as there is no arc
   		dist = deltaVal.right;
   		dist2 = deltaVal.back;
+      deltaVal.angle = 0;
   	}
 
   	robotPos.angle = currentVal.angle; //Update the angle value
@@ -111,11 +112,13 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
     targetAngle = findAngle(current, target);
     travellingAngle = smallestAngle(robotPos.angle, targetAngle);
     if (!forceForward) { //Consider moving backward to get to the target
+      s__t(6, t__s(travellingAngle));
       if (fabs(travellingAngle) > PI / 2) { //Moving backward is better (smaller turn)
         goBackward = true;
         distance = -distance; //PD will give negative values
         travellingAngle = smallestAngle(rotatePi(robotPos.angle), targetAngle); //Consider the possibility of backward movement
       }
+      s__t(7, t__s(travellingAngle));
     }
     tAngleInches = angleToInches(travellingAngle);
     if (pdGetOutput.take(0)) { //Access to PID
@@ -124,12 +127,12 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
       leftOutput += leftStraight.getOutput(0, distance); //Call to PID to find velocity
       rightOutput += rightStraight.getOutput(0, distance);
       if (goBackward) { //Different signs for backward turning
-        leftOutput -= leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
-        rightOutput += rightTurn.getOutput(0, tAngleInches);
+        leftOutput -= 7*leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+        rightOutput += 7*rightTurn.getOutput(0, tAngleInches);
       }
       else {
-        leftOutput += leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
-        rightOutput -= rightTurn.getOutput(0, tAngleInches);
+        leftOutput += 7*leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+        rightOutput -= 7*rightTurn.getOutput(0, tAngleInches);
       }
       lastLeftOutput = leftOutput; //Update the latest available values
       lastRightOutput = rightOutput;
@@ -144,8 +147,8 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
     pros::delay(20);
   } while (distance > maxError);
   //Set motors to a small opposite value for a short time to stop on the spot
-  setDriveSafe(-lastLeftOutput*1.2, -lastRightOutput*1.2);
-  pros::delay(250);
+  setDriveSafe(-lastLeftOutput*10, -lastRightOutput*10);
+  pros::delay(175);
   setDriveSafe(0, 0);
 }
 
@@ -175,8 +178,7 @@ void turnToFace(double targetAngle, double maxError) {
   double lastLeftOutput = 0, lastRightOutput = 0; //The wheel output to be used in case the mutex is unavailable
 
   do {
-    travellingAngle = targetAngle - ((robotPos.angle > 3) ? 0 : robotPos.angle);
-    // travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
     tAngleInches = angleToInches(travellingAngle);
     if (pdGetOutput.take(0)) { //Access to PID
       double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
@@ -194,10 +196,17 @@ void turnToFace(double targetAngle, double maxError) {
       setDriveSafe(lastLeftOutput, lastRightOutput); //Use previous values
     }
   } while (fabs(travellingAngle) > maxError);
-  //Set motors to a small opposite value for a short time to stop on the spot
-  setDriveSafe(-lastLeftOutput*1.2, -lastRightOutput*1.2);
-  pros::delay(250);
+  //Set motors to an opposite value for a short time to stop on the spot
+  setDriveSafe(-lastLeftOutput*5, -lastRightOutput*5);
+  pros::delay(125);
   setDriveSafe(0, 0);
+}
+
+void turnToPoint(double targetX, double targetY, double maxError) {
+  //Like turnToFace, but finding a point
+  double angle = findAngle(Point(robotPos.x, robotPos.y), Point(targetX, targetY));
+  s__t(4, t__s(angle) + " from " + t__s(robotPos.x) + " " + t__s(robotPos.y));
+  turnToFace(angle, maxError);
 }
 
 //Ball manipulation (snail) functions

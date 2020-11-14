@@ -75,6 +75,7 @@ void trackPosition(void*);
 void moveShort(double, double, double, bool);
 void moveLong(double, double, double, double);
 void turnToFace(double, double);
+void turnToPoint(double, double, double);
 
 void countBalls(void*);
 void intakeShoot(int);

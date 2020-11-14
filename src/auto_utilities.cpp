@@ -120,13 +120,12 @@ double smallestAngle(double current, double target) {
   if ((diff <= PI) && (diff >= -PI)) return diff;
   if (diff > 0) return (diff - 2 * PI);
   return (2 * PI + diff);
-
 }
 
 double angleToInches(double angle) {
   //Function to convert an angular measurement to a value (in inches) to be travelled by the drivebase
   //This is unique to each robot and depend on the positioning of the wheels
   //Note that there is a simple linear correlation between angle and return value
-  double coefficient = 10;
+  double coefficient = 5;
   return angle * coefficient;
 }
