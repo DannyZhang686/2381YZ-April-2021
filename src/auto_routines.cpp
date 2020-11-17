@@ -9,22 +9,26 @@ void movementOne(void*) {
   robotPos.angle = 0;
   moveShort(36, 24, 2, true);
   pros::delay(250);
-  turnToPoint(11, 11, 0.1);
+  turnToPoint(14, 15, 0.1);
   pros::delay(250);
-  // turnToPoint(-11, -11, 0.05);
+  moveShort(14, 15, 1.5, true);
+  // turnToPoint(13, 14.5, 0.1);
   // pros::delay(250);
-  moveShort(11, 11, 1.5, true);
-  pros::delay(250); //add time
+  // moveShort(13, 14.5, 1.5, true);
+  pros::delay(1500); //add time
   moveShort(36, 24, 2, false);
   pros::delay(250);
-  // turnToPoint(6.5, 36, 0.1);
-  // pros::delay(250);
-  // moveShort(6.5, 36, 1.5, true);
-  // pros::delay(250);
-  // moveShort(24, 72, 2, true);
-  // pros::delay(250);
-  // turnToPoint(9, 72, 0.1);
-  // pros::delay(250);
+  turnToPoint(11, 38, 0.1);
+  pros::delay(250);
+  moveShort(11, 38, 1.5, true);
+  pros::delay(250);
+  turnToPoint(33, 78, 0.1);
+  pros::delay(250);
+  moveShort(33, 78, 2, true);
+  pros::delay(250);
+  turnToPoint(9, 72, 0.1);
+  pros::delay(250);
+
   // moveShort(9, 72, 1.5, true);
   // pros::delay(3000);
   // moveShort(24, 72, 1.5, false);

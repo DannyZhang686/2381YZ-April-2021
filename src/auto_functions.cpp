@@ -104,35 +104,33 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
   double lastLeftOutput = 0, lastRightOutput = 0; //The wheel output to be used in case the mutex is unavailable
   bool goBackward = false; //Whether to move backward instead of forward to the target
 
+  if (!forceForward) { //Consider moving backward to get to the target
+    targetAngle = findAngle(current, target);
+    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
+    if (fabs(travellingAngle) >= PI / 2) { //Moving backward is better (smaller turn)
+      goBackward = true;
+    }
+  }
+
   //Movement loop
   do {
     //Update distance and angle variables
     current.setValues(robotPos.x, robotPos.y);
     distance = findDistance(current, target);
     targetAngle = findAngle(current, target);
-    travellingAngle = smallestAngle(robotPos.angle, targetAngle);
-    if (!forceForward) { //Consider moving backward to get to the target
-      s__t(6, t__s(travellingAngle));
-      if (fabs(travellingAngle) > PI / 2) { //Moving backward is better (smaller turn)
-        goBackward = true;
-        distance = -distance; //PD will give negative values
-        travellingAngle = smallestAngle(rotatePi(robotPos.angle), targetAngle); //Consider the possibility of backward movement
-      }
-      s__t(7, t__s(travellingAngle));
-    }
+    travellingAngle = smallestAngle(goBackward ? rotatePi(robotPos.angle) : robotPos.angle, targetAngle);
     tAngleInches = angleToInches(travellingAngle);
+
     if (pdGetOutput.take(0)) { //Access to PID
       double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
       //Calculate new drive values, adding together linear and angular values for a final number
       leftOutput += leftStraight.getOutput(0, distance); //Call to PID to find velocity
       rightOutput += rightStraight.getOutput(0, distance);
-      if (goBackward) { //Different signs for backward turning
-        leftOutput -= 7*leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
-        rightOutput += 7*rightTurn.getOutput(0, tAngleInches);
-      }
-      else {
-        leftOutput += 7*leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
-        rightOutput -= 7*rightTurn.getOutput(0, tAngleInches);
+      leftOutput += 7*leftTurn.getOutput(0, tAngleInches); //Setpoint distance value for PD
+      rightOutput -= 7*rightTurn.getOutput(0, tAngleInches);
+      if (goBackward) {
+        leftOutput = -leftOutput;
+        rightOutput = -rightOutput;
       }
       lastLeftOutput = leftOutput; //Update the latest available values
       lastRightOutput = rightOutput;
@@ -147,8 +145,8 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
     pros::delay(20);
   } while (distance > maxError);
   //Set motors to a small opposite value for a short time to stop on the spot
-  setDriveSafe(-lastLeftOutput*10, -lastRightOutput*10);
-  pros::delay(175);
+  setDriveSafe(-lastLeftOutput*6, -lastRightOutput*6);
+  pros::delay(100);
   setDriveSafe(0, 0);
 }
 
@@ -197,7 +195,7 @@ void turnToFace(double targetAngle, double maxError) {
     }
   } while (fabs(travellingAngle) > maxError);
   //Set motors to an opposite value for a short time to stop on the spot
-  setDriveSafe(-lastLeftOutput*5, -lastRightOutput*5);
+  setDriveSafe(-lastLeftOutput*6, -lastRightOutput*6);
   pros::delay(125);
   setDriveSafe(0, 0);
 }

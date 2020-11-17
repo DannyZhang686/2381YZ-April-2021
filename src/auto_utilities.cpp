@@ -1,6 +1,7 @@
 #include "main.h"
 #include "motors.h"
 #include "autonomous.h"
+#include "utilities.h"
 
 //Mutex declarations
 pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
@@ -12,8 +13,20 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   //Scale velocity (0-200) to a voltage value (0-12000 mV)
   // int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 12000), -12000);
   // int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 12000), -12000);
-  int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 8000), -8000);
-  int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 8000), -8000);
+  int leftVoltage = leftVelocity * 60;
+  if (abs(leftVoltage) > 8000) {
+    leftVoltage = 8000 * sgn(leftVoltage);
+  } else if (abs(leftVoltage) < 2250) {
+    leftVoltage = 2250 * sgn(leftVoltage);
+  }
+
+  int rightVoltage = rightVelocity * 60;
+  if (abs(rightVoltage) > 8000) {
+    rightVoltage = 8000 * sgn(rightVoltage);
+  } else if (abs(leftVoltage) < 2250) {
+    rightVoltage = 2250 * sgn(rightVoltage);
+  }
+
   //Take the mutex to avoid writing to the same location twice
   // if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
   if (true) {

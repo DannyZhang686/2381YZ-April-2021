@@ -4,10 +4,10 @@
 #define _AUTONOMOUS_H_
 
 //Tracking constants
-#define TRACKING_WHEEL_DIAMETER 2.75 //inches
-#define L_TO_MID 1.0 //perpendicular distance from tracking wheel to center
-#define R_TO_MID 1.5
-#define B_TO_MID 4.625
+#define TRACKING_WHEEL_DIAMETER 2.806 //inches
+#define L_TO_MID 0.95 //perpendicular distance from tracking wheel to center
+#define R_TO_MID 1.55
+#define B_TO_MID 4.1
 
 //Struct definitions
 
