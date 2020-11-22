@@ -78,7 +78,7 @@ void turnToFace(double, double);
 void turnToPoint(double, double, double);
 
 void countBalls(void*);
-void intakeShoot(int);
+void intakeShoot(int, int);
 void intakeNoShoot(int);
 void intakeNoShoot(void);
 void discard(int);

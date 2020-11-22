@@ -262,14 +262,25 @@ void countBalls(void*) {
 #define AUTO_INDEXER_VEL 200
 #define AUTO_SHOOTER_VEL 200
 
-void intakeShoot(int numBalls) {
+void intakeShoot(int numBallsIn, int numBallsOut) {
   //Intake, index, and shoot the given number of balls (ex. cycling a tower)
-  int initNumBalls = numBallsShot; //Number of balls shot at the start of this function
+  int initNumBallsShot = numBallsShot; //Number of balls shot before this point
+  int initNumBallsIntaken = numBallsIntaken; //Number of balls intaken before this point
+  bool doneIn = false, doneOut = false;
   setIntakesSafe(AUTO_INTAKE_VEL);
   setIndexerSafe(AUTO_INDEXER_VEL);
   setShooterSafe(AUTO_SHOOTER_VEL);
-  while (numBallsShot - initNumBalls < numBalls) {
-    //Continue delaying until numBallsShot updates to the correct amount greater than initNumBalls
+  while (true) {
+    //Continue delaying until the numbers update
+    if (initNumBallsShot + numBallsOut >= numBallsShot) {
+      setShooterSafe(-AUTO_SHOOTER_VEL);
+      doneOut = true;
+    }
+    if (initNumBallsIntaken + numBallsIn + 0.5 >= numBallsIntaken) {
+      setIntakesSafe(0);
+      doneIn = true;
+    }
+    if (doneIn && doneOut) break;
     pros::delay(10);
   }
 }

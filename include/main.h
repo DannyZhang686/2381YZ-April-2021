@@ -84,6 +84,7 @@ void opcontrol(void);
  * You can add C++-only headers here
  */
 #include <queue>
+#include <climits>
 //#include "bits/stdc++.h"
 #endif
 
