@@ -18,12 +18,12 @@
 //Encoder and line sensor ports
 //In encoder ports, the "out" port is always
 //the port immediately following the "in" port
-#define RIGHT_IN 7
-#define RIGHT_OUT 8
-#define BACK_IN 3
-#define BACK_OUT 4
-#define LEFT_IN 5
-#define LEFT_OUT 6
+// #define RIGHT_IN 7
+// #define RIGHT_OUT 8
+#define BACK_IN 5
+#define BACK_OUT 6
+#define LEFT_IN 7
+#define LEFT_OUT 8
 
 #define TOP_LINE 2
 #define BOTTOM_LINE 1
@@ -48,9 +48,9 @@ pros::Imu leftIMU (L_IMU_PORT);
 pros::Imu rightIMU (R_IMU_PORT);
 
 //ADI (Encoders and line sensors)
-pros::ADIEncoder leftTracking (LEFT_IN, LEFT_OUT, false);
-pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
-pros::ADIEncoder backTracking (BACK_IN, BACK_OUT, false);
+pros::ADIEncoder leftTracking (LEFT_IN, LEFT_OUT, true);
+// pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
+pros::ADIEncoder backTracking (BACK_IN, BACK_OUT, true);
 
 pros::ADIAnalogIn tLineSensor (TOP_LINE);
 pros::ADIAnalogIn bLineSensor (BOTTOM_LINE);
