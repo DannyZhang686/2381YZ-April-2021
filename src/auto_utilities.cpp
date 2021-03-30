@@ -23,9 +23,10 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   int rightVoltage = rightVelocity * 60;
   if (abs(rightVoltage) > 8000) {
     rightVoltage = 8000 * sgn(rightVoltage);
-  } else if (abs(leftVoltage) < 2250) {
+  } else if (abs(rightVoltage) < 2250) {
     rightVoltage = 2250 * sgn(rightVoltage);
   }
+  s__t(6, t__s(leftVoltage) + " " + t__s(rightVoltage));
 
   //Take the mutex to avoid writing to the same location twice
   // if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on

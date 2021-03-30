@@ -5,9 +5,14 @@
 
 //Tracking constants
 #define TRACKING_WHEEL_DIAMETER 2.806 //inches
-#define L_TO_MID 0.95 //perpendicular distance from tracking wheel to center
-#define R_TO_MID 1.55
-#define B_TO_MID 4.1
+// #define L_TO_MID 1.0625
+// #define R_TO_MID 1.4375
+// #define B_TO_MID 3.625
+// #define L_TO_MID 1.25 //perpendicular distance from tracking wheel to center
+// #define R_TO_MID 1.25
+// #define B_TO_MID 4
+#define L_TO_MID 2.75
+#define B_TO_MID 5.25
 
 //Struct definitions
 
@@ -58,6 +63,42 @@ typedef struct Point {
   Point(double initX, double initY): x(initX), y(initY) {}
 } Point;
 
+typedef struct Line {
+  Point points[1000];
+  Point findGoalPoint(Point curPos, double lookDist) {
+    double minDist = 1e9, curDist;
+    int closestIndex, goalIndex;
+
+    //Find the closest point to the robot
+    for (int i = 0; i < 1000; i++) {
+      curDist = (points[i].x - curPos.x) * (points[i].x - curPos.x) + (points[i].y - curPos.y) * (points[i].y - curPos.y);
+      if (minDist > curDist) {
+        minDist = curDist;
+        closestIndex = i;
+      }
+    }
+
+    //Find the goal point
+    minDist = 1e9;
+    lookDist = lookDist * lookDist;
+    for (int i = closestIndex; i < 1000; i++) {
+      curDist = (points[i].x - curPos.x) * (points[i].x - curPos.x) + (points[i].y - curPos.y) * (points[i].y - curPos.y);
+      if (minDist > fabs(lookDist - curDist)) {
+        minDist = fabs(lookDist - curDist);
+        goalIndex = i;
+      }
+    }
+    s__t(7, t__s(closestIndex) + " " + t__s(goalIndex) + " " + t__s(lookDist) + " " + t__s(minDist));
+    return points[goalIndex];
+  }
+  Line(Point start, Point end) {
+    for (int i = 0; i < 1000; i++) {
+      points[i].x = start.x + (i+1) * 0.001 * (end.x - start.x);
+      points[i].y = start.y + (i+1) * 0.001 * (end.y - start.y);
+    }
+  }
+} Line;
+
 //Extern structs
 extern Position robotPos;
 extern EncoderVal currentVal, lastVal;
@@ -74,13 +115,17 @@ extern int autonPick;
 void trackPosition(void*);
 void moveShort(double, double, double, bool);
 void moveLong(double, double, double, double);
+void movePurePursuit(double, double, double, double, bool);
+void approachGoal(double, double);
+void backAway(double, double);
 void turnToFace(double, double);
 void turnToPoint(double, double, double);
+void turnAwayFromPoint(double, double, double);
 
 void countBalls(void*);
 void intakeShoot(int, int);
-void intakeNoShoot(int);
-void intakeNoShoot(void);
+void intakeNoShoot(int, double);
+void intakeNoShoot(double);
 void discard(int);
 void discard(void);
 void pushAway(int);
