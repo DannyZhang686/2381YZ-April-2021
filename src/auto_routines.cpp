@@ -4,27 +4,15 @@
 #include "pid.h"
 
 //Mutexes
-pros::Mutex arrivedAtFirstGoal, doneWithFirstGoal, doneFirstDiscard;
+pros::Mutex arrivedAtGoal[9];
+pros::Mutex doneWithGoal[9];
+pros::Mutex doneDiscard;
 
 //Autonomous routines
 void movementOne(void*) {
-  // double leftkP = 1, leftkD = 3; //speculative tuned values
-  // double rightkP = 0, rightkD = 0;
-  // Pd leftStraight(leftkP, leftkD);
-  // Pd leftTurn(leftkP, leftkD);
-  // Pd rightStraight(rightkP, rightkD);
-  // Pd rightTurn(rightkP, rightkD);
-  // while (true) {
-  //   double left = leftStraight.getOutput(rightFront.get_position(), 500);
-  //   s__t(0, t__s(left) + " " + t__s(rightFront.get_position()));
-  //   // double right = rightStraight.getOutput(rightFront.get_position(), 1000);
-  //   leftFront.move(left); //Call to PID to find velocity
-  //   leftBack.move(left);
-  //   rightFront.move(left);
-  //   rightBack.move(left);
-  //   pros::delay(20);
-  // }
-  // arrivedAtFirstGoal.take(0);
+  for (int i = 0; i < 9; i++) {
+    arrivedAtGoal[i].take(0);
+  }
   robotPos.x = 36;
   robotPos.y = 12;
   robotPos.angle = 0;
@@ -32,25 +20,45 @@ void movementOne(void*) {
   turnToPoint(12, 15, 0.1); //13, 16
   movePurePursuit(12, 15, 3, 8, true);
   approachGoal(50, 650);
-  // arrivedAtFirstGoal.give();
-  // doneWithFirstGoal.take(INT_MAX);
+  arrivedAtGoal[0].give();
+  // pros::delay(1000);
+
+  doneWithGoal[0].take(INT_MAX);
   backAway(70, 500);
-  pros::delay(150);
+  pros::delay(600);
   // turnToPoint(11, 39.5, 0.05);
-  // movePurePursuit(11, 39.5, 2.5, 8, true); //11, 39.5
+  // movePurePursuit(11, 39.5, 2.5, 8, true); //Getting the ball on the side wall
   // backAway(70, 500);
   turnToPoint(26, 74, 0.1);
   movePurePursuit(26, 74, 2.5, 8, true);
   turnToPoint(17, 75, 0.1);
   movePurePursuit(17, 75, 2.5, 8, true);
   approachGoal(50, 650);
-  pros::delay(1000);
+  arrivedAtGoal[1].give();
+  // pros::delay(1000);
+
+  doneWithGoal[1].take(INT_MAX);
   backAway(65, 650);
   turnToPoint(60, 75, 0.1);
   movePurePursuit(60, 75, 2.5, 8, true);
-  approachGoal(80, 1000);
-  pros::delay(1000);
-  backAway(65, 650);
+  for (int i = 0; i < 2; i++) {
+    approachGoal(130, 700);
+    pros::delay(500);
+    backAway(130, 400);
+    pros::delay(400);
+  }
+  approachGoal(100, 1000);
+  pros::delay(800);
+  arrivedAtGoal[2].give();
+
+  doneWithGoal[2].take(INT_MAX);
+
+  //UNTESTED
+  turnToPoint(36, 108, 0.1); //Coordinates of ball
+  movePurePursuit(36, 108, 2.5, 8, true);
+  turnToPoint(17, 75, 0.1); //Coordinates of goal
+  movePurePursuit(17, 75, 2.5, 8, true);
+  approachGoal(50, 650);
 
   // moveShort(36, 24, 1.5, true);
   // pros::delay(250);
@@ -77,31 +85,64 @@ void movementOne(void*) {
   // pros::delay(250);
   // turnToPoint(9, 72, 0.1);
   // pros::delay(250);
-
-  // moveShort(9, 72, 1.5, true);
-  // pros::delay(3000);
-  // moveShort(24, 72, 1.5, false);
-  // pros::delay(250);
-  // turnToPoint(72, 72, 0.1);
-  // pros::delay(250);
-  // moveShort(72, 72, 1.5, true);
-  // pros::delay(3000);
 }
 
 void snailOne(void*) {
-  doneWithFirstGoal.take(0);
+  for (int i = 0; i < 9; i++) {
+    doneWithGoal[i].take(0);
+  }
   pros::delay(250);
   intakeNoShoot(200);
-  arrivedAtFirstGoal.take(INT_MAX);
-  intakeShoot(1, 2);
-  doneWithFirstGoal.give();
+  arrivedAtGoal[0].take(INT_MAX);
+
+  stopMotors();
+  pros::delay(100);
+  intakeShoot(0, 1); // intakeShoot(2, 2); with descoring
+  stopMotors();
+  pros::delay(150);
+  doneWithGoal[0].give();
   pros::delay(300);
   discard();
-  pros::delay(300);
-  // doneFirstDiscard.take(INT_MAX);
-  // intakeNoShoot(200);
+  pros::delay(600);
+
+  intakeNoShoot(200);
+  arrivedAtGoal[1].take(INT_MAX);
+
   stopMotors();
-  pros::delay(200000);
+  pros::delay(200);
+  intakeShoot(0, 2); // intakeShoot(1, 1); with descoring
+  stopMotors();
+  pros::delay(150);
+  doneWithGoal[1].give();
+  pros::delay(500);
+
+  intakeNoShoot(200);
+  arrivedAtGoal[2].take(INT_MAX);
+
+  stopMotors();
+  pros::delay(200);
+  intakeShoot(0, 1);
+  stopMotors();
+  pros::delay(150);
+  doneWithGoal[2].give();
+
+  intakeNoShoot(200);
+  pros::delay(15000);
+  stopMotors();
+
+  // s__t(2, "1");
+  // intakeNoShoot(200);
+  // s__t(2, "2");
+  // pros::delay(2000);
+  // s__t(2, "3");
+  // stopMotors();
+  // s__t(2, "4");
+  // pros::delay(2000);
+  // s__t(2, "5");
+  // intakeShoot(2, 2);
+  // s__t(2, "6");
+  // stopMotors();
+  // s__t(2, "7");
 }
 
 void movementTwo(void*) {}

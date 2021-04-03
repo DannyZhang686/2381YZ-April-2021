@@ -297,7 +297,7 @@ void turnToPoint(double targetX, double targetY, double maxError) {
       time = pros::millis();
       setTime = true;
     }
-    else if ((time != 0) && (pros::millis() - time > 300)) {
+    else if ((time != 0) && (pros::millis() - time > 250)) {
       break;
     }
   } while (true);
@@ -363,7 +363,7 @@ void countBalls(void*) {
   //PROS API: "Line Trackers return a value between 0 and 4095, with 0 being the lightest reading and 4095 the darkest"
   //Thus larger return values indicate the presence of a ball (and vice versa)
 
-  int minOutput = 2047; //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
+  int minOutput = 2350; //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
   std::queue<int> tLastOutput, bLastOutput; //The last several outputs of each line sensor, stored in order
   int numOutputs = 5; //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
   int tSumOutputs = 0, bSumOutputs = 0; //The current sum of all elements in each lastOutput variable
@@ -411,29 +411,37 @@ void intakeShoot(int numBallsIn, int numBallsOut) {
   double initNumBallsShot = numBallsShot; //Number of balls shot before this point
   double initNumBallsIntaken = numBallsIntaken; //Number of balls intaken before this point
   bool doneIntaking = false, doneShooting = false;
+
+  int time = 0;
+  bool setTime = false;
+
   //Spin everything
   setIntakesSafe(AUTO_INTAKE_VEL);
   setIndexerSafe(AUTO_INDEXER_VEL);
   setShooterSafe(AUTO_SHOOTER_VEL);
-  s__t(0, "here");
   while (true) {
     //Continue delaying until the numbers update
-    if (initNumBallsShot + numBallsOut <= numBallsShot) {
-      //Spin the shooter the other way instead
+    if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot)) {
+      //Spin the shooter the other way instead, after a short delay
+      time = pros::millis();
+      setTime = true;
+      s__t(3, "time set");
+    }
+    else if ((time != 0) && (pros::millis() - time > 100)) {
       setShooterSafe(-AUTO_SHOOTER_VEL);
       doneShooting = true;
+      s__t(4, "");
     }
-    if (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken) {
+    if ((numBallsIn == 0) || (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken)) {
       //Stop the intakes
       setIntakesSafe(0);
       doneIntaking = true;
     }
     if (doneShooting && doneIntaking) {
-      s__t(3, "done");
       break;
     }
-    s__t(1, t__s(initNumBallsShot) + " " + t__s(numBallsOut) + " " + t__s(numBallsShot));
-    s__t(2, t__s(initNumBallsIntaken) + " " + t__s(numBallsIn) + " " + t__s(numBallsIntaken));
+    s__t(4, t__s(initNumBallsShot) + " " + t__s(numBallsOut) + " " + t__s(numBallsShot));
+    s__t(5, t__s(initNumBallsIntaken) + " " + t__s(numBallsIn) + " " + t__s(numBallsIntaken));
     pros::delay(10);
   }
 }

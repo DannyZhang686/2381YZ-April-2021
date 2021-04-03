@@ -16,9 +16,9 @@ void opcontrol() {
 	// pros::Task indexer(indexerSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Indexer");
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
 
-	// pros::Task lineSensors(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Line Sensors");
+	pros::Task lineSensors(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Line Sensors");
 	pros::Task autoTest(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
-	// pros::Task autoTest1(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
+	pros::Task autoTest1(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
 	while (true) {
 		pros::delay(10);
 	}
