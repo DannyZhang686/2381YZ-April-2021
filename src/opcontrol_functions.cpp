@@ -2,10 +2,135 @@
 #include "opcontrol.h"
 #include "motors.h"
 #include "utilities.h"
+#include "control/motor_controller.hpp"
+#include "control/pid.hpp"
 
 #define DEAD_ZONE 20 //The joystick deadzone in percent of half the joystick range
 #define MAX_DELTA_SPEED 5000 //The maximum permitted change in target speed
+#define DELAY_INTERVAL 20
+using namespace std;
 
+// PID ARRAY
+  enum Motor_Ref {left_back = 0, left_front, right_back, right_front};
+
+array<double, 3> left_back_pid_values = {0.6, 0, 0};
+array<double, 3> right_back_pid_values = {0.6, 0, 0};
+array<double, 3> left_front_pid_values = {0.6, 0, 0};
+array<double, 3> right_front_pid_values = {0.6, 0, 0};
+
+array<double, 3> master_drive_pid_values = {0, 0.01, 0};
+
+std::array<double,4> _pid_inputs = {0,0,0,0};
+
+auto _left_front_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], &leftFront);
+auto _left_back_motor_controller = new Motor_Controller(left_back_pid_values[0], left_back_pid_values[1], left_back_pid_values[2], &leftBack);
+auto _right_front_motor_controller = new Motor_Controller(right_front_pid_values[0], right_front_pid_values[1], right_front_pid_values[2], &rightFront);
+auto _right_back_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], &rightBack);
+auto _master_pid = new Pid((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
+
+// SET DRIVE VARIABLES DEFINED HERE
+  double _left_front_setpoint;
+  double _left_back_setpoint;
+  double _right_front_setpoint;
+  double _right_back_setpoint;
+  
+  double _master_offset = 1;
+
+  double lboffset = 1, rboffset = 1, rfoffset = 1, lfoffset = 1;
+  double lbDistance = 1, rbDistance = 1, rfDistance = 1, lfDistance = 1, masterDistance = 1;
+
+  double _left_back_motor_value, _left_front_motor_value, _right_back_motor_value, _right_front_motor_value;
+
+  double _motor_value_average;
+  double _master_setpoint = 0;  
+  double _previous_setpoint;
+  double _master_error_average = 0;
+
+
+// RATIO CALC FUNCTION USED FOR PID VALUES IN THE SET DRIVE FUNCTION
+double ratioCalc(double masterDis, double masterOS, double specDis, double specOS)
+{
+  if (masterOS == 0 || specDis == 0 || masterDis == 0 || specOS == 0)
+  {
+    return 1;
+  }
+  return pow((masterDis * specOS / (masterOS * specDis)), 6);
+}
+
+
+// SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
+void Set_Drive(double left_x, double left_y, double right_x, double right_y)
+{
+  _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
+  //motor_value_average is what the actual motors are currently set at
+
+  if (_master_setpoint >= 0) //setpoint is what we as controllers want the code to actually output
+  {
+    _master_error_average = _motor_value_average - _master_setpoint; //master error is used in the pid values to tune the motor values
+  }
+  else
+  {
+    _master_error_average = _master_setpoint - _motor_value_average;
+  }
+  _left_back_setpoint = (left_y - left_x + pow((std::abs(right_x) / 127), 0.8) * (right_x));
+  _left_front_setpoint = (left_y + left_x + pow((std::abs(right_x) / 127), 0.8) * (right_x));
+  _right_back_setpoint = (left_y + left_x - pow((std::abs(right_x) / 127), 0.8) * (right_x));
+  _right_front_setpoint = (left_y - left_x - pow((std::abs(right_x) / 127), 0.8) * (right_x));
+
+  _master_setpoint = (abs(_left_back_setpoint) + abs(_left_front_setpoint) + abs(_right_back_setpoint) + abs(_right_front_setpoint)) / 4;
+  _master_offset += (_master_setpoint);
+
+  lfoffset += (abs(_left_front_setpoint));
+  rboffset += (abs(_right_back_setpoint));
+  lboffset += (abs(_left_back_setpoint));
+  rfoffset += (abs(_right_front_setpoint));
+
+  rfDistance += abs(_right_front_motor_controller->Get_Speed()) / DELAY_INTERVAL;
+  lfDistance += abs(_left_front_motor_controller->Get_Speed()) / DELAY_INTERVAL;
+  rbDistance += abs(_right_back_motor_controller->Get_Speed()) / DELAY_INTERVAL;
+  lbDistance += abs(_left_back_motor_controller->Get_Speed()) / DELAY_INTERVAL;
+
+  masterDistance += (abs(_right_front_motor_controller->Get_Speed()) + abs(_left_back_motor_controller->Get_Speed()) + abs(_right_back_motor_controller->Get_Speed()) + abs(_left_front_motor_controller->Get_Speed())) / (4 * DELAY_INTERVAL);
+
+  double tuning_coefficient = _master_pid->Update(0, _master_error_average);
+  if (tuning_coefficient < 0)
+  {
+    _master_pid->ResetError();
+    tuning_coefficient = 1;
+  }
+
+  _pid_inputs[left_back] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuning_coefficient;
+  _pid_inputs[left_front] = _left_front_setpoint * ratioCalc(masterDistance, _master_offset, lfDistance, lfoffset) * tuning_coefficient;
+  _pid_inputs[right_back] = _right_back_setpoint * ratioCalc(masterDistance, _master_offset, rbDistance, rboffset) * tuning_coefficient;
+  _pid_inputs[right_front] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
+
+  // if (master.get_digital(E_CONTROLLER_DIGITAL_A))
+  // {
+  //   lcd::set_text(4, to_string((int)_pid_inputs[left_back]) + ":" + to_string((int)_pid_inputs[left_front]) + ":" + to_string((int)_pid_inputs[right_back]) + ":" + to_string((int)_pid_inputs[right_front]));
+  //   lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
+  //   lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
+  // }
+}
+
+
+void Move_Motor(void*)
+{
+
+  while(true) {
+    Set_Drive(master.get_analog(ANALOG_LEFT_X), master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
+    _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
+    _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
+    _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
+    _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+
+    pros::delay(20);
+  }
+
+  // _left_back_motor_value = left_back_motor.move(_pid_inputs[left_back]);
+  // _left_front_motor_value = left_front_motor.move(_pid_inputs[left_front]);
+  // _right_back_motor_value = right_back_motor.move(_pid_inputs[right_back]);
+  // _right_front_motor_value = right_front_motor.move(_pid_inputs[right_front]);
+}
 void splitArcade(void*) {
   double power, turn, left, right; //Part of the split arcade implementation
   double actualLeftSpeed, actualRightSpeed; //The actual speed for the left and right drive in the equivalent mV value
@@ -72,27 +197,14 @@ void splitArcade(void*) {
 void shooterSpin(void*) {
   //DIGITAL_R1 is the button assigned to the flywheel
   while (true) {
-    if (master.get_digital(DIGITAL_L2)) {
-      if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) {
-        shooter.move_voltage(-SHOOTER_SPEED);
-      }
-      else if (master.get_digital(DIGITAL_B)) {
-        shooter.move_voltage(SHOOTER_SPEED);
-      }
-      else {
-        shooter.move_voltage(0);
-      }
+    if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) {
+      shooter.move_voltage(-SHOOTER_SPEED);
+    }
+    else if (master.get_digital(DIGITAL_X)) {
+      shooter.move_voltage(SHOOTER_SPEED);
     }
     else {
-      if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) {
-        shooter.move_voltage(SHOOTER_SPEED);
-      }
-      else if (master.get_digital(DIGITAL_B)) {
-        shooter.move_voltage(-SHOOTER_SPEED);
-      }
-      else {
-        shooter.move_voltage(0);
-      }
+      shooter.move_voltage(0);
     }
     pros::delay(20);
   }
@@ -102,24 +214,16 @@ void intakeSpin(void*) {
   //DIGITAL_L2 is the button assigned to the intakes
   while (true) {
     if (master.get_digital(DIGITAL_L2)) {
-      if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_B))) {
-        leftIntake.move_voltage(-INTAKE_SPEED);
-        rightIntake.move_voltage(-INTAKE_SPEED);
-      }
-      else {
-        leftIntake.move_voltage(0);
-        rightIntake.move_voltage(0);
-      }
+      leftIntake.move_voltage(-INTAKE_SPEED);
+      rightIntake.move_voltage(-INTAKE_SPEED);
+    }
+    else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X))) {
+      leftIntake.move_voltage(INTAKE_SPEED);
+      rightIntake.move_voltage(INTAKE_SPEED);
     }
     else {
-      if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_B))) {
-        leftIntake.move_voltage(INTAKE_SPEED);
-        rightIntake.move_voltage(INTAKE_SPEED);
-      }
-      else {
-        leftIntake.move_voltage(0);
-        rightIntake.move_voltage(0);
-      }
+      leftIntake.move_voltage(0);
+      rightIntake.move_voltage(0);
     }
     pros::delay(20);
   }
@@ -128,21 +232,11 @@ void intakeSpin(void*) {
 void indexerSpin(void*) {
   //DIGITAL_R2 is the button assigned to the indexer
   while (true) {
-    if (master.get_digital(DIGITAL_L2)) {
-      if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_B))) {
-        indexer.move_voltage(-INDEXER_SPEED);
-      }
-      else {
-        indexer.move_voltage(0);
-      }
+    if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X))) {
+      indexer.move_voltage(INDEXER_SPEED);
     }
     else {
-      if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_B))) {
-        indexer.move_voltage(INDEXER_SPEED);
-      }
-      else {
-        indexer.move_voltage(0);
-      }
+      indexer.move_voltage(0);
     }
     pros::delay(20);
   }
