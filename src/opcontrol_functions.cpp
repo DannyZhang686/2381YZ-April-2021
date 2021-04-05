@@ -9,10 +9,8 @@
 #define MAX_DELTA_SPEED 5000 //The maximum permitted change in target speed
 #define DELAY_INTERVAL 20
 using namespace std;
-
+using namespace pros;
 // PID ARRAY
-  enum Motor_Ref {left_back = 0, left_front, right_back, right_front};
-
 array<double, 3> left_back_pid_values = {0.6, 0, 0};
 array<double, 3> right_back_pid_values = {0.6, 0, 0};
 array<double, 3> left_front_pid_values = {0.6, 0, 0};
@@ -21,12 +19,16 @@ array<double, 3> right_front_pid_values = {0.6, 0, 0};
 array<double, 3> master_drive_pid_values = {0, 0.01, 0};
 
 std::array<double,4> _pid_inputs = {0,0,0,0};
+auto _master_pid = new PID((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
 
-auto _left_front_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], &leftFront);
-auto _left_back_motor_controller = new Motor_Controller(left_back_pid_values[0], left_back_pid_values[1], left_back_pid_values[2], &leftBack);
-auto _right_front_motor_controller = new Motor_Controller(right_front_pid_values[0], right_front_pid_values[1], right_front_pid_values[2], &rightFront);
-auto _right_back_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], &rightBack);
-auto _master_pid = new Pid((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
+const void InitMotorControllers(void)
+{
+  _left_front_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], leftFront);
+  _left_back_motor_controller = new Motor_Controller(left_back_pid_values[0], left_back_pid_values[1], left_back_pid_values[2], leftBack);
+  _right_front_motor_controller = new Motor_Controller(right_front_pid_values[0], right_front_pid_values[1], right_front_pid_values[2], rightFront);
+  _right_back_motor_controller = new Motor_Controller(right_back_pid_values[0], right_back_pid_values[1], right_back_pid_values[2], rightBack);
+
+};
 
 // SET DRIVE VARIABLES DEFINED HERE
   double _left_front_setpoint;
@@ -61,6 +63,7 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
 // SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
 void Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
+  s__t(5, "REEE");
   _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
   //motor_value_average is what the actual motors are currently set at
 
@@ -104,12 +107,12 @@ void Set_Drive(double left_x, double left_y, double right_x, double right_y)
   _pid_inputs[right_back] = _right_back_setpoint * ratioCalc(masterDistance, _master_offset, rbDistance, rboffset) * tuning_coefficient;
   _pid_inputs[right_front] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
 
-  // if (master.get_digital(E_CONTROLLER_DIGITAL_A))
-  // {
-  //   lcd::set_text(4, to_string((int)_pid_inputs[left_back]) + ":" + to_string((int)_pid_inputs[left_front]) + ":" + to_string((int)_pid_inputs[right_back]) + ":" + to_string((int)_pid_inputs[right_front]));
-  //   lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
-  //   lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
-  // }
+  if (master.get_digital(DIGITAL_A))
+  {
+    lcd::set_text(4, to_string((int)_pid_inputs[left_back]) + ":" + to_string((int)_pid_inputs[left_front]) + ":" + to_string((int)_pid_inputs[right_back]) + ":" + to_string((int)_pid_inputs[right_front]));
+    lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
+    lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
+  }
 }
 
 
@@ -117,7 +120,7 @@ void Move_Motor(void*)
 {
 
   while(true) {
-    Set_Drive(master.get_analog(ANALOG_LEFT_X), master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
+    Set_Drive(0, master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
     _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
     _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
     _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
@@ -126,10 +129,6 @@ void Move_Motor(void*)
     pros::delay(20);
   }
 
-  // _left_back_motor_value = left_back_motor.move(_pid_inputs[left_back]);
-  // _left_front_motor_value = left_front_motor.move(_pid_inputs[left_front]);
-  // _right_back_motor_value = right_back_motor.move(_pid_inputs[right_back]);
-  // _right_front_motor_value = right_front_motor.move(_pid_inputs[right_front]);
 }
 void splitArcade(void*) {
   double power, turn, left, right; //Part of the split arcade implementation
@@ -160,8 +159,8 @@ void splitArcade(void*) {
     }
 
     //Limit the maximum change in motor speed to prevent tipping and chain snapping
-    actualLeftSpeed = (leftFront.get_actual_velocity() + leftBack.get_actual_velocity()) * 30; //Multiplied by 0.5 * 60 for average and conversion from rpm (0-200) to equivalent mV (0-12000)
-    actualRightSpeed = (rightFront.get_actual_velocity() + rightBack.get_actual_velocity()) * 30;
+    actualLeftSpeed = (leftFront->get_actual_velocity() + leftBack->get_actual_velocity()) * 30; //Multiplied by 0.5 * 60 for average and conversion from rpm (0-200) to equivalent mV (0-12000)
+    actualRightSpeed = (rightFront->get_actual_velocity() + rightBack->get_actual_velocity()) * 30;
     if (fabs(left - actualLeftSpeed) > MAX_DELTA_SPEED) {
       //Outside the allowable range; set speed as appropriate
       if (left > actualLeftSpeed) {
@@ -179,10 +178,10 @@ void splitArcade(void*) {
         right = actualRightSpeed - MAX_DELTA_SPEED;
       }
     }
-    leftFront.move_voltage((int) left);
-    leftBack.move_voltage((int) left);
-    rightFront.move_voltage((int) right);
-    rightBack.move_voltage((int) right);
+    leftFront->move_voltage((int) left);
+    leftBack->move_voltage((int) left);
+    rightFront->move_voltage((int) right);
+    rightBack->move_voltage((int) right);
     pros::delay(20);
   }
 }

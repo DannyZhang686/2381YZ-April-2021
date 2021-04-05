@@ -31,10 +31,10 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   //Take the mutex to avoid writing to the same location twice
   // if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
   if (true) {
-    leftFront.move_voltage(leftVoltage);
-    leftBack.move_voltage(leftVoltage);
-    rightFront.move_voltage(rightVoltage);
-    rightBack.move_voltage(rightVoltage);
+    leftFront->move_voltage(leftVoltage);
+    leftBack->move_voltage(leftVoltage);
+    rightFront->move_voltage(rightVoltage);
+    rightBack->move_voltage(rightVoltage);
     //Release the mutex
     // driveControl.give();
     return true; //success

@@ -7,7 +7,7 @@
 
 Motor_Controller::Motor_Controller(double kp, double ki, double kd, pros::Motor* motor){
   this->motor = motor;
-  pid = new Pid(kp, ki, kd);
+  pid = new PID(kp, ki, kd);
 }
 
 double Motor_Controller::Get_Speed() {

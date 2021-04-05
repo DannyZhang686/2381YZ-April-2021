@@ -19,7 +19,7 @@ class Motor_Controller {
    * active to prevent integral windup.
    */
    double Set_Speed(double targetValue);
-   Pid* pid;
+   PID* pid;
    pros::Motor* motor;
    double Get_Speed();
    double Get_Distance();

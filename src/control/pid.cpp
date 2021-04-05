@@ -4,7 +4,7 @@
 /**
  * Constructor taking in kp, ki, and kd
  */
-Pid::Pid(double kp, double ki, double kd) {
+PID::PID(double kp, double ki, double kd) {
   kp_ = kp;
   ki_ = ki;
   kd_ = kd;
@@ -14,7 +14,7 @@ Pid::Pid(double kp, double ki, double kd) {
 /**
  * Resets error to prevent integral windup
  */
-void Pid::ResetError() {
+void PID::ResetError() {
   error_sum_ = 0.0;
   last_error_ = 0.0;
 }
@@ -23,7 +23,7 @@ void Pid::ResetError() {
  * Every update period, this is called to calculate a new PID output
  */
 
-double Pid::Update(double setpoint, double current_value) {
+double PID::Update(double setpoint, double current_value) {
   double error = setpoint - current_value;
   double p = kp_ * error;
   error_sum_ += error;
@@ -37,7 +37,7 @@ double Pid::Update(double setpoint, double current_value) {
   return p + i + d;
 }
 
-void Pid::Set_Error(double Error)
+void PID::Set_Error(double Error)
 {
   error_sum_ = Error;
 }
