@@ -178,7 +178,7 @@ void status(void) {
   lv_label_set_array_text(label_1, printChar, 1024);
   lv_obj_align(label_1, NULL, LV_ALIGN_IN_TOP_MID, 0, 5);
 
-  printString = "Motor Temps: " + std::to_string((int) leftFront.get_temperature());
+  printString = "Motor Temps: " + std::to_string((int) leftFront->get_temperature());
   strcpy(printChar, printString.c_str());
 
   lv_obj_t * label_2 = lv_label_create(g_btn_region, NULL);
@@ -192,7 +192,7 @@ void status(void) {
   lv_label_set_array_text(label_3, printChar, 1024);
   lv_obj_align(label_3, NULL, LV_ALIGN_IN_TOP_MID, 0, 35);
 
-  printString = "Motor values: " + std::to_string((int) leftFront.get_position());
+  printString = "Motor values: " + std::to_string((int) leftFront->get_position());
   strcpy(printChar, printString.c_str());
 
   lv_obj_t * label_4 = lv_label_create(g_btn_region, NULL);

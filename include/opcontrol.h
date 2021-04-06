@@ -14,4 +14,8 @@ void shooterSpin(void*);
 void intakeSpin(void*);
 void indexerSpin(void*);
 
+void Move_Motor(void*);
+
+// void Set_Drive(double left_x, double left_y, double right_x, double right_y);
+
 #endif //_OPCONTROL_H_
