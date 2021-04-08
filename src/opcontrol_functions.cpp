@@ -16,7 +16,7 @@ array<double, 3> right_back_pid_values = {0.6, 0, 0};
 array<double, 3> left_front_pid_values = {0.6, 0, 0};
 array<double, 3> right_front_pid_values = {0.6, 0, 0};
 
-array<double, 3> master_drive_pid_values = {0, 0.01, 0};
+array<double, 3> master_drive_pid_values = {0, 0.015, 0};
 
 std::array<double,4> _pid_inputs = {0,0,0,0};
 auto _master_pid = new PID((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
@@ -75,10 +75,10 @@ void Set_Drive(double left_x, double left_y, double right_x, double right_y)
   {
     _master_error_average = _master_setpoint - _motor_value_average;
   }
-  _left_back_setpoint = (left_y - left_x + pow((std::abs(right_x) / 127), 0.8) * (right_x));
-  _left_front_setpoint = (left_y + left_x + pow((std::abs(right_x) / 127), 0.8) * (right_x));
-  _right_back_setpoint = (left_y + left_x - pow((std::abs(right_x) / 127), 0.8) * (right_x));
-  _right_front_setpoint = (left_y - left_x - pow((std::abs(right_x) / 127), 0.8) * (right_x));
+  _left_back_setpoint = (left_y - left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x));
+  _left_front_setpoint = (left_y + left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x));
+  _right_back_setpoint = (left_y + left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x));
+  _right_front_setpoint = (left_y - left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x));
 
   _master_setpoint = (abs(_left_back_setpoint) + abs(_left_front_setpoint) + abs(_right_back_setpoint) + abs(_right_front_setpoint)) / 4;
   _master_offset += (_master_setpoint);
@@ -197,10 +197,10 @@ void shooterSpin(void*) {
   //DIGITAL_R1 is the button assigned to the flywheel
   while (true) {
     if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) {
-      shooter.move_voltage(-SHOOTER_SPEED);
+      shooter.move_voltage(SHOOTER_SPEED);
     }
     else if (master.get_digital(DIGITAL_X)) {
-      shooter.move_voltage(SHOOTER_SPEED);
+      shooter.move_voltage(-SHOOTER_SPEED);
     }
     else {
       shooter.move_voltage(0);
