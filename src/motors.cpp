@@ -36,27 +36,14 @@
 using namespace std;
 using namespace pros;
 
-static DriveConfig Z_Bot_Drive = {
-    {left_back, {6, 1}},
-    {left_front, {9, 0}},
-    {right_back, {18, 0}},
-    {right_front, {19, 1}},
-};
-static DriveConfig Y_Bot_Drive = {
-    {left_back, {11, 0}},
-    {left_front, {20, 0}},
-    {right_back, {16, 1}},
-    {right_front, {17, 1}},
-};
-pros::Motor* leftFront = nullptr;
-pros::Motor* rightFront = nullptr;
-pros::Motor* leftBack = nullptr;
-pros::Motor* rightBack = nullptr;
-
+pros::Motor *leftFront = nullptr;
+pros::Motor *rightFront = nullptr;
+pros::Motor *leftBack = nullptr;
+pros::Motor *rightBack = nullptr;
 
 const void InitDrive(DriveConfig config)
 {
-    leftBack  = new pros::Motor(get<0>(config[left_back]), get<1>(config[left_back]));
+    leftBack = new pros::Motor(get<0>(config[left_back]), get<1>(config[left_back]));
     leftFront = new pros::Motor(get<0>(config[left_front]), get<1>(config[left_front]));
     rightBack = new pros::Motor(get<0>(config[right_back]), get<1>(config[right_back]));
     rightFront = new pros::Motor(get<0>(config[right_front]), get<1>(config[right_front]));
@@ -64,18 +51,19 @@ const void InitDrive(DriveConfig config)
     s__t(0, t__s(leftBack->get_actual_velocity()));
 }
 
-const void InitMotors(RobotConfig config)
+const void InitMotors(ConfigOptions config)
 {
-    switch(config)
+    switch (config)
     {
-        case Z:
-            InitDrive(Z_Bot_Drive);
-            break;
-        case Y:
-            InitDrive(Y_Bot_Drive);
-            break;
+    case Y:
+        InitDrive(Y_Bot_Drive);
+        InitMotorControllers(Y_Bot_Drive_Config);
+        break;
+    default:
+        InitDrive(Z_Bot_Drive);
+        InitMotorControllers(Z_Bot_Drive_Config);
+        break;
     }
-    InitMotorControllers();
 }
 
 //Intakes

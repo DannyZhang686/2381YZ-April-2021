@@ -1,10 +1,16 @@
-#include "main.h"
-#include "control/motor_controller.hpp"
-#include <tuple>
-#include <map>
+     
 
 #ifndef _MOTORS_H_
 #define _MOTORS_H_
+
+#include "main.h"
+#include "control/motor_controller.hpp"
+#include "config/config_types.hpp"
+#include "config/robot_config.hpp"
+
+#include <tuple>
+#include <map>
+
 
 //Extern declarations for motors (and other electronics)
 extern pros::Motor* leftFront;
@@ -18,25 +24,8 @@ static Motor_Controller* _right_front_motor_controller = nullptr;
 static Motor_Controller* _right_back_motor_controller = nullptr;
 
 
-enum Motor_Ref
-{
-    left_back = 0,
-    left_front,
-    right_back,
-    right_front
-};
-
-enum RobotConfig
-{
-    Z = 0,
-    Y
-};
-
-typedef std::tuple<int, bool> MotorConfig; // Port, Orientation
-
-typedef std::map<Motor_Ref, MotorConfig> DriveConfig;
-const void InitMotors(RobotConfig config = Z);
-const void InitMotorControllers(void);
+const void InitMotors(ConfigOptions config = Z);
+const void InitMotorControllers(DrivePidConfig DrivePidConfig = Z_Bot_Drive_Config);
 
 
 extern pros::Motor leftIntake;

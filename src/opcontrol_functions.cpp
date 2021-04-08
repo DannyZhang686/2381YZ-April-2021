@@ -21,12 +21,12 @@ array<double, 3> master_drive_pid_values = {0, 0.01, 0};
 std::array<double,4> _pid_inputs = {0,0,0,0};
 auto _master_pid = new PID((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
 
-const void InitMotorControllers(void)
+const void InitMotorControllers(DrivePidConfig config)
 {
-  _left_front_motor_controller = new Motor_Controller(left_front_pid_values[0], left_front_pid_values[1], left_front_pid_values[2], leftFront);
-  _left_back_motor_controller = new Motor_Controller(left_back_pid_values[0], left_back_pid_values[1], left_back_pid_values[2], leftBack);
-  _right_front_motor_controller = new Motor_Controller(right_front_pid_values[0], right_front_pid_values[1], right_front_pid_values[2], rightFront);
-  _right_back_motor_controller = new Motor_Controller(right_back_pid_values[0], right_back_pid_values[1], right_back_pid_values[2], rightBack);
+  _left_front_motor_controller = new Motor_Controller(config[left_front][0], config[left_front][1], config[left_front][2], leftFront);
+  _left_back_motor_controller = new Motor_Controller(config[left_back][0], config[left_back][1], config[left_back][2], leftBack);
+  _right_front_motor_controller = new Motor_Controller(config[right_front][0], config[right_front][1], config[right_front][2], rightFront);
+  _right_back_motor_controller = new Motor_Controller(config[right_back][0], config[right_back][1], config[right_back][2], rightBack);
 
 };
 

@@ -12,7 +12,7 @@
 
 void initialize() {
 	pros::lcd::initialize();
-	InitMotors(Z);
+	InitMotors(Y);
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over
 	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
