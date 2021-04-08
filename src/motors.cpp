@@ -59,6 +59,10 @@ const void InitMotors(ConfigOptions config)
         InitDrive(Y_Bot_Drive);
         InitMotorControllers(Y_Bot_Drive_Config);
         break;
+    case E:
+        InitDrive(Evan_Bot_Drive);
+        InitMotorControllers(Z_Bot_Drive_Config);
+        break;
     default:
         InitDrive(Z_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);

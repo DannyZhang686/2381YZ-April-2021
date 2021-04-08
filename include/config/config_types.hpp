@@ -17,7 +17,8 @@ enum Motor_Ref
 enum ConfigOptions
 {
     Z = 0,
-    Y
+    Y,
+    E
 };
 
 typedef std::tuple<int, bool> MotorConfig; // Port, Orientation
