@@ -7,6 +7,7 @@
 #include "control/motor_controller.hpp"
 #include "config/config_types.hpp"
 #include "config/robot_config.hpp"
+#include "inertial_module.hpp"
 
 #include <tuple>
 #include <map>
@@ -33,12 +34,11 @@ extern pros::Motor rightIntake;
 extern pros::Motor indexer;
 extern pros::Motor shooter;
 
-extern pros::Imu leftIMU;
-extern pros::Imu rightIMU;
+extern Inertial* inertial;
 
 // extern pros::ADIEncoder rightTracking;
-extern pros::ADIEncoder backTracking;
-extern pros::ADIEncoder leftTracking;
+extern pros::ADIEncoder* backTracking;
+extern pros::ADIEncoder* leftTracking;
 
 extern pros::ADIAnalogIn tLineSensor;
 extern pros::ADIAnalogIn bLineSensor;

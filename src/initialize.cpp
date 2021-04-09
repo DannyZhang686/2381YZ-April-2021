@@ -12,16 +12,14 @@
 
 void initialize() {
 	pros::lcd::initialize();
-	InitMotors(E);
+	InitMotors(L);
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over
 	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
 
-	leftIMU.reset(); //Non-blocking but takes around 2000 ms
-	rightIMU.reset();
-	tLineSensor.calibrate(); //Blocking, takes around 500 ms
-	bLineSensor.calibrate();
-	// pros::delay(3000); //Let everything init properly
+	// tLineSensor.calibrate(); //Blocking, takes around 500 ms
+	// bLineSensor.calibrate();
+	pros::delay(3000); //Let everything init properly
 }
 
 /**

@@ -25,10 +25,10 @@ void trackPosition(void*) {
   //This runs in a Task and thus requires an infinite loop.
   while (true) {
     //Update the current values
-    currentVal.left = leftTracking.get_value();
+    currentVal.left = leftTracking->get_value();
     // currentVal.right = rightTracking.get_value();
-    currentVal.back = backTracking.get_value();
-    currentVal.angle = degToRad(0.5*(leftIMU.get_yaw() + rightIMU.get_yaw()));
+    currentVal.back = backTracking->get_value();
+    currentVal.angle = inertial->Get_Angle();
     if (currentVal.angle > 2 * PI) currentVal.angle -= 2 * PI;
     if (currentVal.angle < 0) currentVal.angle += 2 * PI;
 
