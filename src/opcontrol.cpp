@@ -11,7 +11,7 @@ void opcontrol() {
 	// delete driveValues;
 
 // drive calls move_motor in op_fucntions
-	// pros::Task trollDrive(Move_Motor, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
+	pros::Task trollDrive(Move_Motor, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
 	// pros::Task drive(splitArcade, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive");
 
 	// pros::Task shooter(shooterSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooter");
@@ -21,7 +21,7 @@ void opcontrol() {
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
  
 	// pros::Task lineSensors(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Line Sensors");
-	pros::Task autoTest(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
+	// pros::Task autoTest(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
 	// pros::Task autoTest1(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Test");
 	while (true) {
 		pros::delay(10);

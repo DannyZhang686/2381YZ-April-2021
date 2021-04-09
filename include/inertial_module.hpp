@@ -15,14 +15,18 @@ typedef struct Inertial
     pros::Imu* imu1 = nullptr;
     pros::Imu* imu2 = nullptr;
 
+    double gyroAngle = 0;
+
 
     Inertial(int port1);
     Inertial(int port1, int port2);
 
 
     const void Reset(void);
-
+    const bool IsCalibrating(void);
     const double Get_Angle(void);
+    const double Get_Gyro(void);
+    const void Update_Gyro(void);
 
 
 } Inertial;
