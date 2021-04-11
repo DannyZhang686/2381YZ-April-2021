@@ -2,7 +2,10 @@
 #include "autonomous.h"
 #include "gui.h"
 #include "motors.h"
-
+#include "globals.hpp"
+#include "autonomous/auton_control.hpp"
+#include "autonomous/global_sequences.hpp"
+#include "opcontrol.h"
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -10,9 +13,23 @@
  * to keep execution time for this mode under a few seconds.
  */
 
-void initialize() {
+bool Competition_Env = false;
+AutonControl *auton_control = AutonControl::instance();
+MasterController *master_control = MasterController::instance();
+bool STOP = false;
+
+void initialize()
+{
 	pros::lcd::initialize();
 	InitMotors(L);
+
+	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
+	pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");
+
+	using namespace Auton;
+	auton_control->define_auton(AutonControl::TestAuton, AT_Test_Ultras);
+	auton_control->select_auton(AutonControl::TestAuton);
+
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over
 	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
@@ -40,4 +57,7 @@ void disabled() {}
  * starts.
  */
 
-void competition_initialize() {}
+void competition_initialize()
+{
+	bool Competition_Env = true;
+}

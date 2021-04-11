@@ -26,7 +26,7 @@ typedef struct Pd {
   //Core function to be called
   double getOutput(double currentValue, double setpoint);
   //Variables used in the PD controller
-  double kP, kD, prevError;
+  double kP = 0, kD = 0, prevError = 0;
   void reset() {
     kP = kD = prevError = 0;
   }

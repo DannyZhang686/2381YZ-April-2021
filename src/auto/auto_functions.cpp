@@ -32,6 +32,7 @@ void updateTracking(void)
     return;
   }
 
+
   //Update the current values
   inertial->Update_Gyro();
   currentVal.left = leftTracking->get_value();
@@ -97,9 +98,8 @@ void updateTracking(void)
 
   //Print the tracking values to the brain screen for debugging
   s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.back));
-  s__t(1, t__s(robotPos.angle) + " " +  t__s(inertial->Get_Gyro()));
+  s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
 }
-
 
 void trackPosition(void *)
 {
@@ -162,8 +162,8 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
       }
       lastLeftOutput = leftOutput; //Update the latest available values
       lastRightOutput = rightOutput;
-      s__t(2, t__s(leftOutput) + " " + t__s(rightOutput));
-      s__t(3, t__s(distance) + " " + t__s(current.x) + " " + t__s(current.y));
+      s__t(2, "outputs" +  t__s(leftOutput) + " " + t__s(rightOutput));
+      s__t(3, "dist, pos" + t__s(distance) + " " + t__s(current.x) + " " + t__s(current.y));
       setDriveSafe(leftOutput, rightOutput);
       pdGetOutput.give();
     }
