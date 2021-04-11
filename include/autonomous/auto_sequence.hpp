@@ -1,10 +1,10 @@
+
+#include "autonomous/auto_task.hpp"
+#include <vector>
+
 #ifndef AUTO_SEQUENCE_HPP
 #define AUTO_SEQUENCE_HPP
 
-#include <functional>
-#include <future>
-#include <vector>
-#include "auto_task.hpp"
 
 class AutoSequence : public AutoTask{
     public: 

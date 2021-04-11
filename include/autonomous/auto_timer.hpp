@@ -2,7 +2,6 @@
 #define AUTO_TIMER_HPP
 
 #include <functional>
-#include <future>
 #include "auto_task.hpp"
 
 struct AutoTimerArgs {

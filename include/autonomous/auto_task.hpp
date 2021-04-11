@@ -38,7 +38,6 @@ class AutoTask {
     AutoTask& AddInit(std::function<void(void)> init);
     AutoTask& AddDone(std::function<bool(void)> done);
     
-protected:
 };
 
 #endif

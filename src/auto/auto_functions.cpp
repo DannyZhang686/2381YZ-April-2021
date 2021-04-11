@@ -3,6 +3,7 @@
 #include "motors.h"
 #include "utilities.h"
 #include "pid.h"
+#include "globals.hpp"
 
 //Robot position and encoder values structs
 Position robotPos;
@@ -105,7 +106,7 @@ void trackPosition(void *)
 {
   while (true)
   {
-    updateTracking();
+    position_tracker->Track_Position();
     pros::delay(10);
   }
 }

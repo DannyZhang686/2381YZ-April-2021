@@ -6,7 +6,6 @@
 #include "control/pid.hpp"
 #include "globals.hpp"
 
-
 #define DEAD_ZONE 20         //The joystick deadzone in percent of half the joystick range
 #define MAX_DELTA_SPEED 5000 //The maximum permitted change in target speed
 #define DELAY_INTERVAL 20
@@ -62,7 +61,8 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
 // SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
 const void Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
-    s__t(5, "REEE");
+    left_x = 0;
+    // s__t(5, "REEE");
     _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
     //motor_value_average is what the actual motors are currently set at
 
@@ -114,17 +114,34 @@ const void Set_Drive(double left_x, double left_y, double right_x, double right_
     }
 }
 
-
-
-void PID_Drive(void*)
+const void stop(void)
 {
-    return;
-    if(STOP) return;
+    leftBack->move_voltage(0);
+    rightBack->move_voltage(0);
+    leftFront->move_voltage(0);
+    rightFront->move_voltage(0);
+    _pid_inputs = {0, 0, 0, 0};
+}
 
-    _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
-    _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
-    _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
-    _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+void PID_Drive(void *)
+{
+    while (true)
+    {
+        if (STOP)
+        {
+            leftBack->move(0);
+            rightFront->move(0);
+            rightBack->move(0);
+            leftBack->move(0);
+            _pid_inputs = {0, 0, 0, 0};
+        }
+
+        _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
+        _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
+        _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
+        _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+        pros::delay(DELAY_INTERVAL);
+    }
 }
 void splitArcade(void)
 {

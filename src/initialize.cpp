@@ -17,11 +17,15 @@ bool Competition_Env = false;
 AutonControl *auton_control = AutonControl::instance();
 MasterController *master_control = MasterController::instance();
 bool STOP = false;
+Position_Tracker * position_tracker = Position_Tracker::instance();
+
 
 void initialize()
 {
 	pros::lcd::initialize();
 	InitMotors(L);
+	
+	position_tracker->Create();
 
 	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
 	pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");

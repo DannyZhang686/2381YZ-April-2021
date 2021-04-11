@@ -44,6 +44,7 @@ using namespace std;
 //         [](void) -> bool { return (!robot->drive->get_running()); }, [](void) -> void { robot->drive->Reset_Point(); }, [](void) -> void {});
 // }
 
+// last year
 // AutoTask AutoCurve(complex<double> Waypoint, double angle, complex<double> Endpoint, double EndAngle, double speed, double curvature, double AngleInterpolation)
 // {
 //     return AutoTask::SyncTask(

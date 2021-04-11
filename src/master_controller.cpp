@@ -9,14 +9,6 @@
 using namespace pros;
 using namespace std;
 
-const void stop(void)
-{
-    leftBack->move_voltage(0);
-    rightBack->move_voltage(0);
-    leftFront->move_voltage(0);
-    rightFront->move_voltage(0);
-}
-
 MasterController *MasterController::instance()
 {
     static MasterController factory;
@@ -80,8 +72,8 @@ void MasterController::selector()
 void MasterController::autonomous() {
     // lcd::set_text(1, "Increment Value: " + to_string(_autonomous_increment));
     if (master.get_digital(E_CONTROLLER_DIGITAL_X)){
-        auton_control->run();
         STOP = false;
+        auton_control->run();
     } else {
         stop();
         STOP = true;

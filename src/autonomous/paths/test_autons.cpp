@@ -21,26 +21,13 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
-        SingleRun([](void) -> void {
-            robotPos.x = 36;
-            robotPos.y = 12;
-            robotPos.angle = 0;
-        }),
+        // SingleRun([](void) -> void {
+        //     robotPos.x = 36;
+        //     robotPos.y = 12;
+        //     robotPos.angle = 0;
+        // }),
         AutoTask::AutoDelay(500),
-        PurePursuitTask(36, 30, 2.5, 8, true), //36, 36
-        TurnToPointTask(12, 15, 0.1),          //13, 16
-        PurePursuitTask(12, 15, 3, 8, true),
-        ApproachGoalTask(50, 650),
-        AutoTask::AutoDelay(1000),
-        ApproachGoalTask(-70, 500),
-        AutoTask::AutoDelay(600),
-        TurnToPointTask(26, 74, 0.1),
-        PurePursuitTask(26, 74, 2.5, 8, true),
-        TurnToPointTask(17, 75, 0.1),
-        PurePursuitTask(17, 75, 2.5, 8, true),
-        ApproachGoalTask(50, 650),
-        AutoTask::AutoDelay(1000),
-        ApproachGoalTask(-65, 650),
+        PurePursuitTask({12, 4}, 0, {50, 20}), //36, 36
         
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });
