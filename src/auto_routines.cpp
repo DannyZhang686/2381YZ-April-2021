@@ -29,8 +29,8 @@ void movementOne(void*) {
   // turnToPoint(11, 39.5, 0.05);
   // movePurePursuit(11, 39.5, 2.5, 8, true); //Getting the ball on the side wall
   // backAway(70, 500);
-  turnToPoint(26, 74, 0.1);
-  movePurePursuit(26, 74, 2.5, 8, true);
+  turnToPoint(28.5, 74, 0.1);
+  movePurePursuit(28.5, 74, 2.5, 8, true);
   turnToPoint(17, 75, 0.1);
   movePurePursuit(17, 75, 2.5, 8, true);
   approachGoal(50, 650);
@@ -39,52 +39,50 @@ void movementOne(void*) {
 
   doneWithGoal[1].take(INT_MAX);
   backAway(65, 650);
+  pros::delay(600);
   turnToPoint(60, 75, 0.1);
   movePurePursuit(60, 75, 2.5, 8, true);
   for (int i = 0; i < 2; i++) {
-    approachGoal(130, 700);
-    pros::delay(500);
+    approachGoal(130, 650);
+    pros::delay(300);
     backAway(130, 400);
     pros::delay(400);
   }
   approachGoal(100, 1000);
   pros::delay(800);
   arrivedAtGoal[2].give();
+  // pros::delay(1000);
 
   doneWithGoal[2].take(INT_MAX);
 
-  //UNTESTED
-  turnToPoint(36, 108, 0.1); //Coordinates of ball
-  movePurePursuit(36, 108, 2.5, 8, true);
-  turnToPoint(17, 75, 0.1); //Coordinates of goal
-  movePurePursuit(17, 75, 2.5, 8, true);
-  approachGoal(50, 650);
+  //Code is UNTESTED below this point
+  // backAway(130, 400);
+  // turnToPoint(36, 108, 0.1); //Coordinates of ball
+  // movePurePursuit(36, 108, 2.5, 8, true);
+  // turnToPoint(12, 135, 0.1); //Coordinates of goal
+  // movePurePursuit(12, 135, 2.5, 8, true);
+  // approachGoal(50, 650);
+  // arrivedAtGoal[3].give();
+  // pros::delay(1000);
 
-  // moveShort(36, 24, 1.5, true);
-  // pros::delay(250);
-  // turnToPoint(14, 13, 0.1);
-  // pros::delay(250);
-  // moveShort(14, 15, 1.5, true);
-  // arrivedAtFirstGoal.give();
-  // // turnToPoint(13, 14.5, 0.1);
-  // // pros::delay(250);
-  // // moveShort(13, 14.5, 1.5, true);
-  // doneWithFirstGoal.take(INT_MAX);
-  // // pros::delay(1500); //add time
-  // // turnToOppositePoint(36, 24, 0.1);
-  // moveShort(36, 24, 2, false);
-  // pros::delay(250);
-  // turnToPoint(11, 38, 0.1);
-  // pros::delay(250);
-  // doneFirstDiscard.give();
-  // moveShort(11, 38, 1.5, true);
-  // pros::delay(250);
-  // turnToPoint(33, 78, 0.1);
-  // pros::delay(250);
-  // moveShort(33, 78, 2, true);
-  // pros::delay(250);
-  // turnToPoint(9, 72, 0.1);
-  // pros::delay(250);
+  // doneWithGoal[3].take(INT_MAX);
+  // backAway(65, 650);
+  // turnToPoint(72, 96, 0.1); //Coordinates of ball
+  // movePurePursuit(72, 96, 2.5, 8, true);
+  // turnToPoint(72, 127, 0.1); //Coordinates of goal
+  // movePurePursuit(72, 127, 2.5, 8, true);
+  // approachGoal(50, 650);
+  // arrivedAtGoal[4].give();
+  // // pros::delay(1000);
+  //
+  // doneWithGoal[4].take(INT_MAX);
+  // backAway(65, 650);
+  // turnToPoint(108, 108, 0.1); //Coordinates of ball
+  // movePurePursuit(108, 108, 2.5, 8, true);
+  // turnToPoint(132, 129, 0.1); //Coordinates of goal
+  // movePurePursuit(132, 129, 2.5, 8, true);
+  // approachGoal(50, 650);
+  // arrivedAtGoal[5].give();
 }
 
 void snailOne(void*) {
@@ -114,7 +112,9 @@ void snailOne(void*) {
   stopMotors();
   pros::delay(150);
   doneWithGoal[1].give();
-  pros::delay(500);
+  pros::delay(250);
+  discard();
+  pros::delay(600);
 
   intakeNoShoot(200);
   arrivedAtGoal[2].take(INT_MAX);
@@ -125,9 +125,29 @@ void snailOne(void*) {
   stopMotors();
   pros::delay(150);
   doneWithGoal[2].give();
+  pros::delay(500);
 
-  intakeNoShoot(200);
-  pros::delay(15000);
+  // intakeNoShoot(200);
+  // arrivedAtGoal[3].take(INT_MAX);
+  //
+  // stopMotors();
+  // pros::delay(200);
+  // intakeShoot(0, 1);
+  // stopMotors();
+  // pros::delay(150);
+  // doneWithGoal[3].give();
+  // pros::delay(500);
+
+  // intakeNoShoot(200);
+  // arrivedAtGoal[4].take(INT_MAX);
+  //
+  // stopMotors();
+  // pros::delay(200);
+  // intakeShoot(0, 1);
+  // stopMotors();
+  // pros::delay(150);
+  // doneWithGoal[4].give();
+
   stopMotors();
 
   // s__t(2, "1");
