@@ -193,13 +193,26 @@ void splitArcade(void*) {
 //This increases the number of different things the driver can do
 //using the four buttons on the controller that are easiest to reach.
 
+bool shooterToggle = true;
+double prevNumBalls = 0;
+
 void shooterSpin(void*) {
   //DIGITAL_R1 is the button assigned to the flywheel
   while (true) {
-    if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) {
+
+    if ((floor(numBallsShot) == numBallsShot) && (numBallsShot != prevNumBalls)) {
+      shooterToggle = false;
+    }
+    prevNumBalls = numBallsShot;
+    
+    if ((master.get_digital_new_press(DIGITAL_A)) || (master.get_digital_new_press(DIGITAL_R1))) {
+      shooterToggle = true;
+    }
+    
+    if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A)) && (shooterToggle)) {
       shooter.move_voltage(SHOOTER_SPEED);
     }
-    else if (master.get_digital(DIGITAL_X)) {
+    else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_Y))) {
       shooter.move_voltage(-SHOOTER_SPEED);
     }
     else {
@@ -212,7 +225,7 @@ void shooterSpin(void*) {
 void intakeSpin(void*) {
   //DIGITAL_L2 is the button assigned to the intakes
   while (true) {
-    if (master.get_digital(DIGITAL_L2)) {
+    if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y))) {
       leftIntake.move_voltage(-INTAKE_SPEED);
       rightIntake.move_voltage(-INTAKE_SPEED);
     }
@@ -231,7 +244,10 @@ void intakeSpin(void*) {
 void indexerSpin(void*) {
   //DIGITAL_R2 is the button assigned to the indexer
   while (true) {
-    if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X))) {
+    if (master.get_digital(DIGITAL_Y)) {
+      indexer.move_voltage(-INDEXER_SPEED);
+    }
+    else if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_L1))) {
       indexer.move_voltage(INDEXER_SPEED);
     }
     else {
