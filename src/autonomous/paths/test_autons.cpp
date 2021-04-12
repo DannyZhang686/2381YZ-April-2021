@@ -27,7 +27,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //     robotPos.angle = 0;
         // }),
         AutoTask::AutoDelay(500),
-        PurePursuitTask({12, 4}, 0, {50, 20}), //36, 36
+        PurePursuitTask({36, -36}, 0, 50), //36, 36
         
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });

@@ -151,7 +151,7 @@ void Position_Tracker::Track_Position()
     pilons_disp += pilonsVel;
 
     lcd::set_text(2, "N_POS : ("  + to_string((int)round( 100* Get_Position_N().real())) + ", " + to_string((int)round( 100* Get_Position_N().imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
-    lcd::set_text(1, "P_POS : ("  + to_string((int)round( 100* pilons_disp.real())) + ", " + to_string((int)round( 100* pilons_disp.imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
+    // lcd::set_text(1, "P_POS : ("  + to_string((int)round( 100* pilons_disp.real())) + ", " + to_string((int)round( 100* pilons_disp.imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
 
     // double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
     // double cosTheta = cos(robotPos.angle);

@@ -59,9 +59,22 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
 }
 
 // SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
-const void Set_Drive(double left_x, double left_y, double right_x, double right_y)
+
+array<double, 4> setpoints = {0, 0, 0, 0};
+const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
     left_x = 0;
+    setpoints = {
+        (left_y - left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x)),
+        (left_y + left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x)),
+        (left_y + left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x)),
+        (left_y - left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x)),
+    };
+    Set_Drive(setpoints[0], setpoints[1], setpoints[2], setpoints[3]);
+}
+const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
+{
+
     // s__t(5, "REEE");
     _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
     //motor_value_average is what the actual motors are currently set at
@@ -74,10 +87,10 @@ const void Set_Drive(double left_x, double left_y, double right_x, double right_
     {
         _master_error_average = _master_setpoint - _motor_value_average;
     }
-    _left_back_setpoint = (left_y - left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x));
-    _left_front_setpoint = (left_y + left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x));
-    _right_back_setpoint = (left_y + left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x));
-    _right_front_setpoint = (left_y - left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x));
+    _left_back_setpoint = lbSP;
+    _left_front_setpoint = lfSP;
+    _right_back_setpoint = rbSP;
+    _right_front_setpoint = rfSP;
 
     _master_setpoint = (abs(_left_back_setpoint) + abs(_left_front_setpoint) + abs(_right_back_setpoint) + abs(_right_front_setpoint)) / 4;
     _master_offset += (_master_setpoint);
@@ -170,7 +183,8 @@ void splitArcade(void)
     }
     else
     {
-        //Move at voltage 0 if there's very little or no input
+ 
+       //Move at voltage 0 if there's very little or no input
         left = right = 0;
     }
 

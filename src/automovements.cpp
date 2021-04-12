@@ -1,4 +1,3 @@
-
 #include "main.h"
 #include "opcontrol.h"
 #include "motors.h"
@@ -25,6 +24,7 @@ using namespace std::complex_literals;
 
 typedef complex<double> Pnt;
 typedef vector<complex<double>> PointList;
+
 // const complex<double> Position_Tracker::wheel_center_offset = {2.75, 2.25};
 
 PointList doubleArrayCopy(vector<complex<double>> arr)
@@ -38,7 +38,7 @@ PointList DefinePath(Pnt startPoint, Pnt endPoint, double startAngle)
 {
     // disp between the 2 points
     Pnt disp = endPoint - startPoint;
-    double distance = abs(disp)/3;
+    double distance = abs(disp) / 8;
     Pnt midwayPoint = startPoint + distance * Pnt(cos(startAngle), sin(startAngle));
 
     return {startPoint, midwayPoint, endPoint};
@@ -101,30 +101,28 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
     return newPath;
 }
 
-namespace PPS
+const double Curvature(Pnt currentPos, Pnt targetPos, double currentOrientation)
 {
+    double diffX = targetPos.real() - currentPos.real();
+    double diffY = targetPos.imag() - currentPos.imag();
+    double dist = sqrt(diffX * diffX + diffY * diffY);
 
-    PointList path = {};
+    if ((diffY == diffX) && (!diffX))
+    {
+        return NAN;
+    }
 
-    long mostestClosestIndex = 0;
+    double angleTargetCurrentCenter = atan2(diffY, diffX);
+    double angleToTravel = currentOrientation - angleTargetCurrentCenter;
 
-    Pnt startPoint = 0, endPoint = 0, currentPos = 0, prevPos = 0, waypoint = 0, lookaheadPnt = 0;
-    double startAngle = 0, endAngle = 0, currentAngle = 0;
+    while (angleToTravel > PI)
+        angleToTravel -= 2 * PI;
+    while (angleToTravel < -PI)
+        angleToTravel += 2 * PI;
+    if (angleToTravel == 0)
+        return NAN;
 
-    static double curvature = 1;
-
-    Pd leftStraight1(0.8, 2);
-    Pd leftTurn1(0.8, 2);
-    Pd rightTurn1(0.8, 2);
-    Pd rightStraight1(0.8, 2);
-
-    Pnt current, goalPoint, target, starting;
-    Line movingLine;
-    double distance, targetAngle; //Distance/Angle between current and target
-    double travellingAngle;       //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the target
-    double tAngleInches;          //travellingAngle converted to a value in inches (for PD purposes)
-    long long time = 0;
-    bool setTime = false;
+    return -dist / angleToTravel;
 }
 
 long GetClosest(PointList path, Pnt currentPoint, long previousIndex = 0)
@@ -137,7 +135,7 @@ long GetClosest(PointList path, Pnt currentPoint, long previousIndex = 0)
         previousIndex = 0;
     }
 
-    for (int i = previousIndex; i <  previousIndex + 10; i++)
+    for (int i = previousIndex; i < previousIndex + 10; i++)
     {
         if (i == path.size() - 1)
         {
@@ -161,21 +159,95 @@ PointList GeneratePath(Pnt startpoint, Pnt endpoint, double startAngle, double s
     return path;
 }
 
-// x, y
-// [{0, 1} {0, 2}];
-// coord =
+static Pnt PointNotFound = Pnt(-100000, 100000);
 
-//  {a, b}
-//  a + bi
-// x = a, y = b
-// cmplx.real() = a, cmplx.imag() = b
-// (0, 1i)
-//   Point a = 2 + 3i;
-//     Point a = {2,3};
+Pnt CheckIntersection(Pnt circleCenter, Pnt startPoint, Pnt endPoint, double radius)
+{
+    auto lineSegmentVector = endPoint - startPoint;
+    auto circleToStartVector = startPoint - circleCenter;
 
-// // motion task
+    double a = abs(lineSegmentVector) * abs(lineSegmentVector);
+    double b = 2 * (circleToStartVector.real() * lineSegmentVector.real() + circleToStartVector.imag() * lineSegmentVector.imag());
+    double c = abs(circleToStartVector) * abs(circleToStartVector) - radius * radius;
+    bool root1Intersect = false, root2Intersect = false;
 
-AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, array<double, 2> speed, array<double, 2> errorTolerance)
+    double discriminant = b * b - 4 * a * c;
+
+    if (discriminant >= 0)
+    {
+        discriminant = sqrt(discriminant);
+
+        double root1 = (-b - discriminant) / (2 * a);
+        double root2 = (-b + discriminant) / (2 * a);
+
+        // 3x HIT cases:
+        //          -o->             --|-->  |            |  --|->
+        // Impale(t1 hit,t2 hit), Poke(t1 hit,t2>1), ExitWound(t1<0, t2 hit),
+
+        // 3x MISS cases:
+        //       ->  o                     o ->              | -> |
+        // FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
+
+        //Between 0 and 1 == between 0% and 100% of the way across the vector
+        if ((root2 >= 0) && (root2 <= 1))
+        {
+            //Return immediately; root2 is further along the vector
+            //and so is always a preferable return to root1
+            auto a = startPoint + root2 * lineSegmentVector;
+            auto dist = abs(a - circleCenter);
+            s__t(3, "root2 found: " + t__s(root2) + " dist:" + t__s(dist));
+            return startPoint + root2 * lineSegmentVector;
+        }
+        else if ((root1 >= 0) && (root1 <= 1))
+        {
+            auto a = startPoint + root1 * lineSegmentVector;
+            auto dist = abs(a - circleCenter);
+            s__t(3, "root1 found: " + t__s(root2) + " dist:" + t__s(dist));
+            return startPoint + root1 * lineSegmentVector;
+        }
+    }
+    return PointNotFound;
+}
+
+tuple<long, Pnt> FindLookAhead(Pnt currentPos, PointList path, double radius, long previousIndex = 0)
+{
+    long index = previousIndex;
+    long size = path.size();
+
+    for (long i = index; index < min(size, previousIndex + 200); index++)
+    {
+        Pnt lookaheadCheck = CheckIntersection(currentPos, path[i], path[i + 1], radius);
+        if (lookaheadCheck != PointNotFound)
+        {
+
+            return {i, lookaheadCheck};
+        }
+    }
+    s__t(3, "sadge");
+    return {previousIndex, PointNotFound};
+}
+
+namespace PPS
+{
+
+    PointList path = {};
+
+    long mostestClosestIndex = 0;
+
+    Pnt startPoint = 0, endPoint = 0, currentPos = 0, prevPos = 0, lookaheadPnt = 0;
+    double startAngle = 0, endAngle = 0, currentAngle = 0;
+
+    long previousLookaheadIndex = 0;
+
+    static double lookAheadDistance = 4;
+    static double PathSpacing = 1;
+
+    static double curvature = 1;
+    static double H_Wheel_Disp = 6.315;
+
+}
+
+AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
     using namespace PPS;
     // run function
@@ -190,46 +262,51 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, array<double
             return;
         }
 
-        waypoint = path[mostestClosestIndex + 1];
-        lookaheadPnt = path[mostestClosestIndex + 2];
+        auto lookaheadCheck = FindLookAhead(currentPos, path, lookAheadDistance, mostestClosestIndex);
+        // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
+        // theoretically should store the index of the previous lookahead point if found and use that in place of mostest closest but w/e.
 
-        auto EndpointDisp = lookaheadPnt - currentPos;
-        auto WaypointDisplacement = waypoint - currentPos;
+        if (get<1>(lookaheadCheck) != PointNotFound)
+        {
+            lookaheadPnt = get<1>(lookaheadCheck);
+            previousLookaheadIndex = get<0>(lookaheadCheck);
+        }
 
-        auto InnerAngle = arg(EndpointDisp) - arg(WaypointDisplacement);
+        array<double, 2> speeds = {speed, speed};
 
-        auto TotalDisp = EndpointDisp;
+        double arcRadius = Curvature(currentPos, lookaheadPnt, currentAngle);
 
-        // if (cos(InnerAngle) <= 0)
-        // {
-        //     return;
-        // }
+        if (arcRadius != NAN || arcRadius != INFINITY)
+        {
+            double leftRadius = arcRadius + H_Wheel_Disp;
+            double rightRadius = arcRadius - H_Wheel_Disp;
 
-        TotalDisp *= sin(InnerAngle) * sin(InnerAngle);
-        TotalDisp += (double)2 * WaypointDisplacement * cos(InnerAngle) * cos(InnerAngle) * curvature;
-
-        // auto TargetAngle = EndAngle + pow(cos(InnerAngle), AngleInterpolation) * NormalizeAngle(WaypointAngle - EndAngle);
+            if (abs(leftRadius) == 0)
+            {
+                speeds[0] = 0;
+            }
+            else if (abs(rightRadius) == 0)
+            {
+                speeds[1] = 0;
+            }
+            else if (abs(leftRadius) > abs(rightRadius))
+            {
+                speeds[1] = speeds[1] * rightRadius / leftRadius;
+            }
+            else
+            {
+                speeds[0] = speeds[0] * leftRadius / rightRadius;
+            }
+        }
 
         // lcd::set_text(3, "DISTANCE: " + to_string(abs(TotalDisp)));
         lcd::set_text(4, "Current: " + to_string(currentPos.real()) + ", " + to_string(currentPos.imag()));
-        lcd::set_text(5, "End Point: " + to_string((waypoint).real()) + ", " + to_string((waypoint).imag()));
+        lcd::set_text(5, "End Point: " + to_string((lookaheadPnt).real()) + ", " + to_string((lookaheadPnt).imag()));
         // lcd::set_text(4, "Disp: " + to_string(TotalDisp.real()) + ", " + to_string(TotalDisp.imag()));
 
-        auto AngleDisplacement = arg(TotalDisp);
-        auto AngleRobot = (position_tracker->Get_Angle());
-
-        auto AngleDiff = remainder(AngleRobot - AngleDisplacement, 2 * M_PI);
-        // auto EndAngleDiff = (remainder((AngleRobot - TargetAngle), 2 * M_PI)) / 2;
-
-        // double deaccellCoeff = abs(TotalDisp) * 127 / (12 * speed) < 1 ? abs(TotalDisp) * 127 / (12 * speed) : 1;
-
-        auto Forwards = speed[0] * cos(AngleDiff);
-        auto Turn = speed[1] * sin(AngleDiff);
-        //  (-0.9 * sin(AngleDiff) / pow(pow(sin(AngleDiff), 2.0), 0.25) + 0.1 * abs(sin(AngleDiff)) / sin(AngleDiff))
-
-        s__t(6, "f: " + t__s(Forwards) + " t: " + t__s(Turn));
-                    // lcd::set_text(5, "AngleDiff: " + to_string((int)(AngleDiff*180/M_PI)) + "EndDiff: " + to_string((int)(EndAngleDiff*180/M_PI)));
-                    Set_Drive(0, Forwards, Turn, 0);
+        s__t(6, "l: " + t__s(speeds[0]) + " r: " + t__s(speeds[1]));
+        // lcd::set_text(5, "AngleDiff: " + to_string((int)(AngleDiff*180/M_PI)) + "EndDiff: " + to_string((int)(EndAngleDiff*180/M_PI)));
+        Set_Drive(speeds[0], speeds[0], speeds[1], speeds[1]);
         // curve to the endpoint and reach that point at angle
     };
     // init function
@@ -239,7 +316,9 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, array<double
         endPoint = EndPoint;
         endAngle = EndAngle;
 
-        path = GeneratePath(startPoint, endPoint, startAngle, 1);
+        lookaheadPnt = EndPoint;
+        previousLookaheadIndex = 0;
+        path = GeneratePath(startPoint, endPoint, startAngle, PathSpacing);
     };
     // done function
     auto done = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> bool {
