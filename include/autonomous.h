@@ -91,6 +91,9 @@ typedef struct Line {
     s__t(7, t__s(closestIndex) + " " + t__s(goalIndex) + " " + t__s(lookDist) + " " + t__s(minDist));
     return points[goalIndex];
   }
+  Line() {
+  }
+
   Line(Point start, Point end) {
     for (int i = 0; i < 1000; i++) {
       points[i].x = start.x + (i+1) * 0.001 * (end.x - start.x);

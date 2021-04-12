@@ -36,27 +36,26 @@
 using namespace std;
 using namespace pros;
 
-static DriveConfig Z_Bot_Drive = {
-    {left_back, {6, 1}},
-    {left_front, {9, 0}},
-    {right_back, {18, 0}},
-    {right_front, {19, 1}},
-};
-static DriveConfig Y_Bot_Drive = {
-    {left_back, {11, 0}},
-    {left_front, {20, 0}},
-    {right_back, {16, 1}},
-    {right_front, {17, 1}},
-};
-pros::Motor* leftFront = nullptr;
-pros::Motor* rightFront = nullptr;
-pros::Motor* leftBack = nullptr;
-pros::Motor* rightBack = nullptr;
+pros::Motor *leftFront = nullptr;
+pros::Motor *rightFront = nullptr;
+pros::Motor *leftBack = nullptr;
+pros::Motor *rightBack = nullptr;
 
+pros::ADIEncoder *leftTracking = nullptr;
+pros::ADIEncoder *backTracking = nullptr;
+Inertial* inertial = nullptr;
+
+
+const void InitEncoders(TrackingConfig config)
+{
+    leftTracking = new ADIEncoder(get<0>(config[V]), get<1>(config[V]), get<2>(config[V]));
+    backTracking = new ADIEncoder(get<0>(config[H]), get<1>(config[H]), get<2>(config[H]));
+    inertial = get<2>(config[I]) ? new Inertial(get<0>(config[I]), get<1>(config[I])) : new Inertial(get<0>(config[I]));
+}
 
 const void InitDrive(DriveConfig config)
 {
-    leftBack  = new pros::Motor(get<0>(config[left_back]), get<1>(config[left_back]));
+    leftBack = new pros::Motor(get<0>(config[left_back]), get<1>(config[left_back]));
     leftFront = new pros::Motor(get<0>(config[left_front]), get<1>(config[left_front]));
     rightBack = new pros::Motor(get<0>(config[right_back]), get<1>(config[right_back]));
     rightFront = new pros::Motor(get<0>(config[right_front]), get<1>(config[right_front]));
@@ -64,19 +63,34 @@ const void InitDrive(DriveConfig config)
     s__t(0, t__s(leftBack->get_actual_velocity()));
 }
 
-const void InitMotors(RobotConfig config)
+const void InitMotors(ConfigOptions config)
 {
-    switch(config)
+    switch (config)
     {
-        case Z:
-            InitDrive(Z_Bot_Drive);
-            break;
-        case Y:
-            InitDrive(Y_Bot_Drive);
-            break;
+    case Y:
+        InitDrive(Y_Bot_Drive);
+        InitMotorControllers(Y_Bot_Drive_Config);
+        InitEncoders(L_Track_C);
+        break;
+    case E:
+        InitDrive(Evan_Bot_Drive);
+        InitMotorControllers(Z_Bot_Drive_Config);
+        InitEncoders(Z_Track_C);
+        break;
+    case L:
+        InitDrive(L_Bot_Drive);
+        InitMotorControllers(Z_Bot_Drive_Config);
+        InitEncoders(L_Track_C);
+        break;
+    default:
+        InitDrive(Z_Bot_Drive);
+        InitMotorControllers(Z_Bot_Drive_Config);
+        InitEncoders(Z_Track_C);
+        break;
     }
-    InitMotorControllers();
+    inertial->Reset();
 }
+
 
 //Intakes
 pros::Motor leftIntake(LI_PORT, false);
@@ -87,13 +101,9 @@ pros::Motor indexer(INDEXER_PORT, false);
 pros::Motor shooter(SHOOTER_PORT, false);
 
 //IMUs
-pros::Imu leftIMU(L_IMU_PORT);
-pros::Imu rightIMU(R_IMU_PORT);
 
 //ADI (Encoders and line sensors)
-pros::ADIEncoder leftTracking(LEFT_IN, LEFT_OUT, true);
 // pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
-pros::ADIEncoder backTracking(BACK_IN, BACK_OUT, true);
 
 pros::ADIAnalogIn tLineSensor(TOP_LINE);
 pros::ADIAnalogIn bLineSensor(BOTTOM_LINE);
