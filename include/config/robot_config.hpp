@@ -35,7 +35,7 @@ static DriveConfig Y_Bot_Drive = {
 };
 static DriveConfig L_Bot_Drive = {
     {left_back, {3, 0}},
-    {left_front, {12, 1}},
+    {left_front, {11, 1}},
     {right_back, {4, 1}},
     {right_front, {1, 0}},
 };

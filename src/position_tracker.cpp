@@ -68,7 +68,7 @@ double Position_Tracker::Get_Angle()
     auto corrected = angle;
     // Corrected is adjusted for drift?
 
-    auto radians = -corrected * M_PI / 180;
+    auto radians = -corrected;
     return remainder(radians + ang_origin, 2 * M_PI);
 }
 
@@ -81,6 +81,7 @@ double Position_Tracker::Get_Ang_Vel()
 void Position_Tracker::Track_Position_Pilons() 
 {
 }
+complex<double> pilonsVel = 0;
 
 void Position_Tracker::Track_Position() 
 {
@@ -147,11 +148,11 @@ void Position_Tracker::Track_Position()
   	}
     //Update the angle value
 
-    auto pilonsVel = dist * exp<double>(1i *(ang_disp) ) + dist2 * exp<double>(1i* -(M_PI/2 + ang_disp));
+    pilonsVel = dist * exp<double>(1i *(ang_disp) ) + dist2 * exp<double>(1i* -(M_PI/2 + ang_disp));
     pilons_disp += pilonsVel;
 
-    lcd::set_text(2, "N_POS : ("  + to_string((int)round( 100* Get_Position_N().real())) + ", " + to_string((int)round( 100* Get_Position_N().imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
-    // lcd::set_text(1, "P_POS : ("  + to_string((int)round( 100* pilons_disp.real())) + ", " + to_string((int)round( 100* pilons_disp.imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
+    // lcd::set_text(2, "N_POS : ("  + to_string((int)round( 100* Get_Position_N().real())) + ", " + to_string((int)round( 100* Get_Position_N().imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
+    lcd::set_text(2, "P_POS : ("  + to_string((int)round( 100* Get_Position().real())) + ", " + to_string((int)round( 100* Get_Position().imag())) + "), " + to_string((ang_disp * 180 / M_PI)) +" deg");
 
     // double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
     // double cosTheta = cos(robotPos.angle);
@@ -173,7 +174,10 @@ complex<double> Position_Tracker::Get_Position()
 {
     auto initial_wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * ang_origin);
     auto wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * Get_Angle());
-    return Get_Displacement() + origin - initial_wheel_displacement + wheel_displacement;
+    return Get_Displacement() + origin;
+    // return Get_Displacement() + origin - initial_wheel_displacement + wheel_displacement;
+
+    
 }
 
 
@@ -186,11 +190,11 @@ complex<double> Position_Tracker::Get_Position_N()
 
 complex<double> Position_Tracker::Get_Displacement()
 {
-    return v_disp + h_disp;
+    return pilons_disp;
 }
 
 complex<double> Position_Tracker::Get_Velocity() 
 {
-    return v_vel_n + h_vel_n;
+    return pilonsVel;
 }
 // Position_Tracker::Poistion_Tra  

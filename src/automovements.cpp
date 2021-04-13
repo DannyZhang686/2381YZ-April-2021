@@ -38,7 +38,7 @@ PointList DefinePath(Pnt startPoint, Pnt endPoint, double startAngle)
 {
     // disp between the 2 points
     Pnt disp = endPoint - startPoint;
-    double distance = abs(disp) / 8;
+    double distance = abs(disp) / 4;
     Pnt midwayPoint = startPoint + distance * Pnt(cos(startAngle), sin(startAngle));
 
     return {startPoint, midwayPoint, endPoint};
@@ -58,8 +58,6 @@ PointList InjectPoints(PointList path, double spacing)
         Pnt newPoint = path[0] + Disp * i / distance1;
         newPointList.emplace_back(newPoint);
     }
-    newPointList.emplace_back(path[1]);
-
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
     auto Disp2 = path[2] - path[1];
@@ -67,7 +65,7 @@ PointList InjectPoints(PointList path, double spacing)
 
     for (double i = 0; i < distance2; i += spacing)
     {
-        Pnt newPoint = path[1] + Disp2 * i / distance1;
+        Pnt newPoint = path[1] + Disp2 * i / distance2;
         newPointList.emplace_back(newPoint);
     }
     newPointList.emplace_back(path[2]);
@@ -103,26 +101,21 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
 
 const double Curvature(Pnt currentPos, Pnt targetPos, double currentOrientation)
 {
-    double diffX = targetPos.real() - currentPos.real();
-    double diffY = targetPos.imag() - currentPos.imag();
-    double dist = sqrt(diffX * diffX + diffY * diffY);
+    Pnt disp = targetPos - currentPos;
+    double arg = std::arg(disp);
 
-    if ((diffY == diffX) && (!diffX))
+    double dist = abs(targetPos - currentPos);
+
+    if ((arg == currentOrientation))
     {
         return NAN;
     }
 
-    double angleTargetCurrentCenter = atan2(diffY, diffX);
-    double angleToTravel = currentOrientation - angleTargetCurrentCenter;
+    double angleTargetCurrentCenter = arg;
+    double angleToTravel = remainder(currentOrientation - angleTargetCurrentCenter, 2 * M_PI);
 
-    while (angleToTravel > PI)
-        angleToTravel -= 2 * PI;
-    while (angleToTravel < -PI)
-        angleToTravel += 2 * PI;
-    if (angleToTravel == 0)
-        return NAN;
-
-    return -dist / angleToTravel;
+    //sin(angle) = dist / radius, radius = dist / sin(angle)
+    return dist / (2 * sin(angleToTravel));
 }
 
 long GetClosest(PointList path, Pnt currentPoint, long previousIndex = 0)
@@ -155,7 +148,7 @@ PointList GeneratePath(Pnt startpoint, Pnt endpoint, double startAngle, double s
     PointList path = DefinePath(startpoint, endpoint, startAngle);
     path = InjectPoints(path, spacing);
     // Second Picture
-    path = smoother(path, 0.8, 0.2, 12);
+    path = smoother(path, 0.5, 0.5, 1);
     return path;
 }
 
@@ -209,23 +202,6 @@ Pnt CheckIntersection(Pnt circleCenter, Pnt startPoint, Pnt endPoint, double rad
     return PointNotFound;
 }
 
-tuple<long, Pnt> FindLookAhead(Pnt currentPos, PointList path, double radius, long previousIndex = 0)
-{
-    long index = previousIndex;
-    long size = path.size();
-
-    for (long i = index; index < min(size, previousIndex + 200); index++)
-    {
-        Pnt lookaheadCheck = CheckIntersection(currentPos, path[i], path[i + 1], radius);
-        if (lookaheadCheck != PointNotFound)
-        {
-
-            return {i, lookaheadCheck};
-        }
-    }
-    s__t(3, "sadge");
-    return {previousIndex, PointNotFound};
-}
 
 namespace PPS
 {
@@ -239,13 +215,38 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 4;
+    static double lookAheadDistance = 10;
+    static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
     static double curvature = 1;
     static double H_Wheel_Disp = 6.315;
 
 }
+
+tuple<long, Pnt> FindLookAhead(Pnt currentPos, PointList path, double radius, long previousIndex = 0)
+{
+    long index = previousIndex;
+    long size = path.size();
+
+    while (index < previousIndex + PPS::lookAheadNumber)
+    {
+        if (index == size - 2)
+        {
+            return {size - 2, path[size - 1]};
+        };
+        Pnt lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
+        if (lookaheadCheck != PointNotFound)
+        {
+            return {index, lookaheadCheck};
+        }
+        index++;
+    }
+
+    s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
+    return {previousIndex, PointNotFound};
+}
+
 
 AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
@@ -256,7 +257,23 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         currentAngle = position_tracker->Get_Angle();
         mostestClosestIndex = GetClosest(path, currentPos, mostestClosestIndex);
 
-        if (mostestClosestIndex >= path.size() - 2)
+
+        /** 
+         * TODO: 
+         * 1. ADJUSTABLE TURNING STRENGTH (TURNING COEFFICIENT) ^ (TURNING STRENGTH)
+         * 2. ACCEL AND DEACCEL CURVES - DEPENDING ON CURRENT SPEED, MOSTEST CLOSEST INDEX
+         * 3. PATHING - JUST LIKE WAY BETTER PATH GENERATION, PATH VISUALIZATION - WHAT DOES PATH SMOOTHING EVEN DO
+         * 4. END ANGLE RESILIENCE TESTING - IF YOU *NEED* TO END AT SOME ANGLE IN FRONT OF GOAL, HOW CONSISTENT IS THAT
+         * 5. INTELLIGENT PATH *O FUCK* RECOGNITION - IF ITS WAY OFF THE PATH, GENERATION NEW PATH FROM CURRENT POINT TO END POINT? 
+         *  - MAYBE CONTINUALLY ADJUST THE PATH BASED ON THAT? 
+         * 
+         * 
+         * ACTUALLY MAYBE EVERYTHING LISTED ABOVE ISN'T WORTH AND SHOULD JUST SPEND 4 DAYS SPAM TESTING CONSISTENCY?
+         * CONSISTENCY CONSISTENCY CONSISTENCY
+         * 
+         * 
+         * **/
+        if (mostestClosestIndex >= path.size())
         {
             Set_Drive(0, 0, 0, 0);
             return;
