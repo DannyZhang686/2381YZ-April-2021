@@ -74,12 +74,12 @@ bool setShooterSafe(double velocity) {
   return false;
 }
 
-double findDistance(Point a, Point b) {
+double findDistance(OPoint a, OPoint b) {
   //Function to find distance between two Points using a standard distance formula
   return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
-double findAngle(Point a, Point b) {
+double findAngle(OPoint a, OPoint b) {
   //Function to find angle between two Points starting from Point a
   //This function always returns a value between 0 and 2π
   double diffX = b.x - a.x, diffY = b.y - a.y;

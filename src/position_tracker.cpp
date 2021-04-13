@@ -12,7 +12,7 @@ using namespace pros;
 using namespace std;
 using namespace std::complex_literals;
 
-const complex<double> Position_Tracker::wheel_center_offset = {2.75, 2.25};
+const complex<double> Position_Tracker::wheel_center_offset = {L_TO_MID, B_TO_MID};
 
 Position_Tracker *Position_Tracker::instance() {
     static Position_Tracker instance;

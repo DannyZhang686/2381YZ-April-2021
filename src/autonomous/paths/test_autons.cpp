@@ -16,6 +16,63 @@ using namespace std;
 using namespace Auton;
 using namespace pros;
 
+namespace IntakeShoot
+{
+    double initNumBallsShot;    //Number of balls shot before this point
+    double initNumBallsIntaken; //Number of balls intaken before this point
+    bool doneIntaking, doneShooting;
+    int time;
+    bool setTime;
+}
+
+AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
+{
+    using namespace IntakeShoot;
+    auto init = [&, numBallsIn, numBallsOut](void) -> void {
+        initNumBallsShot = numBallsShot;       //Number of balls shot before this point
+        initNumBallsIntaken = numBallsIntaken; //Number of balls intaken before this point
+        doneIntaking = false, doneShooting = false;
+        time = 0;
+        setTime = false;
+        setIntakesSafe(AUTO_INTAKE_VEL);
+        setIndexerSafe(AUTO_INDEXER_VEL);
+        setShooterSafe(AUTO_SHOOTER_VEL);
+    };
+
+    auto run = [&, numBallsIn, numBallsOut] (void) -> void 
+    {
+        if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot))
+        {
+            //Spin the shooter the other way instead, after a short delay
+            time = pros::millis();
+            setTime = true;
+            s__t(3, "time set");
+        }
+        else if ((time != 0) && (pros::millis() - time > 100))
+        {
+            setShooterSafe(-AUTO_SHOOTER_VEL);
+            doneShooting = true;
+            s__t(4, "");
+        }
+    };
+
+    auto done = [&, numBallsIn, numBallsOut](void) -> bool 
+    {
+        if (doneShooting && doneIntaking)
+        {
+            return true;
+        }
+        return false;
+    };
+
+    auto kill = [](void) -> void 
+    {
+        setIntakesSafe(0);
+    };
+
+    return AutoTask::SyncTask(run, done, init, kill);
+}
+
 AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
     vector<AutoTask>{
         //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
@@ -27,8 +84,13 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //     robotPos.angle = 0;
         // }),
         AutoTask::AutoDelay(500),
-        PurePursuitTask({36, -36}, 0, 50), //36, 36
-        
+        PurePursuitTask({36, -36}, 0, 50).AddRun([]()->void{
+            // do whatever
+        }).AddKill([]()->void{
+
+        }), //36, 36
+        IntakeShootTask(2, 3),
+
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });
 
