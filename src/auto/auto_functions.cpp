@@ -107,6 +107,7 @@ void trackPosition(void *)
   while (true)
   {
     position_tracker->Track_Position();
+    s__t(1, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
     pros::delay(10);
   }
 }

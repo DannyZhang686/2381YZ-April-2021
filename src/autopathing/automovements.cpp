@@ -209,7 +209,7 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 10;
+    static double lookAheadDistance = 15;
     static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
@@ -252,20 +252,20 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         mostestClosestIndex = GetClosest(path, currentPos, mostestClosestIndex);
 
 
-        /** 
-         * TODO: 
+        /**
+         * TODO:
          * 1. ADJUSTABLE TURNING STRENGTH (TURNING COEFFICIENT) ^ (TURNING STRENGTH)
          * 2. ACCEL AND DEACCEL CURVES - DEPENDING ON CURRENT SPEED, MOSTEST CLOSEST INDEX
          * 3. PATHING - JUST LIKE WAY BETTER PATH GENERATION, PATH VISUALIZATION - WHAT DOES PATH SMOOTHING EVEN DO
          * 4. END ANGLE RESILIENCE TESTING - IF YOU *NEED* TO END AT SOME ANGLE IN FRONT OF GOAL, HOW CONSISTENT IS THAT
-         * 5. INTELLIGENT PATH *O FUCK* RECOGNITION - IF ITS WAY OFF THE PATH, GENERATION NEW PATH FROM CURRENT POINT TO END POINT? 
-         *  - MAYBE CONTINUALLY ADJUST THE PATH BASED ON THAT? 
-         * 
-         * 
+         * 5. INTELLIGENT PATH *O FUCK* RECOGNITION - IF ITS WAY OFF THE PATH, GENERATION NEW PATH FROM CURRENT POINT TO END POINT?
+         *  - MAYBE CONTINUALLY ADJUST THE PATH BASED ON THAT?
+         *
+         *
          * ACTUALLY MAYBE EVERYTHING LISTED ABOVE ISN'T WORTH AND SHOULD JUST SPEND 4 DAYS SPAM TESTING CONSISTENCY?
          * CONSISTENCY CONSISTENCY CONSISTENCY
-         * 
-         * 
+         *
+         *
          * **/
         if (mostestClosestIndex >= path.size())
         {

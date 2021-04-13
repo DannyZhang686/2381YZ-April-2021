@@ -11,6 +11,9 @@
 #include "autonomous/auto_drive.hpp"
 #include "autonomous/global_sequences.hpp"
 #include "autonomous.h"
+#include "opcontrol.h"
+#include "autopathing/pathing.hpp"
+#include "pid.h"
 
 using namespace std;
 using namespace Auton;
@@ -39,7 +42,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         setShooterSafe(AUTO_SHOOTER_VEL);
     };
 
-    auto run = [&, numBallsIn, numBallsOut] (void) -> void 
+    auto run = [&, numBallsIn, numBallsOut] (void) -> void
     {
         if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot))
         {
@@ -56,7 +59,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         }
     };
 
-    auto done = [&, numBallsIn, numBallsOut](void) -> bool 
+    auto done = [&, numBallsIn, numBallsOut](void) -> bool
     {
         if (doneShooting && doneIntaking)
         {
@@ -65,7 +68,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         return false;
     };
 
-    auto kill = [](void) -> void 
+    auto kill = [](void) -> void
     {
         setIntakesSafe(0);
     };
@@ -73,24 +76,74 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
     return AutoTask::SyncTask(run, done, init, kill);
 }
 
+namespace TurnToPoint
+{
+    double targetAngle;     //The desired angle, which is constantly updated
+    double travellingAngle; //The angle (-π to π) to travel to face the final angle
+    double tAngleInches;    //travellingAngle converted to a value in inches (for PD purposes)
+    int time;
+    bool setTime;
+}
+
+double turnCalc(double input)
+{
+    return pow((std::abs(input) / 127), -0.5) * (input);
+}
+
+AutoTask TurnToPointTask(Point target, double maxError)
+{
+    using namespace TurnToPoint;
+
+    auto init = [&](void) -> void {
+        time = 0;
+        setTime = false;
+    };
+
+    auto runFn = [&, target, maxError]() -> void {
+        targetAngle = arg(target - position_tracker->Get_Position());
+
+        travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
+        tAngleInches = angleToInches(travellingAngle);
+
+        double leftOutput = 0, rightOutput = 0;                //Power output (0-200) for each side of the robot
+        leftOutput = leftTurn.getOutput(0, 20 * tAngleInches); //Setpoint distance value for PD
+        rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
+        // rightOutput = -leftOutput;
+        setDriveSafe(leftOutput, rightOutput);
+        // Set_Drive(turnCalc(leftOutput), turnCalc(leftOutput), turnCalc(rightOutput), turnCalc(rightOutput));
+        s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
+    };
+
+    auto doneFn = [&, maxError]() -> bool {
+        if ((!setTime) && (fabs(travellingAngle) < maxError))
+        {
+            time = pros::millis();
+            setTime = true;
+        }
+        else if ((time != 0) && (pros::millis() - time > 250))
+        {
+            return true;
+        }
+        return false;
+    };
+    auto kill = [] {
+        Set_Drive(0, 0, 0, 0);
+    };
+    return AutoTask::SyncTask(runFn, doneFn, init, kill);
+}
+
 AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
     vector<AutoTask>{
         //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
-        // SingleRun([](void) -> void {
-        //     robotPos.x = 36;
-        //     robotPos.y = 12;
-        //     robotPos.angle = 0;
-        // }),
-        AutoTask::AutoDelay(500),
-        PurePursuitTask({36, -36}, 0, 50).AddRun([]()->void{
-            // do whatever
-        }).AddKill([]()->void{
-
-        }), //36, 36
-        IntakeShootTask(2, 3),
-
+        SingleRun([](void) -> void {
+          position_tracker->Set_Position({36, 12}, PI/2);
+        }),
+        AutoTask::AutoDelay(100),
+        PurePursuitTask({36, 28}, 0, 100),
+        TurnToPointTask({22, 12}, 0.07),
+        PurePursuitTask({22, 12}, 0, 100),
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });
 
