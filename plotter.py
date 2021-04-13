@@ -73,19 +73,70 @@ def smoother(path : PointList, weight_data :  float, weight_smooth : float, tole
 
     return newPath;
 
+def GeneratePath(startpoint: complex, endpoint : complex, startAngle : float, spacing : float) : 
+    start = startpoint
+    end = endpoint
+    a0 = startAngle * math.pi 
+    # a0 = startAngle * math.pi + math.pi/2
+    r = ((start.real - end.real)**2 + (start.imag-end.imag)**2) / (2*(start.real - end.real)*np.cos(a0) + 2*(start.imag - end.imag)*np.sin(a0))
+    a = math.atan2(((start.real - end.real)**2 - (start.imag-end.imag)**2)*np.sin(a0) - 2*(start.real - end.real)*(start.imag-end.imag)*np.cos(a0), ((start.imag - end.imag)**2 - (start.real - end.real)**2)*np.cos(a0) - 2*(start.real - end.real)*(start.imag-end.imag)*np.sin(a0)) - a0
+    center = start - cmath.rect(r, a0);
+    newPointList : PointList = []
+        
+        
+    i = 0.0
+    angleDiff = a;
+    print(a, a0, r, angleDiff)
+
+    for i in range(100):
+        t = i/100
+        newPoint = center + cmath.rect(r, a0 + a*t)
+        newPointList.append(newPoint)
+    return newPointList
+    
+def modAngle(angle : float, piBy = 1):
+    return np.remainder(angle + np.pi * piBy, 2* np.pi * piBy) - np.pi * piBy
 
 
-def GeneratePath(startpoint: complex, endpoint : complex, startAngle : float, spacing : float) :
-    path = DefinePath(startpoint, endpoint, startAngle);
-    path = InjectPoints(path, spacing);
-    # Second Picture
-    path = smoother(path, 0.1, 0.9, 1);
-    return path;
+def GeneratePath2(startpoint: complex, endpoint : complex, startAngle : float, spacing : float) : 
+    start = startpoint
+    end = endpoint
+    startAngle = modAngle(startAngle);
+    # a0 = startAngle * math.pi
+    a0 = modAngle(startAngle-0.5*math.pi);
+    r = ((start.real - end.real)**2 + (start.imag-end.imag)**2) / (2*(start.real - end.real)*np.cos(a0) + 2*(start.imag - end.imag)*np.sin(a0))
+    a = math.atan2(((start.real - end.real)**2 - (start.imag-end.imag)**2)*np.sin(a0) - 2*(start.real - end.real)*(start.imag-end.imag)*np.cos(a0), ((start.imag - end.imag)**2 - (start.real - end.real)**2)*np.cos(a0) - 2*(start.real - end.real)*(start.imag-end.imag)*np.sin(a0)) - a0
+    center = start - cmath.rect(r, a0);
+    newPointList : PointList = []
+
+    i = 0.0
+    angleDiff = modAngle(a,2);
+    print(a, a0, r, angleDiff)
+    while(abs(i/r) < abs(angleDiff)):
+        newPoint = center + cmath.rect(r, a0 + i/r)
+        newPointList.append(newPoint)
+        i+=  spacing
+    return newPointList
 
 Path = GeneratePath(Point(0,0), Point(36, 36), 0, 2)
+Path2 = GeneratePath2(Point(0,0), Point(36, 36), math.pi/3, 2)
+
+
+
+# def GeneratePath(startpoint: complex, endpoint : complex, startAngle : float, spacing : float) :
+#     path = DefinePath(startpoint, endpoint, startAngle);
+#     path = InjectPoints(path, spacing);
+#     # Second Picture
+#     path = smoother(path, 0.1, 0.9, 1);
+#     return path;
+
+# Path = GeneratePath(Point(0,0), Point(36, 36), 0, 2)
 
 for point in Path:
     plt.plot(point.real, point.imag, 'or')
+    
+for point in Path2:
+    plt.plot(point.real, point.imag, 'bo')
 # reee = complex(0,0);
 # x = np.arange(0.0, 2.0, 0.01)
 # y = x**2

@@ -71,6 +71,6 @@ class Position_Tracker {
     unsigned int velLastChecked = 0;
 };
 
-double NormalizeAngle(double angle);
+double NormalizeAngle(double angle, int multiplier = 1);
 
 #endif

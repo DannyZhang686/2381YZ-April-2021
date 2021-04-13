@@ -14,6 +14,11 @@ using namespace std::complex_literals;
 
 const complex<double> Position_Tracker::wheel_center_offset = {L_TO_MID, B_TO_MID};
 
+double NormalizeAngle(double angle, int multiplier)
+{
+  return remainder(angle, 2 * M_PI * multiplier);
+}
+
 Position_Tracker *Position_Tracker::instance() {
     static Position_Tracker instance;
     return &instance;
@@ -55,10 +60,6 @@ const void Position_Tracker::Set_Position(complex<double> position_, double angl
 int calibrationStart = 0;
 
 
-double NormalizeAngle(double angle)
-{
-  return remainder(angle, 2 * M_PI);
-}
 
 double Position_Tracker::Get_Angle()
 {

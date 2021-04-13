@@ -65,10 +65,10 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 {
     left_x = 0;
     setpoints = {
-        (left_y - left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x)),
-        (left_y + left_x + pow((std::abs(right_x) / 127), 0.6) * (right_x)),
-        (left_y + left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x)),
-        (left_y - left_x - pow((std::abs(right_x) / 127), 0.6) * (right_x)),
+        (left_y - left_x + pow((std::abs(right_x) / 127), 0.3) * (right_x)),
+        (left_y + left_x + pow((std::abs(right_x) / 127), 0.3) * (right_x)),
+        (left_y + left_x - pow((std::abs(right_x) / 127), 0.3) * (right_x)),
+        (left_y - left_x - pow((std::abs(right_x) / 127), 0.3) * (right_x)),
     };
     Set_Drive(setpoints[0], setpoints[1], setpoints[2], setpoints[3]);
 }

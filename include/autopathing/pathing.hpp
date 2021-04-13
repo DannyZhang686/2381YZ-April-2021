@@ -10,7 +10,14 @@
 typedef std::complex<double> Point;
 typedef std::vector<std::complex<double>> PointList;
 
-
+PointList DefinePath(Point startPoint, Point endPoint, double startAngle);
+PointList InjectPoints(PointList path, double spacing);
+PointList smoother(PointList path, double weight_data, double weight_smooth, double tolerance);
+const double Curvature(Point currentPos, Point targetPos, double currentOrientation);
+long GetClosest(PointList path, Point currentPoint, long previousIndex = 0);
+PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing);
+static Point PointNotFound = Point(-100000, 100000);
+Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius);
 
 
 #endif  //!__PATHING__H__
