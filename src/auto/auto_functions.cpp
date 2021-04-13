@@ -120,8 +120,8 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
   Pd leftTurn(leftkP, leftkD);
   Pd rightStraight(rightkP, rightkD);
   Pd rightTurn(rightkP, rightkD);
-  Point current;                                  //Current coordinates as per tracking
-  Point target(targetX, targetY);                 //Target coordinates
+  OPoint current;                                  //Current coordinates as per tracking
+  OPoint target(targetX, targetY);                 //Target coordinates
   double distance, targetAngle;                   //Distance/Angle between current and target
   double travellingAngle;                         //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the target
   double tAngleInches;                            //travellingAngle converted to a value in inches (for PD purposes)
@@ -184,8 +184,8 @@ void moveShort(double targetX, double targetY, double maxError, bool forceForwar
 void moveLong(double targetX, double targetY, double moveShortDistance, double maxError)
 {
   //Moves with position tracking and ends with PD
-  Point current;                  //Current coordinates as per tracking
-  Point target(targetX, targetY); //Target coordinates
+  OPoint current;                  //Current coordinates as per tracking
+  OPoint target(targetX, targetY); //Target coordinates
 
   //Movement loop
   do
@@ -204,9 +204,9 @@ void movePurePursuit(double targetX, double targetY, double maxError, double loo
   Pd rightStraight(rightkP, rightkD);
   Pd rightTurn(rightkP, rightkD);
 
-  Point current(robotPos.x, robotPos.y); //Current coordinates as per tracking
-  Point target(targetX, targetY);        //Target coordinates
-  Point goalPoint;                       //Point the robot will chase
+  OPoint current(robotPos.x, robotPos.y); //Current coordinates as per tracking
+  OPoint target(targetX, targetY);        //Target coordinates
+  OPoint goalPoint;                       //Point the robot will chase
   Line movingLine(current, target);      //Line between starting and target coordinates
   double distance, targetAngle;          //Distance/Angle between current and target
   double travellingAngle;                //The angle (-π to π, though -π/4 to π/4 works much better) to travel to face the target
@@ -214,7 +214,7 @@ void movePurePursuit(double targetX, double targetY, double maxError, double loo
   int time = 0;
   bool setTime = false;
 
-  Point starting(robotPos.x, robotPos.y);
+  OPoint starting(robotPos.x, robotPos.y);
   distance = findDistance(starting, target);
 
   do
@@ -330,7 +330,7 @@ void turnToPoint(double targetX, double targetY, double maxError)
 
   do
   {
-    targetAngle = findAngle(Point(robotPos.x, robotPos.y), Point(targetX, targetY));
+    targetAngle = findAngle(OPoint(robotPos.x, robotPos.y), OPoint(targetX, targetY));
     travellingAngle = smallestAngle(robotPos.angle, targetAngle);
     tAngleInches = angleToInches(travellingAngle);
 
@@ -356,7 +356,7 @@ void turnToPoint(double targetX, double targetY, double maxError)
 void turnAwayFromPoint(double targetX, double targetY, double maxError)
 {
   //Like turnToPoint, but turning away
-  double angle = findAngle(Point(robotPos.x, robotPos.y), Point(targetX, targetY));
+  double angle = findAngle(OPoint(robotPos.x, robotPos.y), OPoint(targetX, targetY));
   turnToFace(rotatePi(angle), maxError);
 }
 
@@ -402,7 +402,7 @@ void turnToFaceOld(double targetAngle, double maxError)
 void turnToPointOld(double targetX, double targetY, double maxError)
 {
   //Like turnToFace, but finding a point
-  double angle = findAngle(Point(robotPos.x, robotPos.y), Point(targetX, targetY));
+  double angle = findAngle(OPoint(robotPos.x, robotPos.y), OPoint(targetX, targetY));
   // s__t(4, t__s(angle) + " from " + t__s(robotPos.x) + " " + t__s(robotPos.y));
   turnToFaceOld(angle, maxError);
 }
@@ -466,9 +466,7 @@ void countBalls(void *)
 }
 
 //The speed at which the motors will run
-#define AUTO_INTAKE_VEL 200
-#define AUTO_INDEXER_VEL 200
-#define AUTO_SHOOTER_VEL 200
+
 
 void intakeShoot(int numBallsIn, int numBallsOut)
 {

@@ -120,7 +120,7 @@ AutoTask TurnToPointTask(double targetX, double targetY, double maxError)
     };
 
     auto runFn = [&, targetX, targetY](void) -> void {
-        targetAngle = findAngle(Point(robotPos.x, robotPos.y), Point(targetX, targetY));
+        targetAngle = findAngle(OPoint(robotPos.x, robotPos.y), OPoint(targetX, targetY));
         travellingAngle = smallestAngle(robotPos.angle, targetAngle);
         tAngleInches = angleToInches(travellingAngle);
 

@@ -35,14 +35,14 @@ static DriveConfig Y_Bot_Drive = {
 };
 static DriveConfig L_Bot_Drive = {
     {left_back, {3, 0}},
-    {left_front, {12, 1}},
+    {left_front, {11, 1}},
     {right_back, {4, 1}},
     {right_front, {1, 0}},
 };
 
 static TrackingConfig L_Track_C = 
 {
-    {H, {3,4,1}},
+    {H, {3,4,0}},
     {V, {1,2,0}},
     {I, {9, 0, false}}, // true / false is for double (true) or single (false) inertial sensors
 };

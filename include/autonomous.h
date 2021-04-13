@@ -12,7 +12,7 @@
 // #define R_TO_MID 1.25
 // #define B_TO_MID 4
 #define L_TO_MID 2.75
-#define B_TO_MID 5.25
+#define B_TO_MID 5.75
 
 //Struct definitions
 
@@ -50,7 +50,7 @@ typedef struct DeltaVal {
 
 //Struct defining a point on the field
 //Units: inches
-typedef struct Point {
+typedef struct OPoint {
   double x, y;
   void resetValues() {
     x = y = 0;
@@ -59,13 +59,13 @@ typedef struct Point {
     x = newX;
     y = newY;
   }
-  Point(): x(0), y(0) {}
-  Point(double initX, double initY): x(initX), y(initY) {}
-} Point;
+  OPoint(): x(0), y(0) {}
+  OPoint(double initX, double initY): x(initX), y(initY) {}
+} OPoint;
 
 typedef struct Line {
-  Point points[1000];
-  Point findGoalPoint(Point curPos, double lookDist) {
+  OPoint points[1000];
+  OPoint findGoalPoint(OPoint curPos, double lookDist) {
     double minDist = 1e9, curDist;
     int closestIndex, goalIndex;
 
@@ -94,7 +94,7 @@ typedef struct Line {
   Line() {
   }
 
-  Line(Point start, Point end) {
+  Line(OPoint start, OPoint end) {
     for (int i = 0; i < 1000; i++) {
       points[i].x = start.x + (i+1) * 0.001 * (end.x - start.x);
       points[i].y = start.y + (i+1) * 0.001 * (end.y - start.y);
@@ -147,9 +147,13 @@ bool setIntakesSafe(double);
 bool setIndexerSafe(double);
 bool setShooterSafe(double);
 
-double findDistance(Point, Point);
-double findAngle(Point, Point);
+double findDistance(OPoint, OPoint);
+double findAngle(OPoint, OPoint);
 double smallestAngle(double, double);
 double angleToInches(double);
+
+#define AUTO_INTAKE_VEL 200
+#define AUTO_INDEXER_VEL 200
+#define AUTO_SHOOTER_VEL 200
 
 #endif //_AUTONOMOUS_H_

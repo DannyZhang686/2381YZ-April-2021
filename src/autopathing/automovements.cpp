@@ -18,28 +18,22 @@
 #include <cmath>
 #include <vector>
 
+#include "pathing.hpp"
+
 using namespace std;
 using namespace pros;
 using namespace std::complex_literals;
 
-typedef complex<double> Pnt;
-typedef vector<complex<double>> PointList;
-
 // const complex<double> Position_Tracker::wheel_center_offset = {2.75, 2.25};
 
-PointList doubleArrayCopy(vector<complex<double>> arr)
-{
-    //size first dimension of array
-    return PointList(arr);
-};
 // step 1 & 2
 
-PointList DefinePath(Pnt startPoint, Pnt endPoint, double startAngle)
+PointList DefinePath(Point startPoint, Point endPoint, double startAngle)
 {
     // disp between the 2 points
-    Pnt disp = endPoint - startPoint;
-    double distance = abs(disp) / 8;
-    Pnt midwayPoint = startPoint + distance * Pnt(cos(startAngle), sin(startAngle));
+    Point disp = endPoint - startPoint;
+    double distance = abs(disp) / 4;
+    Point midwayPoint = startPoint + distance * Point(cos(startAngle), sin(startAngle));
 
     return {startPoint, midwayPoint, endPoint};
 }
@@ -55,11 +49,9 @@ PointList InjectPoints(PointList path, double spacing)
 
     for (double i = 0; i < distance1; i += spacing)
     {
-        Pnt newPoint = path[0] + Disp * i / distance1;
+        Point newPoint = path[0] + Disp * i / distance1;
         newPointList.emplace_back(newPoint);
     }
-    newPointList.emplace_back(path[1]);
-
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
     auto Disp2 = path[2] - path[1];
@@ -67,7 +59,7 @@ PointList InjectPoints(PointList path, double spacing)
 
     for (double i = 0; i < distance2; i += spacing)
     {
-        Pnt newPoint = path[1] + Disp2 * i / distance1;
+        Point newPoint = path[1] + Disp2 * i / distance2;
         newPointList.emplace_back(newPoint);
     }
     newPointList.emplace_back(path[2]);
@@ -89,11 +81,11 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
         for (int i = 1; i < path.size() - 1; i++)
         {
             double auxR = newPath[i].real();
-            newPath[i] += Pnt((weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).real(), 0);
+            newPath[i] += Point((weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).real(), 0);
             change += abs(auxR - newPath[i].real());
 
             double auxI = newPath[i].imag();
-            newPath[i] += Pnt(0, (weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).imag());
+            newPath[i] += Point(0, (weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).imag());
             change += abs(auxI - newPath[i].imag());
         }
     }
@@ -101,31 +93,26 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
     return newPath;
 }
 
-const double Curvature(Pnt currentPos, Pnt targetPos, double currentOrientation)
+const double Curvature(Point currentPos, Point targetPos, double currentOrientation)
 {
-    double diffX = targetPos.real() - currentPos.real();
-    double diffY = targetPos.imag() - currentPos.imag();
-    double dist = sqrt(diffX * diffX + diffY * diffY);
+    Point disp = targetPos - currentPos;
+    double arg = std::arg(disp);
 
-    if ((diffY == diffX) && (!diffX))
+    double dist = abs(targetPos - currentPos);
+
+    if ((arg == currentOrientation))
     {
         return NAN;
     }
 
-    double angleTargetCurrentCenter = atan2(diffY, diffX);
-    double angleToTravel = currentOrientation - angleTargetCurrentCenter;
+    double angleTargetCurrentCenter = arg;
+    double angleToTravel = remainder(currentOrientation - angleTargetCurrentCenter, 2 * M_PI);
 
-    while (angleToTravel > PI)
-        angleToTravel -= 2 * PI;
-    while (angleToTravel < -PI)
-        angleToTravel += 2 * PI;
-    if (angleToTravel == 0)
-        return NAN;
-
-    return -dist / angleToTravel;
+    //sin(angle) = dist / radius, radius = dist / sin(angle)
+    return dist / (2 * sin(angleToTravel));
 }
 
-long GetClosest(PointList path, Pnt currentPoint, long previousIndex = 0)
+long GetClosest(PointList path, Point currentPoint, long previousIndex = 0)
 {
     long double min = -1;
     long minIndex = previousIndex;
@@ -150,18 +137,18 @@ long GetClosest(PointList path, Pnt currentPoint, long previousIndex = 0)
     return minIndex;
 }
 
-PointList GeneratePath(Pnt startpoint, Pnt endpoint, double startAngle, double spacing)
+PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing)
 {
     PointList path = DefinePath(startpoint, endpoint, startAngle);
     path = InjectPoints(path, spacing);
     // Second Picture
-    path = smoother(path, 0.8, 0.2, 12);
+    path = smoother(path, 0.1, 0.9, 1);
     return path;
 }
 
-static Pnt PointNotFound = Pnt(-100000, 100000);
+static Point PointNotFound = Point(-100000, 100000);
 
-Pnt CheckIntersection(Pnt circleCenter, Pnt startPoint, Pnt endPoint, double radius)
+Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius)
 {
     auto lineSegmentVector = endPoint - startPoint;
     auto circleToStartVector = startPoint - circleCenter;
@@ -209,23 +196,6 @@ Pnt CheckIntersection(Pnt circleCenter, Pnt startPoint, Pnt endPoint, double rad
     return PointNotFound;
 }
 
-tuple<long, Pnt> FindLookAhead(Pnt currentPos, PointList path, double radius, long previousIndex = 0)
-{
-    long index = previousIndex;
-    long size = path.size();
-
-    for (long i = index; index < min(size, previousIndex + 200); index++)
-    {
-        Pnt lookaheadCheck = CheckIntersection(currentPos, path[i], path[i + 1], radius);
-        if (lookaheadCheck != PointNotFound)
-        {
-
-            return {i, lookaheadCheck};
-        }
-    }
-    s__t(3, "sadge");
-    return {previousIndex, PointNotFound};
-}
 
 namespace PPS
 {
@@ -234,18 +204,43 @@ namespace PPS
 
     long mostestClosestIndex = 0;
 
-    Pnt startPoint = 0, endPoint = 0, currentPos = 0, prevPos = 0, lookaheadPnt = 0;
+    Point startPoint = 0, endPoint = 0, currentPos = 0, prevPos = 0, lookaheadPnt = 0;
     double startAngle = 0, endAngle = 0, currentAngle = 0;
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 4;
+    static double lookAheadDistance = 10;
+    static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
     static double curvature = 1;
     static double H_Wheel_Disp = 6.315;
 
 }
+
+tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long previousIndex = 0)
+{
+    long index = previousIndex;
+    long size = path.size();
+
+    while (index < previousIndex + PPS::lookAheadNumber)
+    {
+        if (index == size - 2)
+        {
+            return {size - 2, path[size - 1]};
+        };
+        Point lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
+        if (lookaheadCheck != PointNotFound)
+        {
+            return {index, lookaheadCheck};
+        }
+        index++;
+    }
+
+    s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
+    return {previousIndex, PointNotFound};
+}
+
 
 AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
@@ -256,7 +251,23 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         currentAngle = position_tracker->Get_Angle();
         mostestClosestIndex = GetClosest(path, currentPos, mostestClosestIndex);
 
-        if (mostestClosestIndex >= path.size() - 2)
+
+        /** 
+         * TODO: 
+         * 1. ADJUSTABLE TURNING STRENGTH (TURNING COEFFICIENT) ^ (TURNING STRENGTH)
+         * 2. ACCEL AND DEACCEL CURVES - DEPENDING ON CURRENT SPEED, MOSTEST CLOSEST INDEX
+         * 3. PATHING - JUST LIKE WAY BETTER PATH GENERATION, PATH VISUALIZATION - WHAT DOES PATH SMOOTHING EVEN DO
+         * 4. END ANGLE RESILIENCE TESTING - IF YOU *NEED* TO END AT SOME ANGLE IN FRONT OF GOAL, HOW CONSISTENT IS THAT
+         * 5. INTELLIGENT PATH *O FUCK* RECOGNITION - IF ITS WAY OFF THE PATH, GENERATION NEW PATH FROM CURRENT POINT TO END POINT? 
+         *  - MAYBE CONTINUALLY ADJUST THE PATH BASED ON THAT? 
+         * 
+         * 
+         * ACTUALLY MAYBE EVERYTHING LISTED ABOVE ISN'T WORTH AND SHOULD JUST SPEND 4 DAYS SPAM TESTING CONSISTENCY?
+         * CONSISTENCY CONSISTENCY CONSISTENCY
+         * 
+         * 
+         * **/
+        if (mostestClosestIndex >= path.size())
         {
             Set_Drive(0, 0, 0, 0);
             return;
@@ -330,63 +341,3 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
     return AutoTask::SyncTask(
         runFn, done, init, kill);
 }
-
-// void Set_Path_Drive(complex<double> EndPoint, double EndAngle, array<double, 2> speed, array<double, 2> errorTolerance)
-// {
-//     auto currentPos = position_tracker->Get_Position_N();
-//     auto Displacement = EndPoint - CurrentPos;
-
-//     lcd::set_text(3, "DISTANCE: " + to_string(abs(Displacement)));
-//     // lcd::set_text(4, "Current: " + to_string(CurrentPos.real()) + ", " + to_string(CurrentPos.imag()));
-//     // lcd::set_text(5, "End Pnt: " + to_string(EndPoint.real()) + ", " + to_string(EndPoint.imag()));
-//     lcd::set_text(4, "Disp: " + to_string(Displacement.real()) + ", " + to_string(Displacement.imag()));
-
-//     auto AngleDisplacement = arg(Displacement);
-//     auto AngleRobot = (position_tracker->Get_Angle());
-
-//     auto AngleDiff = remainder(AngleRobot - AngleDisplacement, 2 * M_PI);
-//     //Normalize turn angle to between (-pi and pi) so sin(x/2) works properly
-
-//     auto EndAngleDiff = (remainder((AngleRobot - EndAngle), 2 * M_PI)) / 2;
-
-//     if (abs(Displacement) < 1 * errorTolerance[0] && abs(EndAngleDiff) < 0.01 * errorTolerance[1])
-//     {
-//         Stop();
-//         _is_running = false;
-//         return;
-//     }
-//     if (abs(position_tracker->Get_Velocity()) < 0.1 && abs(position_tracker->Get_Ang_Vel()) < 0.1)
-//     {
-//         lcd::set_text(3, "STUCK");
-//         stuck += 1;
-//         if (stuck > 40)
-//         {
-//             Stop();
-//             _is_running = false;
-//             return;
-//         }
-//     }
-//     else
-//     {
-//         stuck = 0;
-//     }
-
-//     lcd::set_text(3, "Vel" + to_string(abs(position_tracker->Get_Velocity()) < 0.1) + " Ang Vel + " + to_string(abs(position_tracker->Get_Ang_Vel()) < 0.1));
-
-//     double deaccellCoeff = abs(Displacement) * 127 / (9 * speed[0]) < 1 ? abs(Displacement) * 127 / (9 * speed[0]) : 1;
-//     double deaccelSecond = abs(Displacement) * 127 / (6 * speed[0]) < 1 ? abs(Displacement) * 127 / (6 * speed[0]) : 1;
-
-//     // double deaccellCoeff = 1;
-
-//     // TurnControl->Update(0, sin(EndAngleDiff));
-//     auto Forwards = speed[0] * cos(AngleDiff) * deaccellCoeff;
-//     auto Strafe = speed[0] * sin(AngleDiff) * deaccellCoeff;
-
-//     auto Turna = (0.9 * sin(EndAngleDiff) / pow(pow(sin(EndAngleDiff), 2.0), 0.25) + 0.15 * abs(sin(EndAngleDiff)) / sin(EndAngleDiff));
-
-//     auto Turn = speed[1] * ((abs(EndAngleDiff) < 0.5 * errorTolerance[1] || deaccellCoeff / errorTolerance[1] > 1) ? Turna : Turna * deaccellCoeff + (EndAngleDiff / abs(EndAngleDiff)) * (1 - deaccellCoeff));
-
-//     lcd::set_text(5, "AngleDiff: " + to_string((int)(AngleDiff * 180 / M_PI)) + "EndDiff: " + to_string((int)(EndAngleDiff * 180 / M_PI)));
-//     // lcd::set_text(6, "Input: " + to_string((int)Strafe) + " / " + to_string((int)Forwards) + " / " + to_string((int)Turn));
-//     Set_Drive(Strafe, Forwards, Turn, 0);
-// }
