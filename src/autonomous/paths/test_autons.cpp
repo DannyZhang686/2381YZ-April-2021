@@ -42,8 +42,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         setShooterSafe(AUTO_SHOOTER_VEL);
     };
 
-    auto run = [&, numBallsIn, numBallsOut] (void) -> void
-    {
+    auto run = [&, numBallsIn, numBallsOut](void) -> void {
         if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot))
         {
             //Spin the shooter the other way instead, after a short delay
@@ -59,8 +58,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         }
     };
 
-    auto done = [&, numBallsIn, numBallsOut](void) -> bool
-    {
+    auto done = [&, numBallsIn, numBallsOut](void) -> bool {
         if (doneShooting && doneIntaking)
         {
             return true;
@@ -68,8 +66,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
         return false;
     };
 
-    auto kill = [](void) -> void
-    {
+    auto kill = [](void) -> void {
         setIntakesSafe(0);
     };
 
@@ -83,6 +80,11 @@ namespace TurnToPoint
     double tAngleInches;    //travellingAngle converted to a value in inches (for PD purposes)
     int time;
     bool setTime;
+}
+
+double turnCalc(double input)
+{
+    return pow((std::abs(input) / 127), -0.5) * (input);
 }
 
 AutoTask TurnToPointTask(Point target, double maxError)
@@ -101,11 +103,11 @@ AutoTask TurnToPointTask(Point target, double maxError)
         tAngleInches = angleToInches(travellingAngle);
 
         double leftOutput = 0, rightOutput = 0;                //Power output (0-200) for each side of the robot
-        leftOutput = leftTurn.getOutput(0, 20 * tAngleInches); //Setpoint distance value for PD
+        leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
         rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
-        
-        
-        Set_Drive(leftOutput, leftOutput, rightOutput, rightOutput);
+        // rightOutput = -leftOutput;
+        // setDriveSafe(leftOutput, rightOutput);
+        Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
         s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
     };
 
@@ -126,10 +128,6 @@ AutoTask TurnToPointTask(Point target, double maxError)
     };
     return AutoTask::SyncTask(runFn, doneFn, init, kill);
 }
-double turnCalc(double input)
-{
-    return pow((std::abs(input) / 127), -0.5) * (input);
-}
 
 AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
     vector<AutoTask>{
@@ -137,11 +135,14 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
         SingleRun([](void) -> void {
-          position_tracker->Set_Position({36, 12}, PI/2);
+            position_tracker->Set_Position({36, 12}, PI / 2);
         }),
-        AutoTask::AutoDelay(100),
-        PurePursuitTask({36, 30}, 0, 50),
-        TurnToPointTask({12, 15}, 0.1),
-        PurePursuitTask({12, 15}, 0, 50),
+        TurnToPointTask({22, 12}, 0.07),
+        SingleRun([](void) -> void {
+            s__t(0, "DONE");
+        }),
+        AutoTask::AutoDelay(200000),
+        PurePursuitTask({36, 28}, 0, 100),
+        PurePursuitTask({22, 12}, 0, 100),
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });
