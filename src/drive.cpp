@@ -65,10 +65,10 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 {
     left_x = 0;
     setpoints = {
-        (left_y - left_x + pow((std::abs(right_x) / 127), 0.3) * (right_x)),
-        (left_y + left_x + pow((std::abs(right_x) / 127), 0.3) * (right_x)),
-        (left_y + left_x - pow((std::abs(right_x) / 127), 0.3) * (right_x)),
-        (left_y - left_x - pow((std::abs(right_x) / 127), 0.3) * (right_x)),
+        (left_y - left_x + pow((std::abs(right_x) / 127), 0) * (right_x)),
+        (left_y + left_x + pow((std::abs(right_x) / 127), 0) * (right_x)),
+        (left_y + left_x - pow((std::abs(right_x) / 127), 0) * (right_x)),
+        (left_y - left_x - pow((std::abs(right_x) / 127), 0) * (right_x)),
     };
     Set_Drive(setpoints[0], setpoints[1], setpoints[2], setpoints[3]);
 }
@@ -129,10 +129,10 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 
 const void stop(void)
 {
-    // leftBack->move_voltage(0);
-    // rightBack->move_voltage(0);
-    // leftFront->move_voltage(0);
-    // rightFront->move_voltage(0);
+    leftBack->move_voltage(0);
+    rightBack->move_voltage(0);
+    leftFront->move_voltage(0);
+    rightFront->move_voltage(0);
     _pid_inputs = {0, 0, 0, 0};
 }
 

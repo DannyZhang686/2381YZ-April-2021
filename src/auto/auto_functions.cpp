@@ -434,15 +434,11 @@ void countBalls(void *)
   {
     //Update variables
     tLastOutput.push(tLineSensor.get_value_calibrated());
-    bLastOutput.push(bLineSensor.get_value_calibrated());
-    // tLastOutput.push(tLineSensor.get_value());
-    // bLastOutput.push(bLineSensor.get_value());
+    // bLastOutput.push(bLineSensor.get_value_calibrated());
     tSumOutputs += tLastOutput.back() - tLastOutput.front();
-    bSumOutputs += bLastOutput.back() - bLastOutput.front();
-    tLastOutput.pop();
-    bLastOutput.pop();
-    if ((tSumOutputs / numOutputs > minOutput) == tIsBall)
-    {
+    // bSumOutputs += bLastOutput.back() - bLastOutput.front();
+    tLastOutput.pop(); // bLastOutput.pop();
+    if ((tSumOutputs / numOutputs > minOutput) == tIsBall) {
       //Nothing needs to be done, as the sensor output agrees with isBall
     }
     else
@@ -452,15 +448,12 @@ void countBalls(void *)
       numBallsShot += 0.5; //Adding 0.5 when the ball starts being shot and creating a total of 1 when the ball finishes shooting
     }
     //Same thing with the other line sensor
-    if ((bSumOutputs / numOutputs > minOutput) == bIsBall)
-    {
-    }
-    else
-    {
-      bIsBall = !bIsBall;
-      numBallsIntaken += 0.5;
-    }
-    s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()) + " " + t__s(numBallsShot) + " " + t__s(numBallsIntaken));
+    // if ((bSumOutputs / numOutputs > minOutput) == bIsBall) {}
+    // else {
+    //   bIsBall = !bIsBall;
+    //   numBallsIntaken += 0.5;
+    // }
+    // s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()) + " " + t__s(numBallsShot) + " " + t__s(numBallsIntaken));
     pros::delay(10);
   }
 }
