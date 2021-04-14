@@ -64,11 +64,14 @@ array<double, 4> setpoints = {0, 0, 0, 0};
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
     left_x = 0;
+
+    double turn = pow((std::abs(right_x) / 127),  0.75) * getSignOf(right_x)*127; // change the 0.5 to chnge responsiveness -> between [0  - 1]
+
     setpoints = {
-        (left_y - left_x + pow((std::abs(right_x) / 127), 0) * (right_x)),
-        (left_y + left_x + pow((std::abs(right_x) / 127), 0) * (right_x)),
-        (left_y + left_x - pow((std::abs(right_x) / 127), 0) * (right_x)),
-        (left_y - left_x - pow((std::abs(right_x) / 127), 0) * (right_x)),
+        (left_y - left_x + turn),
+        (left_y + left_x + turn),
+        (left_y + left_x - turn),
+        (left_y - left_x - turn),
     };
     Set_Drive(setpoints[0], setpoints[1], setpoints[2], setpoints[3]);
 }

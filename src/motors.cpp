@@ -10,7 +10,7 @@
 #define RB_PORT 18
 #define LI_PORT 10
 #define RI_PORT 20
-#define INDEXER_PORT 2
+#define INDEXER_PORT 4
 #define SHOOTER_PORT 1
 
 //IMU ports
@@ -75,7 +75,7 @@ const void InitMotors(ConfigOptions config)
     case E:
         InitDrive(Evan_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
-        InitEncoders(Z_Track_C);
+        InitEncoders(L_Track_C);
         break;
     case L:
         InitDrive(L_Bot_Drive);

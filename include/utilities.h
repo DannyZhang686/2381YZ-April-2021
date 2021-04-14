@@ -13,4 +13,6 @@ double rotatePi(double);
 double degToRad(double);
 double radToDeg(double);
 
+int getSignOf(double);
+
 #endif //_UTILITIES_H_

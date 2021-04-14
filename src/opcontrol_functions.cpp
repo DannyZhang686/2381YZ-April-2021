@@ -64,14 +64,15 @@ void indexerSpin(void*) {
   //DIGITAL_R2 is the button assigned to the indexer
   while (true) {
     if (master.get_digital(DIGITAL_Y)) {
-      indexer.move_voltage(-INDEXER_SPEED);
+      indexer.move(-127);
     }
     else if ((master.get_digital(DIGITAL_R2)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_L1))) {
-      indexer.move_voltage(INDEXER_SPEED);
+      indexer.move(127);
     }
     else {
       indexer.move_voltage(0);
     }
+    s__t(0, "indexer time: " + t__s(pros::millis()) + "");
     pros::delay(20);
   }
 }
