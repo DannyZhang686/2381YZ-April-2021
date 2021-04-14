@@ -39,7 +39,7 @@ void updateTracking(void)
   currentVal.left = leftTracking->get_value();
   // currentVal.right = rightTracking.get_value();
   currentVal.back = backTracking->get_value();
-  currentVal.angle = inertial->Get_Angle();
+  // currentVal.angle = inertial->Get_Angle();
   if (currentVal.angle > 2 * PI)
     currentVal.angle -= 2 * PI;
   if (currentVal.angle < 0)
@@ -107,8 +107,7 @@ void trackPosition(void *)
   while (true)
   {
     position_tracker->Track_Position();
-    s__t(1, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
-    pros::delay(10);
+    pros::delay(DELAY_INTERVAL);
   }
 }
 

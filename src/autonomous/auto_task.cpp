@@ -9,8 +9,8 @@ AutoTask AutoTask::AsyncTask(std::function<void(void)> task, std::function<bool(
 }
 AutoTask AutoTask::SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
 {
-    AutoTask *syncTask = new AutoTask(task, done, init, kill, true);
-    return *syncTask;
+    AutoTask syncTask = AutoTask(task, done, init, kill, true);
+    return syncTask;
 }
 AutoTask AutoTask::AutoDelay(int time, bool sync, std::function<void(void)> task, std::function<void(void)> init, std::function<void(void)> kill)
 {

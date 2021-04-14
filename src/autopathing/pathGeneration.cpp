@@ -5,7 +5,7 @@
 #include "control/motor_controller.hpp"
 
 #include "autonomous.h"
-#include "utilities.h"   
+#include "utilities.h"
 #include "pid.h"
 #include "autonomous/auto_task.hpp"
 
@@ -20,26 +20,25 @@
 
 #include "pathing.hpp"
 
-
 using namespace std;
 using namespace pros;
 using namespace std::complex_literals;
-
 
 PointList DefinePath(Point startPoint, Point endPoint, double startAngle)
 {
     // disp between the 2 points
     Point disp = endPoint - startPoint;
     double distance = abs(disp) / 4;
-    Point midwayPoint = startPoint + distance * Point(cos(startAngle), sin(startAngle));
+    Point midwayPoint = startPoint + distance * exp<double>(1i* startAngle);
 
-    return {startPoint, midwayPoint, endPoint};
+    PointList a =  {Point(startPoint), midwayPoint, Point(endPoint)};
+    return a;
 }
 
 PointList InjectPoints(PointList path, double spacing)
 {
     // spacing is space between 2 points that r injected
-    PointList newPointList = {path[0]};
+    PointList newPointList = {Point(path[0])};
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
     auto Disp = path[1] - path[0];
@@ -48,7 +47,7 @@ PointList InjectPoints(PointList path, double spacing)
     for (double i = 0; i < distance1; i += spacing)
     {
         Point newPoint = path[0] + Disp * i / distance1;
-        newPointList.emplace_back(newPoint);
+        newPointList.push_back(newPoint);
     }
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
@@ -58,10 +57,9 @@ PointList InjectPoints(PointList path, double spacing)
     for (double i = 0; i < distance2; i += spacing)
     {
         Point newPoint = path[1] + Disp2 * i / distance2;
-        newPointList.emplace_back(newPoint);
+        newPointList.push_back(newPoint);
     }
-    newPointList.emplace_back(path[2]);
-
+    newPointList.push_back(Point(path[2]));
     return newPointList;
 }
 
@@ -87,10 +85,8 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
             change += abs(auxI - newPath[i].imag());
         }
     }
-
     return newPath;
 }
-
 
 const double Curvature(Point currentPos, Point targetPos, double currentOrientation)
 {
@@ -113,66 +109,63 @@ const double Curvature(Point currentPos, Point targetPos, double currentOrientat
 
 long GetClosest(PointList path, Point currentPoint, long previousIndex)
 {
-    long double min = -1;
-    long minIndex = previousIndex;
-    previousIndex = previousIndex - 3;
-    if (previousIndex < 0)
+    auto reducedPrevIndex = previousIndex - 3;
+    if (reducedPrevIndex < 0)
     {
-        previousIndex = 0;
+        reducedPrevIndex = 0;
     }
-
-    for (int i = previousIndex; i < previousIndex + 10; i++)
+    long minIndex = reducedPrevIndex;
+    long size = path.size() -1;
+    double min = abs(path[minIndex] - currentPoint);
+    for (long i = reducedPrevIndex; i < reducedPrevIndex + 30; i++)
     {
-        if (i == path.size() - 1)
+        if (i >= size)
         {
             break;
         }
-        if (abs(path[i] - currentPoint) < min || min == -1)
+        if (abs(path[i] - currentPoint) < min)
         {
             min = abs(path[i] - currentPoint);
             minIndex = i;
         }
     }
+    s__t(0, "prev: " + t__s(reducedPrevIndex)  + " : " + t__s(minIndex) + " min: " + t__s(min));
     return minIndex;
 }
 
-
-PointList GeneratePathCirc(Point startpoint, Point endpoint, double startAngle, double spacing) 
+PointList GeneratePathCirc(Point startpoint, Point endpoint, double startAngle, double spacing)
 {
     startAngle = NormalizeAngle(startAngle);
     // # a0 = startAngle * math.pi
-    double a0 = NormalizeAngle(startAngle-0.5* M_PI);
+    double a0 = NormalizeAngle(startAngle - 0.5 * M_PI);
     double distSq = abs((startpoint - endpoint)) * abs((startpoint - endpoint));
-    double r = (distSq / (2*(startpoint.real() - endpoint.real())*cos(a0) + 2*(startpoint.imag() - endpoint.imag())*sin(a0)));
-    double a = atan2((distSq)*sin(a0) - 2*(startpoint.real() - endpoint.real())*(startpoint.imag()-endpoint.imag())*cos(a0), (distSq)*cos(a0) - 2*(startpoint.real() - endpoint.real())*(startpoint.imag()-endpoint.imag())*sin(a0)) - a0;
+    double r = (distSq / (2 * (startpoint.real() - endpoint.real()) * cos(a0) + 2 * (startpoint.imag() - endpoint.imag()) * sin(a0)));
+    double a = atan2((distSq)*sin(a0) - 2 * (startpoint.real() - endpoint.real()) * (startpoint.imag() - endpoint.imag()) * cos(a0), (distSq)*cos(a0) - 2 * (startpoint.real() - endpoint.real()) * (startpoint.imag() - endpoint.imag()) * sin(a0)) - a0;
 
     auto center = startpoint - r * exp<double>(1i * a0);
     PointList newPointList = {};
 
     auto i = 0.0;
-    auto angleDiff = NormalizeAngle(a,2);
+    auto angleDiff = NormalizeAngle(a, 2);
 
-    while(abs(i/r) < abs(angleDiff))
+    while (abs(i / r) < abs(angleDiff))
     {
-        auto newPoint = center + r * exp<double>(1i * (a0 + i/r));
+        auto newPoint = center + r * exp<double>(1i * (a0 + i / r));
         newPointList.emplace_back(newPoint);
-        i+=  spacing;
+        i += spacing;
     }
     return newPointList;
 }
-   
 
 PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing)
 {
-    // PointList path = DefinePath(startpoint, endpoint, startAngle);
-    // path = InjectPoints(path, spacing);
-    // // Second Picture
-    // path = smoother(path, 0.1, 0.9, 1);
-    PointList path = GeneratePathCirc(startpoint, endpoint, startAngle, spacing);
+
+    PointList path = DefinePath(startpoint, endpoint, startAngle);
+    path = InjectPoints(path, spacing);
+    path = smoother(path, 0.1, 0.9, 1);
+    // PointList path = GeneratePathCirc(startpoint, endpoint, startAngle, spacing);
     return path;
 }
-
-
 
 Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius)
 {
@@ -192,7 +185,7 @@ Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, do
 
         double root1 = (-b - discriminant) / (2 * a);
         double root2 = (-b + discriminant) / (2 * a);
-        
+
         if ((root2 >= 0) && (root2 <= 1))
         {
             //Return immediately; root2 is further along the vector
@@ -206,7 +199,7 @@ Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, do
         {
             auto a = startPoint + root1 * lineSegmentVector;
             auto dist = abs(a - circleCenter);
-            s__t(3, "root1 found: " + t__s(root2) + " dist:" + t__s(dist));
+            s__t(3, "root1 found: " + t__s(root1) + " dist:" + t__s(dist));
             return startPoint + root1 * lineSegmentVector;
         }
     }

@@ -45,7 +45,7 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 15;
+    static double lookAheadDistance = 10;
     static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
@@ -64,9 +64,10 @@ tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius
 
     while (index < previousIndex + PPS::lookAheadNumber)
     {
-        if (index == size - 2)
+        if (index >= size - 2)
         {
-            return {size - 2, path[size - 1]};
+            s__t(3, "end of line");
+            return {size - 1, path[size - 1]};
         };
         Point lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
         if (lookaheadCheck != PointNotFound)
@@ -80,6 +81,18 @@ tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius
     return {previousIndex, PointNotFound};
 }
 
+double inner_product(Point a, Point b)
+{
+    return a.real() * b.real() + a.imag() * b.imag();
+}
+int getSignOf(double yeet)
+{
+    if (yeet >= 0)
+    {
+        return 1;
+    }
+    return -1;
+}
 AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
     using namespace PPS;
@@ -104,11 +117,6 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
          *
          *
          * **/
-        if (mostestClosestIndex >= path.size())
-        {
-            Set_Drive(0, 0, 0, 0);
-            return;
-        }
 
         auto lookaheadCheck = FindLookAhead(currentPos, path, lookAheadDistance, mostestClosestIndex);
         // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
@@ -119,12 +127,15 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
             lookaheadPnt = get<1>(lookaheadCheck);
             previousLookaheadIndex = get<0>(lookaheadCheck);
         }
+        Point currentHeading = exp<double>(1i * currentAngle);
 
-        array<double, 2> speeds = {speed, speed};
+        double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
+
+        array<double, 2> speeds = {getSignOf(innerProduct) * speed, getSignOf(innerProduct) * speed};
 
         double arcRadius = Curvature(currentPos, lookaheadPnt, currentAngle);
 
-        if (arcRadius != NAN || arcRadius != INFINITY)
+        if (arcRadius != NAN && arcRadius != INFINITY)
         {
             double leftRadius = arcRadius + H_Wheel_Disp;
             double rightRadius = arcRadius - H_Wheel_Disp;
@@ -148,29 +159,30 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         }
 
         // lcd::set_text(3, "DISTANCE: " + to_string(abs(TotalDisp)));
-        lcd::set_text(4, "Current: " + to_string(currentPos.real()) + ", " + to_string(currentPos.imag()));
-        lcd::set_text(5, "End Point: " + to_string((lookaheadPnt).real()) + ", " + to_string((lookaheadPnt).imag()));
+        lcd::set_text(4, "C: [" +  t__s(mostestClosestIndex) +  "] " + to_string(currentPos.real()) + ", " + to_string(currentPos.imag()));
+        lcd::set_text(5, "EP: ["  + t__s(previousLookaheadIndex) + "]  " + to_string((lookaheadPnt).real()) + ", " + to_string((lookaheadPnt).imag()));
         // lcd::set_text(4, "Disp: " + to_string(TotalDisp.real()) + ", " + to_string(TotalDisp.imag()));
 
-        s__t(6, "l: " + t__s(speeds[0]) + " r: " + t__s(speeds[1]));
+        s__t(6, "l: " + t__s(speeds[0]) + " r: " + t__s(speeds[1]) + " " + t__s(path.size()));
         // lcd::set_text(5, "AngleDiff: " + to_string((int)(AngleDiff*180/M_PI)) + "EndDiff: " + to_string((int)(EndAngleDiff*180/M_PI)));
         Set_Drive(speeds[0], speeds[0], speeds[1], speeds[1]);
         // curve to the endpoint and reach that point at angle
     };
     // init function
     auto init = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> void {
-        startPoint = currentPos = prevPos = position_tracker->Get_Position();
+        startPoint = currentPos = position_tracker->Get_Position();
         startAngle = position_tracker->Get_Angle();
         endPoint = EndPoint;
         endAngle = EndAngle;
 
         lookaheadPnt = EndPoint;
         previousLookaheadIndex = 0;
+        mostestClosestIndex = 0;
         path = GeneratePath(startPoint, endPoint, startAngle, PathSpacing);
     };
     // done function
     auto done = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> bool {
-        return mostestClosestIndex >= path.size() - 2;
+        return mostestClosestIndex >= (path.size() - 2);
     };
 
     auto kill = [](void) -> void { Set_Drive(0, 0, 0, 0); };

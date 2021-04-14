@@ -129,10 +129,10 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 
 const void stop(void)
 {
-    leftBack->move_voltage(0);
-    rightBack->move_voltage(0);
-    leftFront->move_voltage(0);
-    rightFront->move_voltage(0);
+    // leftBack->move_voltage(0);
+    // rightBack->move_voltage(0);
+    // leftFront->move_voltage(0);
+    // rightFront->move_voltage(0);
     _pid_inputs = {0, 0, 0, 0};
 }
 
@@ -145,14 +145,16 @@ void PID_Drive(void *)
             leftBack->move(0);
             rightFront->move(0);
             rightBack->move(0);
-            leftBack->move(0);
+            leftFront->move(0);
             _pid_inputs = {0, 0, 0, 0};
         }
-
-        _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
-        _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
-        _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
-        _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+        else
+        {
+            _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
+            _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
+            _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
+            _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+        }
         pros::delay(DELAY_INTERVAL);
     }
 }
@@ -183,8 +185,8 @@ void splitArcade(void)
     }
     else
     {
- 
-       //Move at voltage 0 if there's very little or no input
+
+        //Move at voltage 0 if there's very little or no input
         left = right = 0;
     }
 

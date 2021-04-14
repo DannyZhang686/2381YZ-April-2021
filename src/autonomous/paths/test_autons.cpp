@@ -87,6 +87,48 @@ double turnCalc(double input)
     return pow((std::abs(input) / 127), -0.5) * (input);
 }
 
+AutoTask TurnToAngleTask(double heading, double maxError)
+{
+    using namespace TurnToPoint;
+
+    auto init = [&](void) -> void {
+        time = 0;
+        setTime = false;
+    };
+
+    auto runFn = [&, heading, maxError]() -> void {
+        targetAngle = heading;
+
+        travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
+        tAngleInches = angleToInches(travellingAngle);
+
+        double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
+        // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
+        rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
+        // rightOutput = -leftOutput;
+        setDriveSafe(-rightOutput, rightOutput);
+        // Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
+        s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
+    };
+
+    auto doneFn = [&, maxError]() -> bool {
+        if ((!setTime) && (fabs(travellingAngle) < maxError))
+        {
+            time = pros::millis();
+            setTime = true;
+        }
+        else if ((time != 0) && (pros::millis() - time > 250))
+        {
+            return true;
+        }
+        return false;
+    };
+    auto kill = [] {
+        Set_Drive(0, 0, 0, 0);
+    };
+    return AutoTask::SyncTask(runFn, doneFn, init, kill);
+}
+
 AutoTask TurnToPointTask(Point target, double maxError)
 {
     using namespace TurnToPoint;
@@ -102,12 +144,12 @@ AutoTask TurnToPointTask(Point target, double maxError)
         travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
         tAngleInches = angleToInches(travellingAngle);
 
-        double leftOutput = 0, rightOutput = 0;                //Power output (0-200) for each side of the robot
-        leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
+        double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
+        // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
         rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
         // rightOutput = -leftOutput;
-        // setDriveSafe(leftOutput, rightOutput);
-        Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
+        setDriveSafe(-rightOutput, rightOutput);
+        // Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
         s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
     };
 
@@ -135,14 +177,31 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
         SingleRun([](void) -> void {
-            position_tracker->Set_Position({36, 12}, PI / 2);
+            // position_tracker->Set_Position(0, 0, );
         }),
-        TurnToPointTask({22, 12}, 0.07),
+
+        TurnToAngleTask(0, 0.07),
+
+        AutoTask::AutoDelay(40000),
+        PurePursuitTask({24, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({0, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({24, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({0, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({24, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({0, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({24, 0}, 0, 40),
+        AutoTask::AutoDelay(1000),
+        PurePursuitTask({0, 0}, 0, 40),
         SingleRun([](void) -> void {
             s__t(0, "DONE");
         }),
-        AutoTask::AutoDelay(200000),
-        PurePursuitTask({36, 28}, 0, 100),
-        PurePursuitTask({22, 12}, 0, 100),
+
+        // PurePursuitTask({22, 12}, 0, 100),
         // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
     });

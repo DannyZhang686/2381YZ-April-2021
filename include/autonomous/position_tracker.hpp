@@ -33,10 +33,12 @@ class Position_Tracker {
     std::complex<double> Get_Displacement();
 
     std::complex<double> Get_Velocity();
-
+    double angle_ = 0;
 
     double Get_Ang_Vel();
     double Get_Angle();
+    double Get_Real_Angle();
+
 
     const void Reset_Position(void);
     const void Set_Position(std::complex<double> newPosition = 0, double Angle = 0, std::complex<double> previousPosition = 0, double previousAngle = 0);
