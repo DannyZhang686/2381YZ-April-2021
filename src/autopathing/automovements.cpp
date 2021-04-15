@@ -45,7 +45,7 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 15;
+    static double maxLookaheadDistance = 18;
     static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
@@ -118,6 +118,8 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
          *
          * **/
 
+        double lookAheadDistance = maxLookaheadDistance * speed / 127;
+
         auto lookaheadCheck = FindLookAhead(currentPos, path, lookAheadDistance, mostestClosestIndex);
         // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
         // theoretically should store the index of the previous lookahead point if found and use that in place of mostest closest but w/e.
@@ -132,7 +134,7 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
         auto realLookaheadDist = abs(lookaheadPnt - currentPos);
 
-        auto deaccelCoeff = pow(min(realLookaheadDist / lookAheadDistance, 1.0), 0.8);
+        auto deaccelCoeff =  0.2 + 0.8 * pow(min(realLookaheadDist / lookAheadDistance, 1.0), 1);
 
         array<double, 2> speeds = {getSignOf(innerProduct) * speed * deaccelCoeff, getSignOf(innerProduct) * speed * deaccelCoeff};
 

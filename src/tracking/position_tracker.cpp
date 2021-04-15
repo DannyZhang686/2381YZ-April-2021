@@ -12,7 +12,6 @@ using namespace pros;
 using namespace std;
 using namespace std::complex_literals;
 
-
 double NormalizeAngle(double angle, int multiplier)
 {
     return remainder(angle, 2 * M_PI * multiplier);
@@ -53,7 +52,6 @@ const void Position_Tracker::Set_Position(complex<double> position_, double angl
     origin = position_ - oldPos + origin;
 
     ang_origin = angle_ - oldAngle + ang_origin;
-    ang_last = Get_Angle();
 }
 
 int calibrationStart = 0;
@@ -91,87 +89,51 @@ void Position_Tracker::Track_Position()
     }
 
     // Current Angle, Angular Dispertion. This is normalized to between (-M_PI, M_PI).
-    this->Get_Real_Angle();
-    ang_disp = this->Get_Angle();
+    ang_disp = this->Get_Real_Angle();
 
     // Angular Velocity
-    ang_vel = fmod(ang_disp - ang_last, 2 * M_PI);
-    auto normalized_ang_vel = NormalizeAngle(ang_disp - ang_last);
+    ang_vel = NormalizeAngle(ang_disp - ang_last);
 
     current_encoder_values[right_] = v_enc_->get_value();
     current_encoder_values[back_] = h_enc_->get_value();
-    lcd::set_text(2, "VERT: " + to_string(current_encoder_values[right_]) + " Horz: " + to_string(current_encoder_values[back_]));
 
     // Position change is the swept angle multiplied by the radius. Radius = 1/2 Diameter, so it is \Delta_Angle * M_PI/180 *Diameter/2.
     position_change[right_] = (current_encoder_values[right_] - last_encoder_values[right_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
     position_change[back_] = (current_encoder_values[back_] - last_encoder_values[back_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
 
-    // Current Orientation - Angular Change/2 to get average between current and last angle measured.
-    // Angular velocity is normalized to (-M_PI, M_PI) so that the change in angle always calculates as the closest side.
-    // Otherwise the vector will be pointing in the opposite direction.
-
-    v_vel = (position_change[right_]) * exp<double>(1i * (ang_disp - ang_vel * 1 / 2));
-    h_vel = (position_change[back_]) * exp<double>(1i * (ang_disp - M_PI / 2 - ang_vel * 1 / 2));
-
-    // v_vel_n = (position_change[right_]) * exp<double>(1i * (ang_disp - normalized_ang_vel * 1/2));
-    // h_vel_n = (position_change[back_]) * exp<double>(1i * (ang_disp - M_PI/2 - normalized_ang_vel * 1/2));
-
-    // v_disp_n += v_vel_n;
-    // h_disp_n += h_vel_n;
-
-    h_disp += h_vel;
-    v_disp += v_vel;
     ang_last = ang_disp;
+
     last_encoder_values = current_encoder_values;
-    s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
 
-    //
-    // lcd::set_text(1, "VEL: ("  + to_string((int)round( 100* abs(Get_Velocity()))) + ", " + to_string((int)round( 100* abs(Get_Ang_Vel()))) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
-    // lcd::set_text(2, "N_POS : ("  + to_string((int)round( 100* Get_Position_N().real())) + ", " + to_string((int)round( 100* Get_Position_N().imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
+    double lRadius;                 //The radius of the circle calculated to the left tracking wheel
+    double bRadius;                 //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
+    double dist;                    //The distance travelled by the tracking center
+    double dist2;                   //dist calculated using the back tracking wheel
+    double sinAngle = sin(ang_vel); //The sine of the angle travelled (used to avoid multiple redundant calculations)
 
-    double lRadius;                                //The radius of the circle calculated to the left tracking wheel
-    double bRadius;                                //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
-    double dist;                                   //The distance travelled by the tracking center
-    double dist2;                                  //dist calculated using the back tracking wheel
-    double sinAngle = sin(2 * normalized_ang_vel); //The sine of the angle travelled (used to avoid multiple redundant calculations)
-
-    if (fabs(normalized_ang_vel) > 0)
+    if (fabs(ang_vel) > 0)
     {
-        lRadius = position_change[right_] / (2 * normalized_ang_vel); //Calculate the radius
-        // dist = (rRadius + R_TO_MID) * normalized_ang_vel; //Calculate the distance (from the center of the robot) using simple trigonometry
-        dist = (lRadius + wheel_center_offset.real()) * sinAngle;    //Calculate the distance (from the center of the robot) using simple trigonometry
-        bRadius = position_change[back_] / (2 * normalized_ang_vel); //Repeat the previous lines using the back tracking wheel (for horizontal error)
+        lRadius = position_change[right_] / (ang_vel); //Calculate the radius
+        // dist = (rRadius + R_TO_MID) * ang_vel; //Calculate the distance (from the center of the robot) using simple trigonometry
+        dist = (lRadius + wheel_center_offset.real()) * sinAngle; //Calculate the distance (from the center of the robot) using simple trigonometry
+        bRadius = position_change[back_] / (ang_vel);             //Repeat the previous lines using the back tracking wheel (for horizontal error)
         dist2 = (bRadius - wheel_center_offset.imag()) * sinAngle;
     }
     else
     {
-        //Robot went straight or didn't move; note that this happens when normalized_ang_vel == 0
+        //Robot went straight or didn't move; note that this happens when ang_vel == 0
         //Values for distance travelled can be set directly to encoder values, as there is no arc
         dist = position_change[right_];
         dist2 = position_change[back_];
     }
     //Update the angle value
 
+    double currentHeading = this->Get_Angle();
     // pilonsVel = dist * exp<double>(1i *(ang_disp) ) + dist2 * exp<double>(1i* -(M_PI/2 + ang_disp)); //Original
-    pilonsVel = dist * exp<double>(1i * (ang_disp)) + dist2 * exp<double>(1i * -(M_PI / 2 - ang_disp));
+    pilonsVel = dist * exp<double>(1i * (currentHeading)) + dist2 * exp<double>(1i * -(M_PI / 2 - currentHeading));
     pilons_disp += pilonsVel;
+    s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
 
-    // lcd::set_text(2, "N_POS : ("  + to_string((int)round( 100* Get_Position_N().real())) + ", " + to_string((int)round( 100* Get_Position_N().imag())) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
-    // lcd::set_text(2, "P_POS : ("  + to_string((int)round( 100* Get_Position().real())) + ", " + to_string((int)round( 100* Get_Position().imag())) + "), " + to_string((ang_disp * 180 / M_PI)) +" deg");
-
-    // double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
-    // double cosTheta = cos(robotPos.angle);
-
-    //Calculate updated absolute position values
-    //Note that these specific signs and ratios are used because:
-    // - dist is calculated using an angle clockwise from the positive y-axis (hence sin is x and cos is y); and
-    // - dist2 is calculated using an angle clockwise from the positive x-axis (hence cos is x and -sin is y)
-    // robotPos.x += dist * sinTheta + dist2 * cosTheta;
-    // robotPos.y += dist * cosTheta - dist2 * sinTheta;
-
-    //Print the tracking values to the brain screen for debugging
-    // s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.back));
-    // s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
 }
 
 complex<double> Position_Tracker::Get_Position()

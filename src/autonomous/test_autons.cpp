@@ -50,6 +50,9 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
+        // PurePursuitTask({36, 0}, 0, 127).AddInit(IntakeF(200)),
+        // Delay(100000),
+
         SingleRun([](void) -> void {
           position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
           // position_tracker->Set_Position({60, 9.5}, 0); //Side first
@@ -66,13 +69,13 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // TurnToPointTask({36, 24}, 0.07),
 
         //Start to 1
-        PurePursuitTask({36, 20.5}, 0, 100).AddInit(IntakeF(200)),
+        PurePursuitTask({36, 20.5}, 0, 127).AddInit(IntakeF(200)),
         Delay(200),
         TurnToPointTask({9, 9}, 0.07),
         Delay(200).AddKill([] {
           stopMotors();
         }),
-        PurePursuitTask({9, 9}, 0, 100),
+        PurePursuitTask({9, 9}, 0, 127),
 
         //Goal 1
         TimeBasedMoveTask(70, 400),
@@ -85,7 +88,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         //1 to 2
         TurnToPointTask({24, 72}, 0.07),
-        PurePursuitTask({24, 72}, 0, 100).AddRun(IntakeF(200)),
+        PurePursuitTask({24, 72}, 0, 127).AddRun(IntakeF(200)),
         // Delay(250).AddRun([]{
         //   setDriveSafe(-50, -50);
         // }),
@@ -97,7 +100,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         Delay(200).AddKill([] {
           stopMotors();
         }),
-        PurePursuitTask({12, 72}, 0, 100),
+        PurePursuitTask({12, 72}, 0, 127),
 
         //Goal 2
         TimeBasedMoveTask(70, 650),
@@ -111,7 +114,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //2 to 3
         TurnToPointTask({36, 115}, 0.07),
 
-        PurePursuitTask({36, 115}, 0, 100).AddInit(IntakeF(200)),
+        PurePursuitTask({36, 115}, 0, 127).AddInit(IntakeF(200)),
 
         // NEW STUFF - Added after merge starts here
 
@@ -125,7 +128,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         Delay(200).AddKill([] {
           stopMotors();
         }),
-        PurePursuitTask({13, 125}, 0, 100),
+        PurePursuitTask({13, 125}, 0, 127),
 
         //Goal 3
         TimeBasedMoveTask(70, 650),
@@ -139,14 +142,14 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         // FIXME - UHH CAN WE NOT HAVE PROS DELAY INSIDE TASK BODY
 
-        PurePursuitTask({72, 90}, 0, 100).AddInit(IntakeF(200)).AddKill([](void) -> void {
+        PurePursuitTask({72, 90}, 0, 127).AddInit(IntakeF(200)).AddKill([](void) -> void {
           setDriveSafe(-50, -50);
           pros::delay(250);
           setDriveSafe(0, 0);
           pros::delay(250);
         }),
         TurnToPointTask({74, 120}, 0.07),
-        PurePursuitTask({74, 120}, 0, 100).AddInit([](void) -> void {
+        PurePursuitTask({74, 120}, 0, 127).AddInit([](void) -> void {
           pros::delay(200);
           stopMotors();
         }),
@@ -160,7 +163,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         //4 to 5
         TurnToPointTask({108, 105}, 0.07),
-        PurePursuitTask({108, 105}, 0, 100).AddInit([](void) -> void {
+        PurePursuitTask({108, 105}, 0, 127).AddInit([](void) -> void {
                                              intakeNoShoot(200);
                                            })
             .AddKill([](void) -> void {
@@ -170,7 +173,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
               pros::delay(250);
             }),
         TurnToPointTask({136, 125}, 0.07),
-        PurePursuitTask({136, 125}, 0, 100).AddInit([](void) -> void {
+        PurePursuitTask({136, 125}, 0, 127).AddInit([](void) -> void {
           pros::delay(200);
           stopMotors();
         }),

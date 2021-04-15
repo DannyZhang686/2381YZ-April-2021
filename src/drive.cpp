@@ -108,7 +108,7 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
     rbDistance += abs(_right_back_motor_controller->Get_Speed()) / DELAY_INTERVAL;
     lbDistance += abs(_left_back_motor_controller->Get_Speed()) / DELAY_INTERVAL;
 
-    masterDistance += (abs(_right_front_motor_controller->Get_Speed()) + abs(_left_back_motor_controller->Get_Speed()) + abs(_right_back_motor_controller->Get_Speed()) + abs(_left_front_motor_controller->Get_Speed())) / (4 * DELAY_INTERVAL);
+    masterDistance = (rfDistance + lfDistance + rbDistance + lbDistance) / 4;
 
     double tuning_coefficient = _master_pid->Update(0, _master_error_average);
     if (tuning_coefficient < 0)
@@ -117,10 +117,8 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
         tuning_coefficient = 1;
     }
 
-    _pid_inputs[left_back] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuning_coefficient;
-    _pid_inputs[left_front] = _left_front_setpoint * ratioCalc(masterDistance, _master_offset, lfDistance, lfoffset) * tuning_coefficient;
-    _pid_inputs[right_back] = _right_back_setpoint * ratioCalc(masterDistance, _master_offset, rbDistance, rboffset) * tuning_coefficient;
-    _pid_inputs[right_front] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
+    _pid_inputs[left_back] = _pid_inputs[left_front] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuning_coefficient;
+    _pid_inputs[right_front] = _pid_inputs[right_back] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
 
     if (master.get_digital(DIGITAL_A))
     {
