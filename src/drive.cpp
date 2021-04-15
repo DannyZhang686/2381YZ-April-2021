@@ -65,7 +65,7 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 {
     left_x = 0;
 
-    double turn = pow((std::abs(right_x) / 127),  0.5) * getSignOf(right_x)*127;
+    double turn = pow((std::abs(right_x) / 127), 0.5) * getSignOf(right_x) * 127;
 
     controllerSetpoints = {
         (left_y - left_x + turn),
@@ -78,7 +78,7 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 {
 
-    // s__t(5, "REEE");
+    activeDriveMode = PidMode;
     _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
     //motor_value_average is what the actual motors are currently set at
 
@@ -143,20 +143,24 @@ void PID_Drive(void *)
 {
     while (true)
     {
-        if (STOP)
+
+        if (activeDriveMode == PidMode)
         {
-            leftBack->move(0);
-            rightFront->move(0);
-            rightBack->move(0);
-            leftFront->move(0);
-            _pid_inputs = {0, 0, 0, 0};
-        }
-        else
-        {
-            _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
-            _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
-            _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
-            _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+            if (STOP)
+            {
+                leftBack->move(0);
+                rightFront->move(0);
+                rightBack->move(0);
+                leftFront->move(0);
+                _pid_inputs = {0, 0, 0, 0};
+            }
+            else
+            {
+                _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
+                _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
+                _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
+                _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+            }
         }
         pros::delay(DELAY_INTERVAL);
     }

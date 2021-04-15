@@ -12,14 +12,27 @@
 
 static bool shooterOn = true, intakeOn = true, indexerOn = true;
 
+static double shooterSetpoint = 0;
+const void controllerShooterSpin(void);
 void shooterSpin(void*);
+
+static double intakeSetpoint = 0;
+const void controllerIntakeSpin(void);
 void intakeSpin(void*);
 
 static double indexerSetpoint = 0;
-void controllerIndexerSpin();
+const void controllerIndexerSpin(void);
 void indexerSpin(void*);
 
 void splitArcade(void);
+
+enum DriveMode 
+{
+    PidMode = 0,
+    ManualMode
+};
+
+static DriveMode activeDriveMode = PidMode;
 
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y);
 const void Set_Drive(double lb, double lf, double rb, double rf);

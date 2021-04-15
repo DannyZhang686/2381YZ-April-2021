@@ -94,6 +94,8 @@ const void InitMotors(ConfigOptions config)
         InitEncoders(L_Track_C);
         SetTrackingOffsets(L_Tracking_Offsets);
         indexerOn = false;
+        intakeOn = false;
+        shooterOn = false;
         break;
     default:
         InitDrive(Z_Bot_Drive);

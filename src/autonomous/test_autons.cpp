@@ -113,7 +113,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         PurePursuitTask({36, 115}, 0, 100).AddInit(IntakeF(200)),
 
-// NEW STUFF - Added after merge starts here
+        // NEW STUFF - Added after merge starts here
 
         // Delay(250).AddRun([] {
         //   setDriveSafe(-50, -50);
@@ -137,16 +137,14 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //3 to 4
         TurnToPointTask({72, 90}, 0.07),
 
-
         // FIXME - UHH CAN WE NOT HAVE PROS DELAY INSIDE TASK BODY
 
-        PurePursuitTask({72, 90}, 0, 100).AddInit(IntakeF(200))
-            .AddKill([](void) -> void {
-              setDriveSafe(-50, -50);
-              pros::delay(250);
-              setDriveSafe(0, 0);
-              pros::delay(250);
-            }),
+        PurePursuitTask({72, 90}, 0, 100).AddInit(IntakeF(200)).AddKill([](void) -> void {
+          setDriveSafe(-50, -50);
+          pros::delay(250);
+          setDriveSafe(0, 0);
+          pros::delay(250);
+        }),
         TurnToPointTask({74, 120}, 0.07),
         PurePursuitTask({74, 120}, 0, 100).AddInit([](void) -> void {
           pros::delay(200);

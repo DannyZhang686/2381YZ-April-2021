@@ -5,6 +5,7 @@
 #include "control/motor_controller.hpp"
 #include "control/pid.hpp"
 #include "globals.hpp"
+
 //For these robot functions, DIGITAL_L2 is used as a "shift" key;
 //when it is pressed along with another button, a different
 //(usually opposite) command is given.
@@ -15,36 +16,64 @@
 bool shooterToggle = true;
 double prevNumBalls = 0;
 
+const void controllerShooterSpin(void)
+{
+  if ((floor(numBallsShot) == numBallsShot) && (numBallsShot != prevNumBalls))
+  {
+    shooterToggle = false;
+  }
+  prevNumBalls = numBallsShot;
+
+  if ((master.get_digital_new_press(DIGITAL_A)) || (master.get_digital_new_press(DIGITAL_R1)))
+  {
+    shooterToggle = true;
+  }
+
+  if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A)) && (shooterToggle))
+  {
+    shooterSetpoint = (SHOOTER_SPEED);
+  }
+  else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_Y)))
+  {
+    shooterSetpoint = (-SHOOTER_SPEED);
+  }
+  else
+  {
+    shooterSetpoint = (0);
+  }
+}
+
 void shooterSpin(void *)
 {
   //DIGITAL_R1 is the button assigned to the flywheel
   while (true)
   {
+    if (shooterOn)
+    {
+      if (STOP)
+      {
+        shooterSetpoint = 0;
+      }
+      shooter.move_voltage(shooterSetpoint);
+    }
+    pros::delay(DELAY_INTERVAL);
+  }
+}
 
-    if ((floor(numBallsShot) == numBallsShot) && (numBallsShot != prevNumBalls))
-    {
-      shooterToggle = false;
-    }
-    prevNumBalls = numBallsShot;
-
-    if ((master.get_digital_new_press(DIGITAL_A)) || (master.get_digital_new_press(DIGITAL_R1)))
-    {
-      shooterToggle = true;
-    }
-
-    if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A)) && (shooterToggle))
-    {
-      shooter.move_voltage(SHOOTER_SPEED);
-    }
-    else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_Y)))
-    {
-      shooter.move_voltage(-SHOOTER_SPEED);
-    }
-    else
-    {
-      shooter.move_voltage(0);
-    }
-    pros::delay(20);
+const void controllerIntakeSpin(void)
+{
+  if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y)))
+  {
+    intakeSetpoint = (-INTAKE_SPEED);
+  }
+  else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X)))
+  {
+    //Forwards
+    intakeSetpoint = (INTAKE_SPEED);
+  }
+  else
+  {
+    intakeSetpoint = (0);
   }
 }
 
@@ -53,27 +82,20 @@ void intakeSpin(void *)
   //DIGITAL_L2 is the button assigned to the intakes
   while (true)
   {
-    if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y)))
+    if (intakeOn)
     {
-      leftIntake.move_voltage(-INTAKE_SPEED);
-      rightIntake.move_voltage(-INTAKE_SPEED);
+      if (STOP)
+      {
+        intakeSetpoint = 0;
+      }
+      leftIntake.move_voltage(intakeSetpoint);
+      rightIntake.move_voltage(intakeSetpoint);
     }
-    else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X)))
-    {
-      //Forwards
-      leftIntake.move_voltage(INTAKE_SPEED);
-      rightIntake.move_voltage(INTAKE_SPEED);
-    }
-    else
-    {
-      leftIntake.move_voltage(0);
-      rightIntake.move_voltage(0);
-    }
-    pros::delay(20);
+    pros::delay(DELAY_INTERVAL);
   }
 }
 
-void controllerIndexerSpin()
+const void controllerIndexerSpin(void)
 {
   if (master.get_digital(DIGITAL_Y))
   {
@@ -95,18 +117,14 @@ void indexerSpin(void *)
   //DIGITAL_R2 is the button assigned to the indexer
   while (true)
   {
-    if(!indexerOn)
+    if (indexerOn)
     {
-      
-    }
-    else if (STOP)
-    {
-      indexer.move_voltage(0);
-    }
-    else
-    {
+      if (STOP)
+      {
+        indexerSetpoint = 0;
+      }
       indexer.move_voltage(indexerSetpoint);
     }
-    pros::delay(20);
+    pros::delay(DELAY_INTERVAL);
   }
 }

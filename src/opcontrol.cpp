@@ -8,15 +8,15 @@
 void driver(void)
 {
 	Controller_Set_Drive(0, master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
-	// splitArcade();
+	controllerIndexerSpin();
+	controllerIntakeSpin();
+	controllerShooterSpin();
 }
 void opcontrol()
 {
 	while (true)
 	{
 		master_control->run();
-		controllerIndexerSpin();
-
 		pros::delay(10);
 	}
 }

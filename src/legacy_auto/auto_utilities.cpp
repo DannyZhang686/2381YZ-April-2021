@@ -15,6 +15,8 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   //Scale velocity (0-200) to a voltage value (0-12000 mV)
   // int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 12000), -12000);
   // int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 12000), -12000);
+  activeDriveMode = ManualMode;
+  
   int leftVoltage = leftVelocity * 60;
   if (abs(leftVoltage) > 8000) {
     leftVoltage = 8000 * sgn(leftVoltage);
@@ -48,8 +50,7 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
 bool setIntakesSafe(double velocity) {
   int voltage = (int) (velocity * 60);
   if (intakeControl.take(0)) {
-    leftIntake.move_voltage(voltage);
-    rightIntake.move_voltage(voltage);
+    intakeSetpoint = (voltage);
     intakeControl.give();
     return true;
   }
@@ -69,7 +70,7 @@ bool setIndexerSafe(double velocity) {
 bool setShooterSafe(double velocity) {
   int voltage = (int) (velocity * 60);
   if (shooterControl.take(0)) {
-    shooter.move_voltage(voltage);
+    shooterSetpoint = (voltage);
     shooterControl.give();
     return true;
   }
