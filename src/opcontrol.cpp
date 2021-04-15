@@ -16,7 +16,7 @@ void opcontrol()
 	{
 		master_control->run();
 		controllerIndexerSpin();
-		
+
 		pros::delay(10);
 	}
 }

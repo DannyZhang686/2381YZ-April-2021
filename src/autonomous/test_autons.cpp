@@ -16,7 +16,7 @@ namespace TaskLambdas
 {
 
   /**
- * @brief Intake Single Run Lambda
+ * @brief Intake Single Run Lambda - Previously Intake No Shoot
  * @param intakeSpeed Intake Voltage default 200
  * 
  */
@@ -113,62 +113,74 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         PurePursuitTask({36, 115}, 0, 100).AddInit(IntakeF(200)),
 
-        // TurnToPointTask({18, 114}, 0.07),
-        // Delay(200).AddKill([]{
-        // stopMotors();
-        // }),
-        // PurePursuitTask({18, 114}, 0, 100),
+// NEW STUFF - Added after merge starts here
 
-        // //Goal 3
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
+        // Delay(250).AddRun([] {
+        //   setDriveSafe(-50, -50);
         // }),
-        // TimeBasedMoveTask(-65, 650),
+        // Delay(250).AddRun([] {
+        //   setDriveSafe(0, 0);
+        // }), - Removed This Because Deaccel should compensate
+        TurnToPointTask({13, 125}, 0.07),
+        Delay(200).AddKill([] {
+          stopMotors();
+        }),
+        PurePursuitTask({13, 125}, 0, 100),
 
-        // //3 to 4
-        // TurnToPointTask({72, 96}, 0.07),
-        // PurePursuitTask({72, 96}, 0, 100).AddInit([](void) -> void {
-        //   intakeNoShoot(200);
-        // }).AddKill([](void) -> void {
-        //   setDriveSafe(-50, -50);
-        //   pros::delay(250);
-        //   setDriveSafe(0, 0);
-        //   pros::delay(250);
-        // }),
-        // TurnToPointTask({72, 106}, 0.07),
-        // PurePursuitTask({72, 106}, 0, 100).AddInit([](void) -> void {
-        //   pros::delay(200);
-        //   stopMotors();
-        // }),
-        //
-        // //Goal 4
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
-        // }),
-        // TimeBasedMoveTask(-65, 650),
-        //
-        // //4 to 5
-        // TurnToPointTask({98, 101}, 0.07),
-        // PurePursuitTask({98, 101}, 0, 100).AddInit([](void) -> void {
-        //   intakeNoShoot(200);
-        // }).AddKill([](void) -> void {
-        //   setDriveSafe(-50, -50);
-        //   pros::delay(250);
-        //   setDriveSafe(0, 0);
-        //   pros::delay(250);
-        // }),
-        // TurnToPointTask({101, 101}, 0.07),
-        // PurePursuitTask({101, 101}, 0, 100).AddInit([](void) -> void {
-        //   pros::delay(200);
-        //   stopMotors();
-        // }),
-        //
-        // //Goal 5
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
-        // }),
-        // TimeBasedMoveTask(-65, 650),
+        //Goal 3
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
+
+        //3 to 4
+        TurnToPointTask({72, 90}, 0.07),
+
+
+        // FIXME - UHH CAN WE NOT HAVE PROS DELAY INSIDE TASK BODY
+
+        PurePursuitTask({72, 90}, 0, 100).AddInit(IntakeF(200))
+            .AddKill([](void) -> void {
+              setDriveSafe(-50, -50);
+              pros::delay(250);
+              setDriveSafe(0, 0);
+              pros::delay(250);
+            }),
+        TurnToPointTask({74, 120}, 0.07),
+        PurePursuitTask({74, 120}, 0, 100).AddInit([](void) -> void {
+          pros::delay(200);
+          stopMotors();
+        }),
+
+        //Goal 4
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
+
+        //4 to 5
+        TurnToPointTask({108, 105}, 0.07),
+        PurePursuitTask({108, 105}, 0, 100).AddInit([](void) -> void {
+                                             intakeNoShoot(200);
+                                           })
+            .AddKill([](void) -> void {
+              setDriveSafe(-50, -50);
+              pros::delay(250);
+              setDriveSafe(0, 0);
+              pros::delay(250);
+            }),
+        TurnToPointTask({136, 125}, 0.07),
+        PurePursuitTask({136, 125}, 0, 100).AddInit([](void) -> void {
+          pros::delay(200);
+          stopMotors();
+        }),
+
+        //Goal 5
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
     });

@@ -102,8 +102,8 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         currentAngle = position_tracker->Get_Angle();
         mostestClosestIndex = GetClosest(path, currentPos, mostestClosestIndex);
 
-        /** 
-         * TODO: 
+        /**
+         * TODO:
          * 1. ADJUSTABLE TURNING STRENGTH (TURNING COEFFICIENT) ^ (TURNING STRENGTH)
          * 2. ACCEL AND DEACCEL CURVES - DEPENDING ON CURRENT SPEED, MOSTEST CLOSEST INDEX
          * 3. PATHING - JUST LIKE WAY BETTER PATH GENERATION, PATH VISUALIZATION - WHAT DOES PATH SMOOTHING EVEN DO
