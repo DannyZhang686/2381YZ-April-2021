@@ -12,7 +12,7 @@
 #define RB_PORT 18
 #define LI_PORT 10
 #define RI_PORT 20
-#define INDEXER_PORT 2
+#define INDEXER_PORT 4
 #define SHOOTER_PORT 1
 // FIXME - SHOULD BE SHOOTER PORT 1 BUT W/E
 

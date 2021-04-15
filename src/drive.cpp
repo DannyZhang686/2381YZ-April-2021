@@ -65,7 +65,7 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 {
     left_x = 0;
 
-    double turn = pow((std::abs(right_x) / 127), 0.5) * getSignOf(right_x) * 127;
+    double turn = pow((std::abs(right_x) / 127), 0.75) * getSignOf(right_x) * 127;
 
     controllerSetpoints = {
         (left_y - left_x + turn),

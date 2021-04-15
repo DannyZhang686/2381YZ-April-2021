@@ -67,7 +67,14 @@ static std::complex<double> Z_Tracking_Offsets =
  5.25
 }; // Left to mid, back to mid
 
-static DrivePidConfig Y_Bot_Drive_Config =
+static TrackingConfig E_Track_C = 
+{
+    {H, {5,6,1}},
+    {V, {7,8,1}},
+    {I, {11, 0, false}},
+};
+
+static DrivePidConfig Y_Bot_Drive_Config = 
 {
     {left_back, {0.6, 0, 0}},
     {left_front, {0.6, 0, 0}},

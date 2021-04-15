@@ -31,6 +31,7 @@ const double Inertial::Get_Angle(void)
 { 
     if(mode == A) return degToRad(imu1->get_heading());
     if(mode == B) return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
+    return 0;
 }
 
 const void Inertial::Update_Gyro(void)
