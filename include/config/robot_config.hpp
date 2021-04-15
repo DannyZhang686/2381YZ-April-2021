@@ -54,6 +54,13 @@ static TrackingConfig Z_Track_C =
     {I, {4, 11, true}},
 };
 
+static TrackingConfig E_Track_C = 
+{
+    {H, {5,6,1}},
+    {V, {7,8,1}},
+    {I, {11, 0, false}},
+};
+
 static DrivePidConfig Y_Bot_Drive_Config = 
 {
     {left_back, {0.6, 0, 0}},
