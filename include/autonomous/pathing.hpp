@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include <tuple>
 
 typedef std::complex<double> Point;
 typedef std::vector<std::complex<double>> PointList;
@@ -17,6 +18,8 @@ const double Curvature(Point currentPos, Point targetPos, double currentOrientat
 long GetClosest(PointList path, Point currentPoint, long previousIndex = 0);
 PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing);
 const static Point PointNotFound = Point(-100000, 100000);
+std::tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long maxLookahead, long previousIndex = 0);
+
 Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius);
 
 

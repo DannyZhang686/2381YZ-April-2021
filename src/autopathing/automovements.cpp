@@ -17,6 +17,7 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include <queue>
 
 #include "autonomous/pathing.hpp"
 
@@ -33,6 +34,19 @@ double powCalc(double x, double power)
     return pow(abs(x), power) * getSignOf(x);
 }
 
+double inner_product(Point a, Point b)
+{
+    return a.real() * b.real() + a.imag() * b.imag();
+}
+int getSignOf(double yeet)
+{
+    if (yeet >= 0)
+    {
+        return 1;
+    }
+    return -1;
+}
+
 namespace PPS
 {
 
@@ -47,9 +61,17 @@ namespace PPS
 
     static double maxLookaheadDistance = 18;
     static long lookAheadNumber = 40;
+    static double startDistance = 0;
     static double PathSpacing = 1;
 
-    static double turningStrength = 0.5; //
+    array<double, 2> previousSpeeds = {0, 0};
+
+    static double deaccelStrength = 2;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
+    static double turningStrength = 0;  // Turning Level Coefficient - Exponential - -1 for max sensitive turning, +1 for max dampened turning 
+    static double accelDampening = 0.3; // Top Level Acceleration Control Coefficient - Exponential - Between 0 - 1
+    
+
+    static double deaccelCoeff;         // Remaining Distance Calculator, Range between 0 -1, set to 1 by default in `init`, don't change this.
     static double actualTurningCoeff = exp(turningStrength);
 
     static double curvature = 1;
@@ -57,42 +79,6 @@ namespace PPS
 
 }
 
-tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long previousIndex = 0)
-{
-    long index = previousIndex;
-    long size = path.size();
-
-    while (index < previousIndex + PPS::lookAheadNumber)
-    {
-        if (index >= size - 2)
-        {
-            s__t(3, "end of line");
-            return {size - 1, path[size - 1]};
-        };
-        Point lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
-        if (lookaheadCheck != PointNotFound)
-        {
-            return {index, lookaheadCheck};
-        }
-        index++;
-    }
-
-    s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
-    return {previousIndex, PointNotFound};
-}
-
-double inner_product(Point a, Point b)
-{
-    return a.real() * b.real() + a.imag() * b.imag();
-}
-int getSignOf(double yeet)
-{
-    if (yeet >= 0)
-    {
-        return 1;
-    }
-    return -1;
-}
 AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
     using namespace PPS;
@@ -120,7 +106,7 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
 
         double lookAheadDistance = maxLookaheadDistance * speed / 127;
 
-        auto lookaheadCheck = FindLookAhead(currentPos, path, lookAheadDistance, mostestClosestIndex);
+        auto lookaheadCheck = FindLookAhead(currentPos, path, lookAheadDistance, lookAheadNumber, mostestClosestIndex);
         // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
         // theoretically should store the index of the previous lookahead point if found and use that in place of mostest closest but w/e.
 
@@ -134,7 +120,7 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
         auto realLookaheadDist = abs(lookaheadPnt - currentPos);
 
-        auto deaccelCoeff =  0.2 + 0.8 * pow(min(realLookaheadDist / lookAheadDistance, 1.0), 1);
+        deaccelCoeff = pow(min(realLookaheadDist / min(lookAheadDistance, startDistance/2), 1.0), deaccelStrength);
 
         array<double, 2> speeds = {getSignOf(innerProduct) * speed * deaccelCoeff, getSignOf(innerProduct) * speed * deaccelCoeff};
 
@@ -163,31 +149,32 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
             }
         }
 
-        // s__t(3, "DISTANCE: " + t__s(abs(TotalDisp)));
+        previousSpeeds = {previousSpeeds[0] * accelDampening + (1 - accelDampening) * speeds[0], previousSpeeds[1] * accelDampening + (1 - accelDampening) * speeds[1]};
+
         s__t(4, "C: [" + t__s(mostestClosestIndex) + "] " + t__s(currentPos.real()) + ", " + t__s(currentPos.imag()));
         s__t(5, "EP: [" + t__s(previousLookaheadIndex) + "]  " + t__s((lookaheadPnt).real()) + ", " + t__s((lookaheadPnt).imag()));
-        // s__t(4, "Disp: " + t__s(TotalDisp.real()) + ", " + t__s(TotalDisp.imag()));
 
-        s__t(6, "l: " + t__s(speeds[0]) + " r: " + t__s(speeds[1]) + " " + t__s(path.size()));
-        // s__t(5, "AngleDiff: " + t__s((int)(AngleDiff*180/M_PI)) + "EndDiff: " + t__s((int)(EndAngleDiff*180/M_PI)));
-        Set_Drive(speeds[0], speeds[0], speeds[1], speeds[1]);
+        s__t(6, "l: " + t__s(previousSpeeds[0]) + " r: " + t__s(previousSpeeds[1]) + " " + t__s(path.size()));
+        Set_Drive(previousSpeeds[0], previousSpeeds[0], previousSpeeds[1], previousSpeeds[1]);
         // curve to the endpoint and reach that point at angle
     };
     // init function
     auto init = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> void {
         startPoint = currentPos = position_tracker->Get_Position();
         startAngle = position_tracker->Get_Angle();
-        endPoint = EndPoint;
+        endPoint = lookaheadPnt =  EndPoint;
         endAngle = EndAngle;
+        startDistance = abs(endPoint - startPoint);
 
-        lookaheadPnt = EndPoint;
+        previousSpeeds = {0,0};
         previousLookaheadIndex = 0;
         mostestClosestIndex = 0;
+        deaccelCoeff = 1;
         path = GeneratePath(startPoint, endPoint, startAngle, PathSpacing);
     };
     // done function
     auto done = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> bool {
-        return mostestClosestIndex >= (path.size() - 2);
+        return (deaccelCoeff < 0.5 && abs(previousSpeeds[0]) + abs(previousSpeeds[1]) < 40);
     };
 
     auto kill = [](void) -> void { Set_Drive(0, 0, 0, 0); };

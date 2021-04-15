@@ -50,6 +50,7 @@ Inertial *inertial = nullptr;
 
 // Default Competition Robot Tracking Setup
 complex<double> Position_Tracker::wheel_center_offset = {2.75, 5.25};
+bool shooterOn = true, intakeOn = true, indexerOn = true;
 
 const void InitEncoders(TrackingConfig config)
 {

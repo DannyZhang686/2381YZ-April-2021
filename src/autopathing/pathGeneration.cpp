@@ -14,7 +14,6 @@
 #include <cmath>
 #include <vector>
 
-
 using namespace std;
 using namespace pros;
 using namespace std::complex_literals;
@@ -24,9 +23,9 @@ PointList DefinePath(Point startPoint, Point endPoint, double startAngle)
     // disp between the 2 points
     Point disp = endPoint - startPoint;
     double distance = abs(disp) / 4;
-    Point midwayPoint = startPoint + distance * exp<double>(1i* startAngle);
+    Point midwayPoint = startPoint + distance * exp<double>(1i * startAngle);
 
-    PointList a =  {Point(startPoint), midwayPoint, Point(endPoint)};
+    PointList a = {Point(startPoint), midwayPoint, Point(endPoint)};
     return a;
 }
 
@@ -110,7 +109,7 @@ long GetClosest(PointList path, Point currentPoint, long previousIndex)
         reducedPrevIndex = 0;
     }
     long minIndex = reducedPrevIndex;
-    long size = path.size() -1;
+    long size = path.size() - 1;
     double min = abs(path[minIndex] - currentPoint);
     for (long i = reducedPrevIndex; i < reducedPrevIndex + 30; i++)
     {
@@ -126,6 +125,30 @@ long GetClosest(PointList path, Point currentPoint, long previousIndex)
     }
     // s__t(0, "prev: " + t__s(reducedPrevIndex)  + " : " + t__s(minIndex) + " min: " + t__s(min));
     return minIndex;
+}
+
+tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long maxLookahead, long previousIndex)
+{
+    long index = previousIndex;
+    long size = path.size();
+
+    while (index < previousIndex + maxLookahead)
+    {
+        if (index >= size - 2)
+        {
+            s__t(3, "end of line");
+            return {size - 1, path[size - 1]};
+        };
+        Point lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
+        if (lookaheadCheck != PointNotFound)
+        {
+            return {index, lookaheadCheck};
+        }
+        index++;
+    }
+
+    s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
+    return {previousIndex, PointNotFound};
 }
 
 PointList GeneratePathCirc(Point startpoint, Point endpoint, double startAngle, double spacing)

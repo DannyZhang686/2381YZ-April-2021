@@ -30,6 +30,7 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   } else if (abs(rightVoltage) < 2750) {
     rightVoltage = 2750 * sgn(rightVoltage);
   }
+  
   s__t(6, t__s(leftVoltage) + " " + t__s(rightVoltage));
 
   //Take the mutex to avoid writing to the same location twice

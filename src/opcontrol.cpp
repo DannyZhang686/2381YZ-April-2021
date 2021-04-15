@@ -17,7 +17,7 @@ void opcontrol()
 	while (true)
 	{
 		master_control->run();
-		pros::delay(10);
+		pros::delay(DELAY_INTERVAL);
 	}
 }
 

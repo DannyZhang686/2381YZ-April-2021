@@ -18,11 +18,12 @@ AutonControl *auton_control = AutonControl::instance();
 MasterController *master_control = MasterController::instance();
 bool STOP = false;
 Position_Tracker *position_tracker = Position_Tracker::instance();
+DriveMode activeDriveMode = PidMode;
 
 void initialize()
 {
 	pros::lcd::initialize();
-	InitMotors(Z);
+	InitMotors(L);
 
 	position_tracker->Create();
 
@@ -31,7 +32,7 @@ void initialize()
 	pros::Task intake(intakeSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake");
 	pros::Task indexer(indexerSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Indexer");
 
-	pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");
+	// pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");
 	pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");
 
 	using namespace Auton;

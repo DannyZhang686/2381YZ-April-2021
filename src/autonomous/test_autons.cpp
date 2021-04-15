@@ -57,7 +57,9 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
           position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
           // position_tracker->Set_Position({60, 9.5}, 0); //Side first
         }),
+        // PurePursuitTask({36, 36}, 0, 100),
 
+        // Delay(100000000),
         // //Start goal
         // TimeBasedMoveTask(100, 1000).AddInit([](void) -> void {
         //   intakeNoShoot(200);
@@ -72,7 +74,10 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // PurePursuitTask({36, 20.5}, 0, 100).AddInit([](void) -> void {
         //   IntakeF(200);
         // }),
+
+
         PurePursuitTask({36, 20.5}, 0, 100).AddInit(IntakeF(200)),
+
         // Delay(200),
         TurnToPointTask({14, 14}, 0.07),
         Delay(200).AddKill([] {
@@ -86,7 +91,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         IntakeShootTask(0, 1).AddKill([](void) -> void {
           stopMotors();
-        }),
+        }).TimeLimit(1000),
         TimeBasedMoveTask(-65, 650),
 
         //1 to 2
@@ -111,7 +116,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
 
         IntakeShootTask(0, 1).AddKill([](void) -> void {
           stopMotors();
-        }),
+        }).TimeLimit(1000),
         TimeBasedMoveTask(-65, 450),
 
         //2 to 3
@@ -135,7 +140,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         TimeBasedMoveTask(70, 650),
         IntakeShootTask(0, 1).AddKill([](void) -> void {
           stopMotors();
-        }),
+        }).TimeLimit(1000),
         TimeBasedMoveTask(-65, 650),
 
         //3 to 4
@@ -157,7 +162,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         TimeBasedMoveTask(70, 650),
         IntakeShootTask(0, 1).AddKill([](void) -> void {
           stopMotors();
-        }),
+        }).TimeLimit(1000),
         TimeBasedMoveTask(-65, 650),
 
         //4 to 5
@@ -179,7 +184,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         TimeBasedMoveTask(70, 650),
         IntakeShootTask(0, 1).AddKill([](void) -> void {
           stopMotors();
-        }),
+        }).TimeLimit(1000),
         TimeBasedMoveTask(-65, 650),
 
         //
