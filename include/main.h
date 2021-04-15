@@ -85,6 +85,11 @@ void opcontrol(void);
  */
 #include <queue>
 #include <climits>
+#include <complex>
+#include <vector>
+#include <array>
+#include <tuple>
+#include <cmath>
 //#include "bits/stdc++.h"
 #endif
 

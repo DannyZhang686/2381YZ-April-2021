@@ -4,8 +4,7 @@
 #include <functional>
 #include <vector>
 
-
-
+#define Delay AutoTask::AutoDelay
 
 class AutoTask {
     public: 
@@ -14,8 +13,6 @@ class AutoTask {
     void initialize(void);
     void run(void);
     void kill(void);
-
-
 
     std::vector<std::function<void(void)>> runList = {};
     std::vector<std::function<void(void)>> killList = {};

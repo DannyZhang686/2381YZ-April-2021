@@ -18,7 +18,8 @@ enum Tracking_Ref
 {
  H = 0,
  V, 
- I
+ I,
+ Offsets
 };
 
 enum ConfigOptions
@@ -35,6 +36,5 @@ typedef std::tuple<int, int, bool> EncoderConfig; // Port, Orientation
 typedef std::map<Tracking_Ref, EncoderConfig> TrackingConfig;
 typedef std::map<Motor_Ref, MotorConfig> DriveConfig;
 typedef std::map<Motor_Ref, std::array<double,3>> DrivePidConfig;
-
 
 #endif  //!__CONFIG_TYPES__H__

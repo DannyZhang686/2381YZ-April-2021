@@ -2,6 +2,8 @@
 #include "autonomous.h"
 #include "motors.h"
 #include "pid.h"
+#include "legacy/legacy_autonomous.hpp"
+
 
 //Mutexes
 pros::Mutex arrivedAtGoal[9];

@@ -18,7 +18,7 @@
 #include <cmath>
 #include <vector>
 
-#include "pathing.hpp"
+#include "autonomous/pathing.hpp"
 
 using namespace std;
 using namespace pros;
@@ -30,9 +30,8 @@ using namespace std::complex_literals;
 
 double powCalc(double x, double power)
 {
-    return pow(abs(x), power) * x;
+    return pow(abs(x), power) * getSignOf(x);
 }
-
 
 namespace PPS
 {
@@ -46,12 +45,12 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 10;
+    static double lookAheadDistance = 15;
     static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
     static double turningStrength = 0.5; //
-    static double actualTurningCoeff = exp(turningStrength) - 1;
+    static double actualTurningCoeff = exp(turningStrength);
 
     static double curvature = 1;
     static double H_Wheel_Disp = 6.315;
@@ -131,8 +130,11 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         Point currentHeading = exp<double>(1i * currentAngle);
 
         double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
+        auto realLookaheadDist = abs(lookaheadPnt - currentPos);
 
-        array<double, 2> speeds = {getSignOf(innerProduct) * speed, getSignOf(innerProduct) * speed};
+        auto deaccelCoeff = pow(min(realLookaheadDist / lookAheadDistance, 1.0), 0.8);
+
+        array<double, 2> speeds = {getSignOf(innerProduct) * speed * deaccelCoeff, getSignOf(innerProduct) * speed * deaccelCoeff};
 
         double arcRadius = Curvature(currentPos, lookaheadPnt, currentAngle);
 
@@ -159,13 +161,13 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
             }
         }
 
-        // lcd::set_text(3, "DISTANCE: " + to_string(abs(TotalDisp)));
-        lcd::set_text(4, "C: [" +  t__s(mostestClosestIndex) +  "] " + to_string(currentPos.real()) + ", " + to_string(currentPos.imag()));
-        lcd::set_text(5, "EP: ["  + t__s(previousLookaheadIndex) + "]  " + to_string((lookaheadPnt).real()) + ", " + to_string((lookaheadPnt).imag()));
-        // lcd::set_text(4, "Disp: " + to_string(TotalDisp.real()) + ", " + to_string(TotalDisp.imag()));
+        // s__t(3, "DISTANCE: " + t__s(abs(TotalDisp)));
+        s__t(4, "C: [" + t__s(mostestClosestIndex) + "] " + t__s(currentPos.real()) + ", " + t__s(currentPos.imag()));
+        s__t(5, "EP: [" + t__s(previousLookaheadIndex) + "]  " + t__s((lookaheadPnt).real()) + ", " + t__s((lookaheadPnt).imag()));
+        // s__t(4, "Disp: " + t__s(TotalDisp.real()) + ", " + t__s(TotalDisp.imag()));
 
         s__t(6, "l: " + t__s(speeds[0]) + " r: " + t__s(speeds[1]) + " " + t__s(path.size()));
-        // lcd::set_text(5, "AngleDiff: " + to_string((int)(AngleDiff*180/M_PI)) + "EndDiff: " + to_string((int)(EndAngleDiff*180/M_PI)));
+        // s__t(5, "AngleDiff: " + t__s((int)(AngleDiff*180/M_PI)) + "EndDiff: " + t__s((int)(EndAngleDiff*180/M_PI)));
         Set_Drive(speeds[0], speeds[0], speeds[1], speeds[1]);
         // curve to the endpoint and reach that point at angle
     };

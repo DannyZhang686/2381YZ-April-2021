@@ -9,8 +9,14 @@
 #define INDEXER_SPEED 10000
 
 //opcontrol function declarations
+
+static bool shooterOn = true, intakeOn = true, indexerOn = true;
+
 void shooterSpin(void*);
 void intakeSpin(void*);
+
+static double indexerSetpoint = 0;
+void controllerIndexerSpin();
 void indexerSpin(void*);
 
 void splitArcade(void);

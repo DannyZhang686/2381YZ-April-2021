@@ -2,6 +2,8 @@
 #include "motors.h"
 #include "autonomous.h"
 #include "utilities.h"
+#include "legacy/legacy_autonomous.hpp"
+#include "opcontrol.h"
 
 //Mutex declarations
 pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
@@ -57,7 +59,7 @@ bool setIntakesSafe(double velocity) {
 bool setIndexerSafe(double velocity) {
   int voltage = (int) (velocity * 60);
   if (indexerControl.take(0)) {
-    indexer.move_voltage(voltage);
+    indexerSetpoint = voltage;
     indexerControl.give();
     return true;
   }

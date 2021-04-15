@@ -1,13 +1,9 @@
 #include "main.h"
 #include "opcontrol.h"
-#include "motors.h"
-#include "utilities.h"
-#include "control/motor_controller.hpp"
-
 #include "autonomous.h"
+
 #include "utilities.h"
 #include "pid.h"
-#include "autonomous/auto_task.hpp"
 
 #include "control/pid.hpp"
 #include "globals.hpp"
@@ -18,7 +14,6 @@
 #include <cmath>
 #include <vector>
 
-#include "pathing.hpp"
 
 using namespace std;
 using namespace pros;
@@ -129,7 +124,7 @@ long GetClosest(PointList path, Point currentPoint, long previousIndex)
             minIndex = i;
         }
     }
-    s__t(0, "prev: " + t__s(reducedPrevIndex)  + " : " + t__s(minIndex) + " min: " + t__s(min));
+    // s__t(0, "prev: " + t__s(reducedPrevIndex)  + " : " + t__s(minIndex) + " min: " + t__s(min));
     return minIndex;
 }
 

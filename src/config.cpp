@@ -1,5 +1,7 @@
 #include "main.h"
 #include "motors.h"
+#include "autonomous/position_tracker.hpp"
+#include "opcontrol.h"
 #include <tuple>
 #include <map>
 
@@ -12,6 +14,7 @@
 #define RI_PORT 20
 #define INDEXER_PORT 2
 #define SHOOTER_PORT 1
+// FIXME - SHOULD BE SHOOTER PORT 1 BUT W/E
 
 //IMU ports
 #define L_IMU_PORT 4
@@ -43,8 +46,10 @@ pros::Motor *rightBack = nullptr;
 
 pros::ADIEncoder *leftTracking = nullptr;
 pros::ADIEncoder *backTracking = nullptr;
-Inertial* inertial = nullptr;
+Inertial *inertial = nullptr;
 
+// Default Competition Robot Tracking Setup
+complex<double> Position_Tracker::wheel_center_offset = {2.75, 5.25};
 
 const void InitEncoders(TrackingConfig config)
 {
@@ -63,6 +68,11 @@ const void InitDrive(DriveConfig config)
     s__t(0, t__s(leftBack->get_actual_velocity()));
 }
 
+const void SetTrackingOffsets(complex<double> trackingOffset)
+{
+    Position_Tracker::wheel_center_offset = trackingOffset;
+}
+
 const void InitMotors(ConfigOptions config)
 {
     switch (config)
@@ -76,21 +86,24 @@ const void InitMotors(ConfigOptions config)
         InitDrive(Evan_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
         InitEncoders(Z_Track_C);
+        SetTrackingOffsets(Z_Tracking_Offsets);
         break;
     case L:
         InitDrive(L_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
         InitEncoders(L_Track_C);
+        SetTrackingOffsets(L_Tracking_Offsets);
+        indexerOn = false;
         break;
     default:
         InitDrive(Z_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
         InitEncoders(Z_Track_C);
+        SetTrackingOffsets(L_Tracking_Offsets);
         break;
     }
     inertial->Reset();
 }
-
 
 //Intakes
 pros::Motor leftIntake(LI_PORT, false);
@@ -108,5 +121,4 @@ pros::Motor shooter(SHOOTER_PORT, false);
 pros::ADIAnalogIn tLineSensor(TOP_LINE);
 pros::ADIAnalogIn bLineSensor(BOTTOM_LINE);
 
-// pros::Controller::Controller (id_e_t id)
 pros::Controller master(CONTROLLER_MASTER);

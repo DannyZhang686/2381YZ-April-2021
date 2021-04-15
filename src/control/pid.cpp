@@ -1,43 +1,22 @@
-#include "control/pid.hpp"
-#include "api.h"
+#include "main.h"
+#include "pid.h"
 
-/**
- * Constructor taking in kp, ki, and kd
- */
-PID::PID(double kp, double ki, double kd) {
-  kp_ = kp;
-  ki_ = ki;
-  kd_ = kd;
-  ResetError();
-}
+//Core functionality code for both PID and PD controller
 
-/**
- * Resets error to prevent integral windup
- */
-void PID::ResetError() {
-  error_sum_ = 0.0;
-  last_error_ = 0.0;
-}
-
-/**
- * Every update period, this is called to calculate a new PID output
- */
-
-double PID::Update(double setpoint, double current_value) {
-  double error = setpoint - current_value;
-  double p = kp_ * error;
-  error_sum_ += error;
-  
-
-
-  double i = ki_ * error_sum_;
-  double d_error = error - last_error_;
-  double d = kd_ * d_error;
-  last_error_ = error;
+double Pid::getOutput(double currentValue, double setpoint) {
+  double error = setpoint - currentValue; //Distance from the target
+  double p = kP * error; //P component of return velocity
+  errorSum += error; //Add to the integral error
+  double i = kI * errorSum; //I component of return velocity == kI * integral
+  double d = kD * (error - prevError); //D component of return velocity == kD * derivative error
+  prevError = error; //Update the previous error
   return p + i + d;
 }
 
-void PID::Set_Error(double Error)
-{
-  error_sum_ = Error;
+double Pd::getOutput(double currentValue, double setpoint) {
+  double error = setpoint - currentValue; //Distance from the target
+  double p = kP * error; //P component of return velocity
+  double d = kD * (error - prevError); //D component of return velocity == kD * derivative error
+  prevError = error; //Update the previous error
+  return p + d;
 }

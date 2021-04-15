@@ -4,16 +4,15 @@
 #include "main.h"
 #include "autonomous.h"
 #include "utilities.h"
+#include "legacy/legacy_autonomous.hpp"
+#include "globals.hpp"
 
 void autonomous() {
-	#ifndef ALREADY_CALLED
-	#define ALREADY_CALLED
-		//Initialize tracking and ball-counting tasks (used across all autons)
-		pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");		//Position tracking task
-		pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");	//Ball counting task
-		pros::Task autoMovement(movementOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "AutoMove");	//Robot movement task
-		pros::Task autoBallHandling(snailOne, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "AutoSnail");	//Ball control task
-	#endif //ALREADY_CALLED
+	while(true)
+	{
+		auton_control->run();
+		pros::delay(DELAY_INTERVAL);
+	}
 }
 
 /**

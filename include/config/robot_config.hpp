@@ -44,7 +44,8 @@ static TrackingConfig L_Track_C =
 {
     {H, {3,4,1}},
     {V, {1,2,0}},
-    {I, {9, 0, false}}, // true / false is for double (true) or single (false) inertial sensors
+    {I, {9, 0, false}},
+    // true / false is for double (true) or single (false) inertial sensors
 };
 
 static TrackingConfig Z_Track_C =
@@ -53,6 +54,18 @@ static TrackingConfig Z_Track_C =
     {V, {7,8,1}},
     {I, {4, 11, true}},
 };
+
+static std::complex<double> L_Tracking_Offsets = 
+{
+ 2.75,
+ 5.25
+}; // Left to mid, back to mid
+
+static std::complex<double> Z_Tracking_Offsets = 
+{
+ 2.75,
+ 5.25
+}; // Left to mid, back to mid
 
 static DrivePidConfig Y_Bot_Drive_Config =
 {

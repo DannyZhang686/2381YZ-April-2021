@@ -4,6 +4,7 @@
 #include "utilities.h"
 #include "pid.h"
 #include "autonomous/auto_task.hpp"
+#include "legacy/legacy_autonomous.hpp"
 
 // namespace PPS
 // {

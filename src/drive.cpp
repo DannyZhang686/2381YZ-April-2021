@@ -41,7 +41,7 @@ double _master_offset = 1;
 double lboffset = 1, rboffset = 1, rfoffset = 1, lfoffset = 1;
 double lbDistance = 1, rbDistance = 1, rfDistance = 1, lfDistance = 1, masterDistance = 1;
 
-double _left_back_motor_value, _left_front_motor_value, _right_back_motor_value, _right_front_motor_value;
+double _left_back_motor_value = 0, _left_front_motor_value = 0, _right_back_motor_value = 0, _right_front_motor_value = 0;
 
 double _motor_value_average;
 double _master_setpoint = 0;
@@ -60,20 +60,20 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
 
 // SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
 
-array<double, 4> setpoints = {0, 0, 0, 0};
+array<double, 4> controllerSetpoints = {0, 0, 0, 0};
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
     left_x = 0;
 
     double turn = pow((std::abs(right_x) / 127),  0.5) * getSignOf(right_x)*127;
 
-    setpoints = {
+    controllerSetpoints = {
         (left_y - left_x + turn),
         (left_y + left_x + turn),
         (left_y + left_x - turn),
         (left_y - left_x - turn),
     };
-    Set_Drive(setpoints[0], setpoints[1], setpoints[2], setpoints[3]);
+    Set_Drive(controllerSetpoints[0], controllerSetpoints[1], controllerSetpoints[2], controllerSetpoints[3]);
 }
 const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 {

@@ -1,9 +1,9 @@
-#include "main.h"
 #include "autonomous.h"
 #include "motors.h"
 #include "utilities.h"
 #include "pid.h"
 #include "globals.hpp"
+#include "legacy/legacy_autonomous.hpp"
 
 //Robot position and encoder values structs
 Position robotPos;
@@ -27,79 +27,79 @@ void updateTracking(void)
 {
   //This runs in a Task and thus requires an infinite loop.
 
-  if (inertial->IsCalibrating())
-  {
-    s__t(1, "IMU CALIBRATING");
-    return;
-  }
+  // if (inertial->IsCalibrating())
+  // {
+  //   s__t(1, "IMU CALIBRATING");
+  //   return;
+  // }
 
 
-  //Update the current values
-  inertial->Update_Gyro();
-  currentVal.left = leftTracking->get_value();
-  // currentVal.right = rightTracking.get_value();
-  currentVal.back = backTracking->get_value();
-  // currentVal.angle = inertial->Get_Angle();
-  if (currentVal.angle > 2 * PI)
-    currentVal.angle -= 2 * PI;
-  if (currentVal.angle < 0)
-    currentVal.angle += 2 * PI;
+  // //Update the current values
+  // inertial->Update_Gyro();
+  // currentVal.left = leftTracking->get_value();
+  // // currentVal.right = rightTracking.get_value();
+  // currentVal.back = backTracking->get_value();
+  // // currentVal.angle = inertial->Get_Angle();
+  // if (currentVal.angle > 2 * PI)
+  //   currentVal.angle -= 2 * PI;
+  // if (currentVal.angle < 0)
+  //   currentVal.angle += 2 * PI;
 
-  //Find the change since the previous calculation
-  //Note that deltaVal is in inches and not encoder units, hence the conversion.
-  deltaVal.left = encToInches(currentVal.left - lastVal.left);
-  // deltaVal.right = encToInches(currentVal.right - lastVal.right);
-  deltaVal.back = encToInches(currentVal.back - lastVal.back);
-  deltaVal.angle = currentVal.angle - lastVal.angle;
-  // deltaVal.angle = smallestAngle(currentVal.angle, lastVal.angle);
+  // //Find the change since the previous calculation
+  // //Note that deltaVal is in inches and not encoder units, hence the conversion.
+  // deltaVal.left = encToInches(currentVal.left - lastVal.left);
+  // // deltaVal.right = encToInches(currentVal.right - lastVal.right);
+  // deltaVal.back = encToInches(currentVal.back - lastVal.back);
+  // deltaVal.angle = currentVal.angle - lastVal.angle;
+  // // deltaVal.angle = smallestAngle(currentVal.angle, lastVal.angle);
 
-  //Update the previous values (for use the next time)
-  lastVal.left = currentVal.left;
-  // lastVal.right = currentVal.right;
-  lastVal.back = currentVal.back;
-  lastVal.angle = currentVal.angle;
+  // //Update the previous values (for use the next time)
+  // lastVal.left = currentVal.left;
+  // // lastVal.right = currentVal.right;
+  // lastVal.back = currentVal.back;
+  // lastVal.angle = currentVal.angle;
 
-  //Consider the tracking center at the last calculation and the current
-  //calculation: due to the frequency at which they are recalculated, they
-  //can be approximated as points on an arc traveling around a circle
+  // //Consider the tracking center at the last calculation and the current
+  // //calculation: due to the frequency at which they are recalculated, they
+  // //can be approximated as points on an arc traveling around a circle
 
-  double lRadius;                        //The radius of the circle calculated to the left tracking wheel
-  double bRadius;                        //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
-  double dist;                           //The distance travelled by the tracking center
-  double dist2;                          //dist calculated using the back tracking wheel
-  double sinAngle = sin(deltaVal.angle); //The sine of the angle travelled (used to avoid multiple redundant calculations)
+  // double lRadius;                        //The radius of the circle calculated to the left tracking wheel
+  // double bRadius;                        //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
+  // double dist;                           //The distance travelled by the tracking center
+  // double dist2;                          //dist calculated using the back tracking wheel
+  // double sinAngle = sin(deltaVal.angle); //The sine of the angle travelled (used to avoid multiple redundant calculations)
 
-  if (fabs(deltaVal.angle) > 0)
-  {
-    lRadius = deltaVal.left / deltaVal.angle; //Calculate the radius
-    // dist = (rRadius + R_TO_MID) * deltaVal.angle; //Calculate the distance (from the center of the robot) using simple trigonometry
-    dist = (lRadius - L_TO_MID) * sinAngle;   //Calculate the distance (from the center of the robot) using simple trigonometry
-    bRadius = deltaVal.back / deltaVal.angle; //Repeat the previous lines using the back tracking wheel (for horizontal error)
-    dist2 = (bRadius + B_TO_MID) * sinAngle;
-  }
-  else
-  {
-    //Robot went straight or didn't move; note that this happens when deltaVal.angle == 0
-    //Values for distance travelled can be set directly to encoder values, as there is no arc
-    dist = deltaVal.left;
-    dist2 = deltaVal.back;
-    deltaVal.angle = 0;
-  }
+  // if (fabs(deltaVal.angle) > 0)
+  // {
+  //   lRadius = deltaVal.left / deltaVal.angle; //Calculate the radius
+  //   // dist = (rRadius + R_TO_MID) * deltaVal.angle; //Calculate the distance (from the center of the robot) using simple trigonometry
+  //   dist = (lRadius - L_TO_MID) * sinAngle;   //Calculate the distance (from the center of the robot) using simple trigonometry
+  //   bRadius = deltaVal.back / deltaVal.angle; //Repeat the previous lines using the back tracking wheel (for horizontal error)
+  //   dist2 = (bRadius + B_TO_MID) * sinAngle;
+  // }
+  // else
+  // {
+  //   //Robot went straight or didn't move; note that this happens when deltaVal.angle == 0
+  //   //Values for distance travelled can be set directly to encoder values, as there is no arc
+  //   dist = deltaVal.left;
+  //   dist2 = deltaVal.back;
+  //   deltaVal.angle = 0;
+  // }
 
-  robotPos.angle = currentVal.angle;     //Update the angle value
-  double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
-  double cosTheta = cos(robotPos.angle);
+  // robotPos.angle = currentVal.angle;     //Update the angle value
+  // double sinTheta = sin(robotPos.angle); //Calculate the sine and cosine of the final angle to avoid redundancy
+  // double cosTheta = cos(robotPos.angle);
 
-  //Calculate updated absolute position values
-  //Note that these specific signs and ratios are used because:
-  // - dist is calculated using an angle clockwise from the positive y-axis (hence sin is x and cos is y); and
-  // - dist2 is calculated using an angle clockwise from the positive x-axis (hence cos is x and -sin is y)
-  robotPos.x += dist * sinTheta + dist2 * cosTheta;
-  robotPos.y += dist * cosTheta - dist2 * sinTheta;
+  // //Calculate updated absolute position values
+  // //Note that these specific signs and ratios are used because:
+  // // - dist is calculated using an angle clockwise from the positive y-axis (hence sin is x and cos is y); and
+  // // - dist2 is calculated using an angle clockwise from the positive x-axis (hence cos is x and -sin is y)
+  // robotPos.x += dist * sinTheta + dist2 * cosTheta;
+  // robotPos.y += dist * cosTheta - dist2 * sinTheta;
 
-  //Print the tracking values to the brain screen for debugging
-  s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.back));
-  s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
+  // //Print the tracking values to the brain screen for debugging
+  // s__t(0, t__s(currentVal.left) + " " + t__s(currentVal.back));
+  // s__t(1, t__s(robotPos.x) + " " + t__s(robotPos.y) + " " + t__s(robotPos.angle));
 }
 
 void trackPosition(void *)
