@@ -49,6 +49,7 @@ AutoTask TurnToPointTask(Point target, double maxError)
         setDriveSafe(leftOutput, rightOutput);
         // Set_Drive(turnCalc(leftOutput), turnCalc(leftOutput), turnCalc(rightOutput), turnCalc(rightOutput));
         s__t(0, "TURN:" + t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
+        s__t(1, "TURN_VEL:" + t__s(leftOutput) + " " + t__s(rightOutput));
     };
 
     auto doneFn = [&, maxError]() -> bool {
@@ -142,7 +143,7 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
             setTime = true;
             // s__t(3, "time set");
         }
-        else if ((time != 0) && (pros::millis() - time > 50))
+        else if ((time != 0) && (pros::millis() - time > 0))
         {
             setShooterSafe(-AUTO_SHOOTER_VEL);
             doneShooting = true;
