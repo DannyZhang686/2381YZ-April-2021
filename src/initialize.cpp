@@ -23,7 +23,7 @@ DriveMode activeDriveMode = PidMode;
 void initialize()
 {
 	pros::lcd::initialize();
-	InitMotors(L);
+	InitMotors(Z);
 
 	position_tracker->Create();
 

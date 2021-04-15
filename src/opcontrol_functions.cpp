@@ -131,6 +131,41 @@ void indexerSpin(void *)
   }
 }
 
+bool setDriveSafe(double leftVelocity, double rightVelocity) {
+  //Scale velocity (0-200) to a voltage value (0-12000 mV)
+  // int leftVoltage = (int) fmax(fmin(leftVelocity * 60, 12000), -12000);
+  // int rightVoltage = (int) fmax(fmin(rightVelocity * 60, 12000), -12000);
+  activeDriveMode = ManualMode;
+
+  int leftVoltage = leftVelocity * 60;
+  if (abs(leftVoltage) > 8000) {
+    leftVoltage = 8000 * sgn(leftVoltage);
+  } else if (abs(leftVoltage) < 3500) {
+    leftVoltage = 3500 * sgn(leftVoltage);
+  }
+
+  int rightVoltage = rightVelocity * 60;
+  if (abs(rightVoltage) > 8000) {
+    rightVoltage = 8000 * sgn(rightVoltage);
+  } else if (abs(rightVoltage) < 3500) {
+    rightVoltage = 3500 * sgn(rightVoltage);
+  }
+  s__t(6, t__s(leftVoltage) + " " + t__s(rightVoltage));
+
+  //Take the mutex to avoid writing to the same location twice
+  // if (driveControl.take(0)) { //0 indicates the max number of milliseconds to wait before moving on
+  if (true) {
+    leftFront->move_voltage(leftVoltage);
+    leftBack->move_voltage(leftVoltage);
+    rightFront->move_voltage(rightVoltage);
+    rightBack->move_voltage(rightVoltage);
+    //Release the mutex
+    // driveControl.give();
+    return true; //success
+  }
+  return false; //Could not set value
+}
+
 //Similar functions to setDriveSafe, for different parts of the robot
 bool setIntakesSafe(double velocity) {
   int voltage = (int) (velocity * 60);
@@ -160,4 +195,3 @@ bool setShooterSafe(double velocity) {
     return true;
   }
   return false;
-}
