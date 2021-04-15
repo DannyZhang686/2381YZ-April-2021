@@ -15,11 +15,11 @@ static DriveConfig Evan_Bot_Drive = {
     {left_front, {5, 0}},
     {right_back, {3, 0}},
     {right_front, {6, 1}},
-}; 
+};
 
 // 1 is top roller
 
-static DrivePidConfig Z_Bot_Drive_Config = 
+static DrivePidConfig Z_Bot_Drive_Config =
 {
     {left_back, {0.6, 0, 0}},
     {left_front, {0.6, 0, 0}},
@@ -40,21 +40,21 @@ static DriveConfig L_Bot_Drive = {
     {right_front, {1, 0}},
 };
 
-static TrackingConfig L_Track_C = 
+static TrackingConfig L_Track_C =
 {
     {H, {3,4,1}},
     {V, {1,2,0}},
     {I, {9, 0, false}}, // true / false is for double (true) or single (false) inertial sensors
 };
 
-static TrackingConfig Z_Track_C = 
+static TrackingConfig Z_Track_C =
 {
     {H, {5,6,1}},
     {V, {7,8,1}},
     {I, {4, 11, true}},
 };
 
-static DrivePidConfig Y_Bot_Drive_Config = 
+static DrivePidConfig Y_Bot_Drive_Config =
 {
     {left_back, {0.6, 0, 0}},
     {left_front, {0.6, 0, 0}},

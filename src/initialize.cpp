@@ -23,12 +23,13 @@ Position_Tracker * position_tracker = Position_Tracker::instance();
 void initialize()
 {
 	pros::lcd::initialize();
-	InitMotors(L);
-	
+	InitMotors(Z);
+
 	position_tracker->Create();
-	
-	// pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
-	// pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");
+
+	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
+	pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");
+	pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");
 
 	using namespace Auton;
 	auton_control->define_auton(AutonControl::TestAuton, AT_Test_Ultras);

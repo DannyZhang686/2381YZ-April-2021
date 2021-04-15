@@ -448,11 +448,14 @@ void countBalls(void *)
       numBallsShot += 0.5; //Adding 0.5 when the ball starts being shot and creating a total of 1 when the ball finishes shooting
     }
     //Same thing with the other line sensor
-    // if ((bSumOutputs / numOutputs > minOutput) == bIsBall) {}
-    // else {
-    //   bIsBall = !bIsBall;
-    //   numBallsIntaken += 0.5;
-    // }
+    if ((bSumOutputs / numOutputs > minOutput) == bIsBall)
+    {
+    }
+    else
+    {
+      bIsBall = !bIsBall;
+      numBallsIntaken += 0.5;
+    }
     // s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()) + " " + t__s(numBallsShot) + " " + t__s(numBallsIntaken));
     pros::delay(10);
   }
@@ -483,13 +486,13 @@ void intakeShoot(int numBallsIn, int numBallsOut)
       //Spin the shooter the other way instead, after a short delay
       time = pros::millis();
       setTime = true;
-      s__t(3, "time set");
+      // s__t(3, "time set");
     }
     else if ((time != 0) && (pros::millis() - time > 100))
     {
       setShooterSafe(-AUTO_SHOOTER_VEL);
       doneShooting = true;
-      s__t(4, "");
+      // s__t(4, "");
     }
     if ((numBallsIn == 0) || (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken))
     {
@@ -514,10 +517,6 @@ void intakeNoShoot(int time, double velocity)
   setIntakesSafe(velocity);
   setIndexerSafe(velocity);
   setShooterSafe(-velocity);
-  while (pros::millis() < endTime)
-  {
-    pros::delay(10);
-  }
 }
 
 void intakeNoShoot(double velocity)
