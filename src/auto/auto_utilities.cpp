@@ -16,15 +16,15 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   int leftVoltage = leftVelocity * 60;
   if (abs(leftVoltage) > 8000) {
     leftVoltage = 8000 * sgn(leftVoltage);
-  } else if (abs(leftVoltage) < 2250) {
-    leftVoltage = 2250 * sgn(leftVoltage);
+  } else if (abs(leftVoltage) < 2750) {
+    leftVoltage = 2750 * sgn(leftVoltage);
   }
 
   int rightVoltage = rightVelocity * 60;
   if (abs(rightVoltage) > 8000) {
     rightVoltage = 8000 * sgn(rightVoltage);
-  } else if (abs(rightVoltage) < 2250) {
-    rightVoltage = 2250 * sgn(rightVoltage);
+  } else if (abs(rightVoltage) < 2750) {
+    rightVoltage = 2750 * sgn(rightVoltage);
   }
   s__t(6, t__s(leftVoltage) + " " + t__s(rightVoltage));
 

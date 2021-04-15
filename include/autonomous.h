@@ -12,7 +12,7 @@
 // #define R_TO_MID 1.25
 // #define B_TO_MID 4
 #define L_TO_MID 2.75
-#define B_TO_MID 5.75
+#define B_TO_MID 5.25
 
 //Struct definitions
 

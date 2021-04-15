@@ -49,13 +49,19 @@ AutoTask IntakeShootTask(int numBallsIn, int numBallsOut)
             //Spin the shooter the other way instead, after a short delay
             time = pros::millis();
             setTime = true;
-            s__t(3, "time set");
+            // s__t(3, "time set");
         }
-        else if ((time != 0) && (pros::millis() - time > 100))
+        else if ((time != 0) && (pros::millis() - time > 50))
         {
             setShooterSafe(-AUTO_SHOOTER_VEL);
             doneShooting = true;
-            s__t(4, "");
+            // s__t(4, "");
+        }
+        if ((numBallsIn == 0) || (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken))
+        {
+          //Stop the intakes
+          setIntakesSafe(0);
+          doneIntaking = true;
         }
     };
 
@@ -111,7 +117,7 @@ AutoTask TurnToPointTask(Point target, double maxError)
         // rightOutput = -leftOutput;
         setDriveSafe(leftOutput, rightOutput);
         // Set_Drive(turnCalc(leftOutput), turnCalc(leftOutput), turnCalc(rightOutput), turnCalc(rightOutput));
-        s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
+        s__t(0, "TURN:" + t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
     };
 
     auto doneFn = [&, maxError]() -> bool {
@@ -132,19 +138,172 @@ AutoTask TurnToPointTask(Point target, double maxError)
     return AutoTask::SyncTask(runFn, doneFn, init, kill);
 }
 
+namespace TimeBasedMove {
+  int counter;
+}
+
+AutoTask TimeBasedMoveTask(double velocity, double time) {
+  using namespace TimeBasedMove;
+  auto init = [&](void) -> void {
+    counter = pros::millis();
+    setDriveSafe(velocity, velocity);
+  };
+
+  auto run = [&, velocity, time]() -> void {
+    setDriveSafe(velocity, velocity);
+  };
+
+  auto done = [&, time]() -> bool {
+      if (pros::millis() - counter > time)
+      {
+          return true;
+      }
+      return false;
+  };
+
+  auto kill = [] {
+    setDriveSafe(0, 0);
+  };
+
+  return AutoTask::SyncTask(run, done, init, kill);
+}
+
 AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
     vector<AutoTask>{
         //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
         // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
         SingleRun([](void) -> void {
-          position_tracker->Set_Position({36, 12}, PI/2);
+          position_tracker->Set_Position({36, 12}, PI/2); //Corner first
+          // position_tracker->Set_Position({60, 9.5}, 0); //Side first
         }),
-        AutoTask::AutoDelay(100),
-        PurePursuitTask({36, 28}, 0, 100),
-        TurnToPointTask({22, 12}, 0.07),
-        PurePursuitTask({22, 12}, 0, 100),
-        // SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {50, 1}, 0); }),
+
+        // //Start goal
+        // TimeBasedMoveTask(100, 1000).AddInit([](void) -> void {
+        //   intakeNoShoot(200);
+        // }),
+        // IntakeShootTask(0, 1).AddKill([](void) -> void {
+        //   stopMotors();
+        // }),
+        // TimeBasedMoveTask(-65, 650),
+        // TurnToPointTask({36, 24}, 0.07),
+
+        //Start to 1
+        PurePursuitTask({36, 20.5}, 0, 100).AddInit([](void) -> void {
+          intakeNoShoot(200);
+        }),
+        AutoTask::AutoDelay(250).AddRun([]{
+          setDriveSafe(-50, -50);
+        }),
+        AutoTask::AutoDelay(250).AddRun([]{
+          setDriveSafe(0, 0);
+        }),
+        TurnToPointTask({9, 9}, 0.07),
+        AutoTask::AutoDelay(200).AddKill([]{
+          stopMotors();
+        }),
+        PurePursuitTask({9, 9}, 0, 100),
+
+        //Goal 1
+        TimeBasedMoveTask(70, 400),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
+
+        //1 to 2
+        TurnToPointTask({24, 72}, 0.07),
+        PurePursuitTask({24, 72}, 0, 100).AddInit([](void) -> void {
+          intakeNoShoot(200);
+        }),
+        AutoTask::AutoDelay(250).AddRun([]{
+          setDriveSafe(-50, -50);
+        }),
+        AutoTask::AutoDelay(250).AddRun([]{
+          setDriveSafe(0, 0);
+        }),
+        TurnToPointTask({12, 75}, 0.07),
+        AutoTask::AutoDelay(200).AddKill([]{
+          stopMotors();
+        }),
+        PurePursuitTask({12, 75}, 0, 100),
+
+        //Goal 2
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 450),
+
+        //2 to 3
+        TurnToPointTask({36, 115}, 0.07),
+        PurePursuitTask({36, 115}, 0, 100).AddInit([](void) -> void {
+          intakeNoShoot(200);
+        }),
+        AutoTask::AutoDelay(1000).AddRun([]{
+          setDriveSafe(-50, -50);
+        }),
+        AutoTask::AutoDelay(1000).AddRun([]{
+          setDriveSafe(0, 0);
+        }),
+        // TurnToPointTask({18, 114}, 0.07),
+        // AutoTask::AutoDelay(200).AddKill([]{
+          // stopMotors();
+        // }),
+        // PurePursuitTask({18, 114}, 0, 100),
+
+        // //Goal 3
+        // TimeBasedMoveTask(70, 650),
+        // IntakeShootTask(0, 1).AddKill([](void) -> void {
+        //   stopMotors();
+        // }),
+        // TimeBasedMoveTask(-65, 650),
+
+        // //3 to 4
+        // TurnToPointTask({72, 96}, 0.07),
+        // PurePursuitTask({72, 96}, 0, 100).AddInit([](void) -> void {
+        //   intakeNoShoot(200);
+        // }).AddKill([](void) -> void {
+        //   setDriveSafe(-50, -50);
+        //   pros::delay(250);
+        //   setDriveSafe(0, 0);
+        //   pros::delay(250);
+        // }),
+        // TurnToPointTask({72, 106}, 0.07),
+        // PurePursuitTask({72, 106}, 0, 100).AddInit([](void) -> void {
+        //   pros::delay(200);
+        //   stopMotors();
+        // }),
+        //
+        // //Goal 4
+        // TimeBasedMoveTask(70, 650),
+        // IntakeShootTask(0, 1).AddKill([](void) -> void {
+        //   stopMotors();
+        // }),
+        // TimeBasedMoveTask(-65, 650),
+        //
+        // //4 to 5
+        // TurnToPointTask({98, 101}, 0.07),
+        // PurePursuitTask({98, 101}, 0, 100).AddInit([](void) -> void {
+        //   intakeNoShoot(200);
+        // }).AddKill([](void) -> void {
+        //   setDriveSafe(-50, -50);
+        //   pros::delay(250);
+        //   setDriveSafe(0, 0);
+        //   pros::delay(250);
+        // }),
+        // TurnToPointTask({101, 101}, 0.07),
+        // PurePursuitTask({101, 101}, 0, 100).AddInit([](void) -> void {
+        //   pros::delay(200);
+        //   stopMotors();
+        // }),
+        //
+        // //Goal 5
+        // TimeBasedMoveTask(70, 650),
+        // IntakeShootTask(0, 1).AddKill([](void) -> void {
+        //   stopMotors();
+        // }),
+        // TimeBasedMoveTask(-65, 650),
     });
 
 // AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
