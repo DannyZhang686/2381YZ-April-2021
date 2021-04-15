@@ -66,9 +66,9 @@ namespace PPS
 
     array<double, 2> previousSpeeds = {0, 0};
 
-    static double deaccelStrength = 2;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
-    static double turningStrength = 0;  // Turning Level Coefficient - Exponential - -1 for max sensitive turning, +1 for max dampened turning 
-    static double accelDampening = 0.3; // Top Level Acceleration Control Coefficient - Exponential - Between 0 - 1
+    static double deaccelStrength = 3;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
+    static double turningStrength = 0.1;  // Turning Level Coefficient - Exponential - -1 for max sensitive turning, +1 for max dampened turning 
+    static double accelDampening = 0.1; // Top Level Acceleration Control Coefficient - Exponential - Between 0 - 1
     
 
     static double deaccelCoeff;         // Remaining Distance Calculator, Range between 0 -1, set to 1 by default in `init`, don't change this.

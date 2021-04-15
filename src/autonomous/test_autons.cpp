@@ -54,12 +54,12 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // Delay(100000),
 
         SingleRun([](void) -> void {
-          position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
+          // position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
           // position_tracker->Set_Position({60, 9.5}, 0); //Side first
         }),
-        // PurePursuitTask({36, 36}, 0, 100),
+        PurePursuitTask({36, 36}, 0, 100),
 
-        // Delay(100000000),
+        Delay(100000000),
         // //Start goal
         // TimeBasedMoveTask(100, 1000).AddInit([](void) -> void {
         //   intakeNoShoot(200);
@@ -95,12 +95,7 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //1 to 2
         TurnToPointTask({24, 72}, 0.07),
         PurePursuitTask({24, 72}, 0, 100).AddRun(IntakeF(200)),
-        Delay(250).AddRun([]{
-          setDriveSafe(-50, -50);
-        }),
-        Delay(250).AddRun([]{
-          setDriveSafe(0, 0);
-        }),
+        
         TurnToPointTask({19, 74}, 0.07),
         Delay(200).AddKill([] {
           stopMotors();
@@ -117,12 +112,14 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //2 to 3
         TurnToPointTask({34, 118}, 0.07),
         PurePursuitTask({34, 118}, 0, 100).AddInit(IntakeF(200)),
-        Delay(250).AddRun([] {
-          setDriveSafe(-50, -50);
-        }),
-        Delay(250).AddRun([] {
-          setDriveSafe(0, 0);
-        }),
+        // Delay(250).AddRun([] {
+        //   setDriveSafe(-50, -50);
+        // }),
+        // Delay(250).AddRun([] {
+        //   setDriveSafe(0, 0);
+        // }),
+
+
         TurnToPointTask({20, 130}, 0.07),
         Delay(200).AddKill([] {
           stopMotors();
@@ -139,15 +136,13 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         //3 to 4
         TurnToPointTask({70, 101}, 0.07),
         PurePursuitTask({70, 101}, 0, 100).AddInit(IntakeF(200)),
-        Delay(250).AddRun([] {
-          setDriveSafe(-50, -50);
-        }),
-        Delay(250).AddRun([] {
-          setDriveSafe(0, 0);
-        }),
+        // Pick up ball before goal 4
+        // Delay(250).AddRun([] {
+        //   setDriveSafe(-50, -50);
+        // }),
+        Delay(250),
         TurnToPointTask({72, 127}, 0.07),
         PurePursuitTask({72, 127}, 0, 127).AddInit([](void) -> void {
-          pros::delay(200);
           stopMotors();
         }),
 
