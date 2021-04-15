@@ -70,9 +70,9 @@ void indexerSpin(void*) {
       indexer.move(127);
     }
     else {
-      indexer.move_voltage(0);
+      indexer.move(0);
     }
-    s__t(0, "indexer time: " + t__s(pros::millis()) + "");
+    s__t(0, "indexer time: " + t__s(pros::millis()) + " : " + t__s(master.get_digital(DIGITAL_Y)));
     pros::delay(20);
   }
 }

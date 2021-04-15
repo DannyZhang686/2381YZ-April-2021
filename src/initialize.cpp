@@ -24,7 +24,8 @@ void initialize()
 {
 	pros::lcd::initialize();
 	InitMotors(E);
-	
+	// indexer.move(-20);
+
 	position_tracker->Create();
 
 	// pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
