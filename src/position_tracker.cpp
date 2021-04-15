@@ -91,7 +91,8 @@ void Position_Tracker::Track_Position()
     }
 
     // Current Angle, Angular Dispertion. This is normalized to between (-M_PI, M_PI).
-    ang_disp = this->Get_Real_Angle();
+    this->Get_Real_Angle();
+    ang_disp = this->Get_Angle();
 
     // Angular Velocity
     ang_vel = fmod(ang_disp - ang_last, 2*M_PI);

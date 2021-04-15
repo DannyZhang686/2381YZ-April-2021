@@ -46,7 +46,7 @@ namespace PPS
 
     long previousLookaheadIndex = 0;
 
-    static double lookAheadDistance = 10;
+    static double lookAheadDistance = 15;
     static long lookAheadNumber = 40;
     static double PathSpacing = 1;
 
@@ -103,8 +103,8 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         currentAngle = position_tracker->Get_Angle();
         mostestClosestIndex = GetClosest(path, currentPos, mostestClosestIndex);
 
-        /** 
-         * TODO: 
+        /**
+         * TODO:
          * 1. ADJUSTABLE TURNING STRENGTH (TURNING COEFFICIENT) ^ (TURNING STRENGTH)
          * 2. ACCEL AND DEACCEL CURVES - DEPENDING ON CURRENT SPEED, MOSTEST CLOSEST INDEX
          * 3. PATHING - JUST LIKE WAY BETTER PATH GENERATION, PATH VISUALIZATION - WHAT DOES PATH SMOOTHING EVEN DO
@@ -132,7 +132,11 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
 
         double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
 
-        array<double, 2> speeds = {getSignOf(innerProduct) * speed, getSignOf(innerProduct) * speed};
+        auto realLookaheadDist = abs(lookaheadPnt - currentPos);
+
+        auto deaccelCoeff = 0.5 + 0.5 * min(realLookaheadDist/lookAheadDistance, 1.0);
+
+        array<double, 2> speeds = {getSignOf(innerProduct) * speed * deaccelCoeff, getSignOf(innerProduct) * speed * deaccelCoeff};
 
         double arcRadius = Curvature(currentPos, lookaheadPnt, currentAngle);
 

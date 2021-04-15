@@ -151,7 +151,7 @@ AutoTask TurnToPointTask(Point target, double maxError)
         tAngleInches = angleToInches(travellingAngle);
 
         double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
-        // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
+        leftOutput = leftTurn.getOutput(0, 20 * tAngleInches); //Setpoint distance value for PD
         rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
         // rightOutput = -leftOutput;
         setDriveSafe(leftOutput, rightOutput);
@@ -279,68 +279,68 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         PurePursuitTask({36, 115}, 0, 100).AddInit([](void) -> void {
           intakeNoShoot(200);
         }),
-        AutoTask::AutoDelay(1000).AddRun([]{
+        AutoTask::AutoDelay(250).AddRun([]{
           setDriveSafe(-50, -50);
         }),
-        AutoTask::AutoDelay(1000).AddRun([]{
+        AutoTask::AutoDelay(250).AddRun([]{
           setDriveSafe(0, 0);
         }),
-        // TurnToPointTask({18, 114}, 0.07),
-        // AutoTask::AutoDelay(200).AddKill([]{
-          // stopMotors();
-        // }),
-        // PurePursuitTask({18, 114}, 0, 100),
+        TurnToPointTask({13, 125}, 0.07),
+        AutoTask::AutoDelay(200).AddKill([]{
+          stopMotors();
+        }),
+        PurePursuitTask({13, 125}, 0, 100),
 
-        // //Goal 3
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
-        // }),
-        // TimeBasedMoveTask(-65, 650),
+        //Goal 3
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
 
-        // //3 to 4
-        // TurnToPointTask({72, 96}, 0.07),
-        // PurePursuitTask({72, 96}, 0, 100).AddInit([](void) -> void {
-        //   intakeNoShoot(200);
-        // }).AddKill([](void) -> void {
-        //   setDriveSafe(-50, -50);
-        //   pros::delay(250);
-        //   setDriveSafe(0, 0);
-        //   pros::delay(250);
-        // }),
-        // TurnToPointTask({72, 106}, 0.07),
-        // PurePursuitTask({72, 106}, 0, 100).AddInit([](void) -> void {
-        //   pros::delay(200);
-        //   stopMotors();
-        // }),
-        //
-        // //Goal 4
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
-        // }),
-        // TimeBasedMoveTask(-65, 650),
-        //
-        // //4 to 5
-        // TurnToPointTask({98, 101}, 0.07),
-        // PurePursuitTask({98, 101}, 0, 100).AddInit([](void) -> void {
-        //   intakeNoShoot(200);
-        // }).AddKill([](void) -> void {
-        //   setDriveSafe(-50, -50);
-        //   pros::delay(250);
-        //   setDriveSafe(0, 0);
-        //   pros::delay(250);
-        // }),
-        // TurnToPointTask({101, 101}, 0.07),
-        // PurePursuitTask({101, 101}, 0, 100).AddInit([](void) -> void {
-        //   pros::delay(200);
-        //   stopMotors();
-        // }),
-        //
-        // //Goal 5
-        // TimeBasedMoveTask(70, 650),
-        // IntakeShootTask(0, 1).AddKill([](void) -> void {
-        //   stopMotors();
-        // }),
-        // TimeBasedMoveTask(-65, 650),
+        //3 to 4
+        TurnToPointTask({72, 90}, 0.07),
+        PurePursuitTask({72, 90}, 0, 100).AddInit([](void) -> void {
+          intakeNoShoot(200);
+        }).AddKill([](void) -> void {
+          setDriveSafe(-50, -50);
+          pros::delay(250);
+          setDriveSafe(0, 0);
+          pros::delay(250);
+        }),
+        TurnToPointTask({74, 120}, 0.07),
+        PurePursuitTask({74, 120}, 0, 100).AddInit([](void) -> void {
+          pros::delay(200);
+          stopMotors();
+        }),
+
+        //Goal 4
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
+
+        //4 to 5
+        TurnToPointTask({108, 105}, 0.07),
+        PurePursuitTask({108, 105}, 0, 100).AddInit([](void) -> void {
+          intakeNoShoot(200);
+        }).AddKill([](void) -> void {
+          setDriveSafe(-50, -50);
+          pros::delay(250);
+          setDriveSafe(0, 0);
+          pros::delay(250);
+        }),
+        TurnToPointTask({136, 125}, 0.07),
+        PurePursuitTask({136, 125}, 0, 100).AddInit([](void) -> void {
+          pros::delay(200);
+          stopMotors();
+        }),
+
+        //Goal 5
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }),
+        TimeBasedMoveTask(-65, 650),
     });
