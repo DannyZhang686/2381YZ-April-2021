@@ -46,36 +46,7 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
   return false; //Could not set value
 }
 
-//Similar functions to setDriveSafe, for different parts of the robot
-bool setIntakesSafe(double velocity) {
-  int voltage = (int) (velocity * 60);
-  if (intakeControl.take(0)) {
-    intakeSetpoint = (voltage);
-    intakeControl.give();
-    return true;
-  }
-  return false;
-}
 
-bool setIndexerSafe(double velocity) {
-  int voltage = (int) (velocity * 60);
-  if (indexerControl.take(0)) {
-    indexerSetpoint = voltage;
-    indexerControl.give();
-    return true;
-  }
-  return false;
-}
-
-bool setShooterSafe(double velocity) {
-  int voltage = (int) (velocity * 60);
-  if (shooterControl.take(0)) {
-    shooterSetpoint = (voltage);
-    shooterControl.give();
-    return true;
-  }
-  return false;
-}
 
 double findDistance(OPoint a, OPoint b) {
   //Function to find distance between two Points using a standard distance formula

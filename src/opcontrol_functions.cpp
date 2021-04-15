@@ -5,6 +5,8 @@
 #include "control/motor_controller.hpp"
 #include "control/pid.hpp"
 #include "globals.hpp"
+#include "legacy/legacy_autonomous.hpp"
+#include "autonomous.h"
 
 //For these robot functions, DIGITAL_L2 is used as a "shift" key;
 //when it is pressed along with another button, a different
@@ -127,4 +129,35 @@ void indexerSpin(void *)
     }
     pros::delay(DELAY_INTERVAL);
   }
+}
+
+//Similar functions to setDriveSafe, for different parts of the robot
+bool setIntakesSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (intakeControl.take(0)) {
+    intakeSetpoint = (voltage);
+    intakeControl.give();
+    return true;
+  }
+  return false;
+}
+
+bool setIndexerSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (indexerControl.take(0)) {
+    indexerSetpoint = voltage;
+    indexerControl.give();
+    return true;
+  }
+  return false;
+}
+
+bool setShooterSafe(double velocity) {
+  int voltage = (int) (velocity * 60);
+  if (shooterControl.take(0)) {
+    shooterSetpoint = (voltage);
+    shooterControl.give();
+    return true;
+  }
+  return false;
 }
