@@ -33,6 +33,7 @@ double powCalc(double x, double power)
     return pow(abs(x), power) * x;
 }
 
+
 namespace PPS
 {
 

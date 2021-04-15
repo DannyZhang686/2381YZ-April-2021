@@ -181,8 +181,11 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         }),
 
         TurnToAngleTask(0, 0.07),
+        
 
-        AutoTask::AutoDelay(40000),
+        AutoTask::AutoDelay(250).AddRun([]{setDriveSafe(50,50);}),
+        AutoTask::AutoDelay(250).AddRun([]{setDriveSafe(0,0);}), 
+
         PurePursuitTask({24, 0}, 0, 40),
         AutoTask::AutoDelay(1000),
         PurePursuitTask({0, 0}, 0, 40),
