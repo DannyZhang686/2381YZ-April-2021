@@ -123,7 +123,7 @@ void Position_Tracker::Track_Position()
     v_disp += v_vel;
     ang_last = ang_disp;
     last_encoder_values = current_encoder_values;
-    s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
+    s__t(1, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
 
     //
     // lcd::set_text(1, "VEL: ("  + to_string((int)round( 100* abs(Get_Velocity()))) + ", " + to_string((int)round( 100* abs(Get_Ang_Vel()))) + "), " + to_string(round(ang_disp * 180 / M_PI)) +" deg");
@@ -133,14 +133,14 @@ void Position_Tracker::Track_Position()
     double bRadius;                                //rRadius calculated for the back tracking wheel (used as an adjustment for when the robot turns or is pushed sideways)
     double dist;                                   //The distance travelled by the tracking center
     double dist2;                                  //dist calculated using the back tracking wheel
-    double sinAngle = sin(2 * normalized_ang_vel); //The sine of the angle travelled (used to avoid multiple redundant calculations)
+    double sinAngle = sin(normalized_ang_vel); //The sine of the angle travelled (used to avoid multiple redundant calculations)
 
     if (fabs(normalized_ang_vel) > 0)
     {
-        lRadius = position_change[right_] / (2 * normalized_ang_vel); //Calculate the radius
+        lRadius = position_change[right_] / (normalized_ang_vel); //Calculate the radius
         // dist = (rRadius + R_TO_MID) * normalized_ang_vel; //Calculate the distance (from the center of the robot) using simple trigonometry
         dist = (lRadius + wheel_center_offset.real()) * sinAngle;    //Calculate the distance (from the center of the robot) using simple trigonometry
-        bRadius = position_change[back_] / (2 * normalized_ang_vel); //Repeat the previous lines using the back tracking wheel (for horizontal error)
+        bRadius = position_change[back_] / (normalized_ang_vel); //Repeat the previous lines using the back tracking wheel (for horizontal error)
         dist2 = (bRadius - wheel_center_offset.imag()) * sinAngle;
     }
     else

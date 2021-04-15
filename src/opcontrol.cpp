@@ -15,7 +15,7 @@ void opcontrol()
 	while (true)
 	{
 		master_control->run();
-		controllerIndexerSpin();
+		// controllerIndexerSpin();
 
 		pros::delay(10);
 	}

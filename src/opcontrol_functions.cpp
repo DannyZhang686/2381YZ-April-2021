@@ -32,7 +32,7 @@ void shooterSpin(void *)
       shooterToggle = true;
     }
 
-    if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A)) && (shooterToggle))
+    if ((master.get_digital(DIGITAL_R1)) || ((master.get_digital(DIGITAL_A)) && (shooterToggle)))
     {
       shooter.move_voltage(SHOOTER_SPEED);
     }
@@ -97,7 +97,7 @@ void indexerSpin(void *)
   {
     if(!indexerOn)
     {
-      
+
     }
     else if (STOP)
     {

@@ -90,7 +90,7 @@ const double Curvature(Point currentPos, Point targetPos, double currentOrientat
 
     double dist = abs(targetPos - currentPos);
 
-    if ((arg == currentOrientation))
+    if (arg == currentOrientation)
     {
         return NAN;
     }
@@ -187,14 +187,14 @@ Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, do
             //and so is always a preferable return to root1
             auto a = startPoint + root2 * lineSegmentVector;
             auto dist = abs(a - circleCenter);
-            s__t(3, "root2 found: " + t__s(root2) + " dist:" + t__s(dist));
+            // s__t(3, "root2 found: " + t__s(root2) + " dist:" + t__s(dist));
             return startPoint + root2 * lineSegmentVector;
         }
         else if ((root1 >= 0) && (root1 <= 1))
         {
             auto a = startPoint + root1 * lineSegmentVector;
             auto dist = abs(a - circleCenter);
-            s__t(3, "root1 found: " + t__s(root1) + " dist:" + t__s(dist));
+            // s__t(3, "root1 found: " + t__s(root1) + " dist:" + t__s(dist));
             return startPoint + root1 * lineSegmentVector;
         }
     }
