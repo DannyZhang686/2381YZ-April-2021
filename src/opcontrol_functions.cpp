@@ -29,7 +29,7 @@ const void controllerShooterSpin(void)
     shooterToggle = true;
   }
 
-  if ((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A)) && (shooterToggle))
+  if (((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) && (shooterToggle))
   {
     shooterSetpoint = (SHOOTER_SPEED);
   }
