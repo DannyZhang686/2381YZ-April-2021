@@ -195,3 +195,4 @@ bool setShooterSafe(double velocity) {
     return true;
   }
   return false;
+}
