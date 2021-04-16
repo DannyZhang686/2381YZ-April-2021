@@ -54,12 +54,12 @@ AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
         // Delay(100000),
 
         SingleRun([](void) -> void {
-          // position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
+          position_tracker->Set_Position({36, 12}, PI / 2); //Corner first
           // position_tracker->Set_Position({60, 9.5}, 0); //Side first
         }),
-        PurePursuitTask({36, 36}, 0, 100),
+        // PurePursuitTask({36, 36}, 0, 100),
 
-        Delay(100000000),
+        // Delay(100000000),
         // //Start goal
         // TimeBasedMoveTask(100, 1000).AddInit([](void) -> void {
         //   intakeNoShoot(200);

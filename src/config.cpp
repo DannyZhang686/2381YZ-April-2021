@@ -65,8 +65,6 @@ const void InitDrive(DriveConfig config)
     leftFront = new pros::Motor(get<0>(config[left_front]), get<1>(config[left_front]));
     rightBack = new pros::Motor(get<0>(config[right_back]), get<1>(config[right_back]));
     rightFront = new pros::Motor(get<0>(config[right_front]), get<1>(config[right_front]));
-
-    s__t(0, t__s(leftBack->get_actual_velocity()));
 }
 
 const void SetTrackingOffsets(complex<double> trackingOffset)
@@ -86,8 +84,8 @@ const void InitMotors(ConfigOptions config)
     case E:
         InitDrive(Evan_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
-        InitEncoders(Z_Track_C);
-        SetTrackingOffsets(Z_Tracking_Offsets);
+        InitEncoders(E_Track_C);
+        SetTrackingOffsets(L_Tracking_Offsets);
         break;
     case L:
         InitDrive(L_Bot_Drive);
@@ -121,7 +119,7 @@ pros::Motor shooter(SHOOTER_PORT, false);
 //ADI (Encoders and line sensors)
 // pros::ADIEncoder rightTracking (RIGHT_IN, RIGHT_OUT, true);
 
-pros::ADIAnalogIn tLineSensor(TOP_LINE);
-pros::ADIAnalogIn bLineSensor(BOTTOM_LINE);
+pros::ADIAnalogIn tLineSensor(7);
+pros::ADIAnalogIn bLineSensor(8);
 
 pros::Controller master(CONTROLLER_MASTER);

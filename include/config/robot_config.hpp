@@ -58,7 +58,7 @@ static TrackingConfig Z_Track_C =
 static std::complex<double> L_Tracking_Offsets = 
 {
  2.75,
- 5.25
+ 5.75
 }; // Left to mid, back to mid
 
 static std::complex<double> Z_Tracking_Offsets = 
@@ -69,8 +69,8 @@ static std::complex<double> Z_Tracking_Offsets =
 
 static TrackingConfig E_Track_C = 
 {
-    {H, {5,6,1}},
-    {V, {7,8,1}},
+    {H, {3,4,0}},
+    {V, {1,2,1}},
     {I, {11, 0, false}},
 };
 

@@ -63,15 +63,16 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
 array<double, 4> controllerSetpoints = {0, 0, 0, 0};
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
-    left_x = 0;
+    // left_x = 0;
 
-    double turn = pow((std::abs(right_x) / 127), 0.75) * getSignOf(right_x) * 127;
+    double turn = pow((std::abs(right_x) / 127), 1) * getSignOf(right_x) * 20;
+
 
     controllerSetpoints = {
-        (left_y - left_x + turn),
-        (left_y + left_x + turn),
-        (left_y + left_x - turn),
-        (left_y - left_x - turn),
+        (left_y + turn),
+        (left_y + turn),
+        (left_y - turn),
+        (left_y - turn),
     };
     Set_Drive(controllerSetpoints[0], controllerSetpoints[1], controllerSetpoints[2], controllerSetpoints[3]);
 }

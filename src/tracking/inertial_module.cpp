@@ -7,11 +7,14 @@ using namespace pros;
 Inertial::Inertial(int port1) : mode(A)
 {
     imu1 = new Imu(port1);
+
+
 }
 Inertial::Inertial(int port1, int port2) : mode(B)
 {
     imu1 = new Imu(port1);
     imu2 = new Imu(port2);
+
 }
 const bool Inertial::IsCalibrating(void)
 {

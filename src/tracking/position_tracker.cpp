@@ -93,13 +93,15 @@ void Position_Tracker::Track_Position()
 
     // Angular Velocity
     ang_vel = NormalizeAngle(ang_disp - ang_last);
-
+    
     current_encoder_values[right_] = v_enc_->get_value();
     current_encoder_values[back_] = h_enc_->get_value();
 
     // Position change is the swept angle multiplied by the radius. Radius = 1/2 Diameter, so it is \Delta_Angle * M_PI/180 *Diameter/2.
     position_change[right_] = (current_encoder_values[right_] - last_encoder_values[right_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
     position_change[back_] = (current_encoder_values[back_] - last_encoder_values[back_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
+
+    s__t(3, "en: " + t__s(current_encoder_values[right_]) + " " + t__s(current_encoder_values[back_]) + " ");
 
     ang_last = ang_disp;
 
