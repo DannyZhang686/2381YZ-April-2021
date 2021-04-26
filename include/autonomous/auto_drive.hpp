@@ -14,7 +14,7 @@ extern AutoTask SingleRun(std::function<void(void)> run);
 
 
 extern AutoTask AutoCurve(std::complex<double> Waypoint, double angle, std::complex<double> EndPoint, double endAngle, double speed, double curvature = 1, double angleInterpolation = 1);
-extern AutoTask TurnToPointTask(Point target, double maxError = 0.07);
+extern AutoTask TurnToPointTask(Point target, double maxError = 0.07, double turnSpeed = 127);
 extern AutoTask IntakeShootTask(int numBallsIn, int numBallsOut);
 extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
 

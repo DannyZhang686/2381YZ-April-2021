@@ -3,12 +3,7 @@
 #include "autonomous.h"
 #include "pid.h"
 #include "opcontrol.h"
-
-double turnCalc(double input)
-{
-    return pow((std::abs(input) / 127), -0.5) * (input);
-}
-
+#include "utilities.h"
 using namespace std;
 
 AutoTask SingleRun(std::function<void(void)> run)
@@ -18,14 +13,16 @@ AutoTask SingleRun(std::function<void(void)> run)
 
 namespace TurnToPoint
 {
-    double targetAngle;     //The desired angle, which is constantly updated
-    double travellingAngle; //The angle (-π to π) to travel to face the final angle
-    double tAngleInches;    //travellingAngle converted to a value in inches (for PD purposes)
+    double targetAngle;  //The desired angle, which is constantly updated
+    double angleDiff;    //The angle (-π to π) to travel to face the final angle
+    double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
     int time;
     bool setTime;
+
+    static double turnCoeff = 0.95;
 }
 
-AutoTask TurnToPointTask(Point target, double maxError)
+AutoTask TurnToPointTask(Point target, double maxError, double turnSpeed)
 {
     using namespace TurnToPoint;
 
@@ -34,35 +31,22 @@ AutoTask TurnToPointTask(Point target, double maxError)
         setTime = false;
     };
 
-    auto runFn = [&, target, maxError]() -> void {
+    auto runFn = [&, target, maxError, turnSpeed]() -> void {
         targetAngle = arg(target - position_tracker->Get_Position());
 
-        travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
-        tAngleInches = angleToInches(travellingAngle);
+        angleDiff = NormalizeAngle(targetAngle - position_tracker->Get_Angle());
 
-        double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
-        // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
-        leftOutput = leftTurn.getOutput(0, 20 * tAngleInches);
-        rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
+    
+        auto input = (abs(angleDiff) > M_PI/2) ? turnSpeed * getSignOf(angleDiff) :  turnSpeed * (turnCoeff * sin(angleDiff) / pow(pow(sin(angleDiff), 2.0), -0.1) + (1 - turnCoeff) * abs(sin(angleDiff)) / sin(angleDiff));
 
-        // rightOutput = -leftOutput;
-        setDriveSafe(leftOutput, rightOutput);
-        // Set_Drive(turnCalc(leftOutput), turnCalc(leftOutput), turnCalc(rightOutput), turnCalc(rightOutput));
-        s__t(0, "TURN:" + t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
-        s__t(1, "TURN_VEL:" + t__s(leftOutput) + " " + t__s(rightOutput));
+        
+        Set_Drive(-input, -input, input, input);
+        s__t(0, "TURN:" + t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(angleDiff));
+        s__t(1, "TURN_VEL:" + t__s(input) + " " +  t__s(position_tracker->Get_Ang_Vel()));
     };
 
     auto doneFn = [&, maxError]() -> bool {
-        if ((!setTime) && (fabs(travellingAngle) < maxError))
-        {
-            time = pros::millis();
-            setTime = true;
-        }
-        else if ((time != 0) && (pros::millis() - time > 250))
-        {
-            return true;
-        }
-        return false;
+        return (abs(angleDiff)  < maxError && abs(position_tracker->Get_Ang_Vel()) < maxError);
     };
     auto kill = [] {
         Set_Drive(0, 0, 0, 0);
@@ -80,30 +64,30 @@ AutoTask TurnToAngleTask(double heading, double maxError)
     };
 
     auto runFn = [&, heading, maxError]() -> void {
-        targetAngle = heading;
+        // targetAngle = heading;
 
-        travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
-        tAngleInches = angleToInches(travellingAngle);
+        // travellingAngle = -smallestAngle(position_tracker->Get_Angle(), targetAngle);
+        // tAngleInches = angleToInches(travellingAngle);
 
-        double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
-        // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
-        rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
-        // rightOutput = -leftOutput;
-        setDriveSafe(-rightOutput, rightOutput);
-        // Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
-        s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
+        // double leftOutput = 0, rightOutput = 0; //Power output (0-200) for each side of the robot
+        // // leftOutput = turnCalc(leftTurn.getOutput(0, 20 * tAngleInches)); //Setpoint distance value for PD
+        // rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
+        // // rightOutput = -leftOutput;
+        // setDriveSafe(-rightOutput, rightOutput);
+        // // Set_Drive(leftOutput, leftOutput, -leftOutput, -leftOutput);
+        // s__t(4, t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(travellingAngle));
     };
 
     auto doneFn = [&, maxError]() -> bool {
-        if ((!setTime) && (fabs(travellingAngle) < maxError))
-        {
-            time = pros::millis();
-            setTime = true;
-        }
-        else if ((time != 0) && (pros::millis() - time > 250))
-        {
-            return true;
-        }
+        // if ((!setTime) && (fabs(travellingAngle) < maxError))
+        // {
+        //     time = pros::millis();
+        //     setTime = true;
+        // }
+        // else if ((time != 0) && (pros::millis() - time > 250))
+        // {
+        //     return true;
+        // }
         return false;
     };
     auto kill = [] {

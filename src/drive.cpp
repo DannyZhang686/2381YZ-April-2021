@@ -17,7 +17,7 @@ array<double, 3> right_back_pid_values = {0.6, 0, 0};
 array<double, 3> left_front_pid_values = {0.6, 0, 0};
 array<double, 3> right_front_pid_values = {0.6, 0, 0};
 
-array<double, 3> master_drive_pid_values = {0, 0.015, 0};
+array<double, 3> master_drive_pid_values = {0.1, 0, 0};
 
 std::array<double, 4> _pid_inputs = {0, 0, 0, 0};
 auto _master_pid = new PID((master_drive_pid_values)[0], (master_drive_pid_values)[1], (master_drive_pid_values)[2]);
@@ -48,6 +48,8 @@ double _master_setpoint = 0;
 double _previous_setpoint;
 double _master_error_average = 0;
 
+double tuningCoeff = 1;
+
 // RATIO CALC FUNCTION USED FOR PID VALUES IN THE SET DRIVE FUNCTION
 double ratioCalc(double masterDis, double masterOS, double specDis, double specOS)
 {
@@ -55,7 +57,7 @@ double ratioCalc(double masterDis, double masterOS, double specDis, double specO
     {
         return 1;
     }
-    return pow((masterDis * specOS / (masterOS * specDis)), 6);
+    return pow((masterDis * specOS / (masterOS * specDis)), 3);
 }
 
 // SET DRIVE FUNCTION CALLED BY MOVE_MOTOR
@@ -64,8 +66,8 @@ array<double, 4> controllerSetpoints = {0, 0, 0, 0};
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y)
 {
     // left_x = 0;
-
-    double turn = pow((std::abs(right_x) / 127), 1) * getSignOf(right_x) * 35;
+ 
+    double turn = pow((std::abs(right_x) / 127), 1) * getSignOf(right_x) * 127;
 
 
     controllerSetpoints = {
@@ -111,21 +113,31 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 
     masterDistance = (rfDistance + lfDistance + rbDistance + lbDistance) / 4;
 
-    double tuning_coefficient = _master_pid->Update(0, _master_error_average);
-    if (tuning_coefficient < 0)
-    {
-        _master_pid->ResetError();
-        tuning_coefficient = 1;
-    }
 
-    _pid_inputs[left_back] = _pid_inputs[left_front] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuning_coefficient;
-    _pid_inputs[right_front] = _pid_inputs[right_back] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
+    tuningCoeff += _master_pid->Update(0, _master_error_average);
+    // if (tuningCoeff < 0)
+    // {
+    //     _master_pid->ResetError();
+    //     tuningCoeff = 1;
+    // }
+    // if(master.get_digital(DIGITAL_A))
+    // {
+    //     tuningCoeff = 1;
+    // }
+    _pid_inputs[left_back] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuningCoeff;
 
-    if (master.get_digital(DIGITAL_A))
+    _pid_inputs[left_front] =_left_front_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lfoffset) * tuningCoeff;
+
+    _pid_inputs[right_front] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuningCoeff;
+
+    _pid_inputs[right_back] = _right_back_setpoint * ratioCalc(masterDistance, _master_offset, rbDistance, rboffset) * tuningCoeff;
+
+    if (master.get_digital(DIGITAL_LEFT))
     {
-        lcd::set_text(4, to_string((int)_pid_inputs[left_back]) + ":" + to_string((int)_pid_inputs[left_front]) + ":" + to_string((int)_pid_inputs[right_back]) + ":" + to_string((int)_pid_inputs[right_front]));
-        lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
-        lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
+        s__t(4, t__s(tuningCoeff));
+        // lcd::set_text(4, to_string((int)_pid_inputs[left_back]) + ":" + to_string((int)_pid_inputs[left_front]) + ":" + to_string((int)_pid_inputs[right_back]) + ":" + to_string((int)_pid_inputs[right_front]));
+        // lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
+        // lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
     }
 }
 
@@ -138,7 +150,7 @@ const void stop(void)
     _pid_inputs = {0, 0, 0, 0};
 }
 
-void PID_Drive(void *)
+void PID_Drive3(void *)
 {
     while (true)
     {

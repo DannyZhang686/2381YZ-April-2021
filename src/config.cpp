@@ -48,6 +48,13 @@ pros::ADIEncoder *leftTracking = nullptr;
 pros::ADIEncoder *backTracking = nullptr;
 Inertial *inertial = nullptr;
 
+DrivePidConfig Z_Bot_Drive_Config =
+    {
+        {left_back, {0.6, 0, -0.1}},
+        {left_front, {0.6, 0, -0.1}},
+        {right_back, {0.6, 0, -0.1}},
+        {right_front, {0.6, 0, -0.1}},
+};
 // Default Competition Robot Tracking Setup
 complex<double> Position_Tracker::wheel_center_offset = {2.75, 5.25};
 bool shooterOn = true, intakeOn = true, indexerOn = true;

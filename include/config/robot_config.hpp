@@ -19,13 +19,7 @@ static DriveConfig Evan_Bot_Drive = {
 
 // 1 is top roller
 
-static DrivePidConfig Z_Bot_Drive_Config =
-{
-    {left_back, {0.6, 0, 0}},
-    {left_front, {0.6, 0, 0}},
-    {right_back, {0.6, 0, 0}},
-    {right_front, {0.6, 0, 0 }},
-};
+extern DriveConfig Z_Bot_Drive;
 
 static DriveConfig Y_Bot_Drive = {
     {left_back, {11, 0}},

@@ -26,7 +26,7 @@ static Motor_Controller* _right_back_motor_controller = nullptr;
 
 
 const void InitMotors(ConfigOptions config = Z);
-const void InitMotorControllers(DrivePidConfig DrivePidConfig = Z_Bot_Drive_Config);
+const void InitMotorControllers(DrivePidConfig DrivePidConfig );
 
 
 extern pros::Motor leftIntake;
