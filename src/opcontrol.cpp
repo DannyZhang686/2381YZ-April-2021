@@ -7,7 +7,7 @@
 
 void driver(void)
 {
-	// Controller_Set_Drive(0, master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
+	Controller_Set_Drive(0, master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
 	controllerIndexerSpin();
 	controllerIntakeSpin();
 	controllerShooterSpin();

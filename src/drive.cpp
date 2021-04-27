@@ -115,15 +115,15 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 
 
     tuningCoeff += _master_pid->Update(0, _master_error_average);
-    // if (tuningCoeff < 0)
-    // {
-    //     _master_pid->ResetError();
-    //     tuningCoeff = 1;
-    // }
-    // if(master.get_digital(DIGITAL_A))
-    // {
-    //     tuningCoeff = 1;
-    // }
+    if (tuningCoeff < 0)
+    {
+        _master_pid->ResetError();
+        tuningCoeff = 1;
+    }
+    if(master.get_digital(DIGITAL_A))
+    {
+        tuningCoeff = 1;
+    }
     _pid_inputs[left_back] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuningCoeff;
 
     _pid_inputs[left_front] =_left_front_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lfoffset) * tuningCoeff;
@@ -150,7 +150,7 @@ const void stop(void)
     _pid_inputs = {0, 0, 0, 0};
 }
 
-void PID_Drive3(void *)
+void PID_Drive(void *)
 {
     while (true)
     {

@@ -313,7 +313,7 @@ Drive::Input_t currentInput, previousInput = Drive::Input_t::Zero();
 
 double leftPos = 0, rightPos = 0;
 
-void PID_Drive(void*)
+void PID_Drive2(void*)
     {
     double timeSinceLast = 0;
     while (true)
