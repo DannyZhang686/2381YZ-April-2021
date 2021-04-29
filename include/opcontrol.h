@@ -36,6 +36,8 @@ extern DriveMode activeDriveMode;
 
 const void Controller_Set_Drive(double left_x, double left_y, double right_x, double right_y);
 const void Set_Drive(double lb, double lf, double rb, double rf);
+const void Set_Drive_Direct(double lb, double lf, double rb, double rf);
+
 void PID_Drive(void*);
 
 // void Set_Drive(double left_x, double left_y, double right_x, double right_y);

@@ -4,13 +4,62 @@
 #include "pid.h"
 #include "opcontrol.h"
 #include "utilities.h"
+#include "motors.h"
 using namespace std;
 
 AutoTask SingleRun(std::function<void(void)> run)
 {
     return AutoTask(run, [](void) -> bool { return true; });
 }
+namespace DriveProfile
+{
+    double targetAngle;  //The desired angle, which is constantly updated
+    double angleDiff;    //The angle (-π to π) to travel to face the final angle
+    double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
+    int time;
+    bool setTime;
 
+    static double turnCoeff = 0.95;
+}
+
+AutoTask DriveProfileTask(double speed)
+{
+    int* iteration;
+    auto init = [&](void)->void
+    {
+        iteration = new int(0);
+    };
+
+    auto run = [&, speed](void) -> void 
+    {
+        Set_Drive_Direct(speed, speed, -speed, -speed);
+        double currentSpeed = abs(position_tracker->Get_Velocity());
+        double currentAngVel = position_tracker->Get_Ang_Vel()*180/M_PI;
+
+		double currentWheelSpeed = (abs(leftBack->get_actual_velocity()) +abs( rightBack->get_actual_velocity()) +abs( leftFront->get_actual_velocity()) + abs(rightFront->get_actual_velocity()))/4;
+        s__t(3, t__s(*iteration));
+        std::string a = "" + t__s(*iteration) + "x"  + t__s(currentAngVel) + "\n";
+        std::string b = "" + t__s(*iteration) + "x"  + t__s(currentWheelSpeed) + ")\n";
+
+        printf(a.c_str());
+        printf(b.c_str());
+
+        (*iteration)++;
+    };
+
+    auto done = [&](void) -> bool
+    {
+        return false;
+    };
+
+    auto kill = [&](void)->void
+    {
+        delete iteration;
+    };
+
+    return AutoTask::SyncTask(run, done, init, kill);
+
+}
 namespace TurnToPoint
 {
     double targetAngle;  //The desired angle, which is constantly updated
@@ -27,7 +76,7 @@ AutoTask TurnToPointTask(Point target, double maxError, double turnSpeed)
     using namespace TurnToPoint;
 
     auto init = [&](void) -> void {
-        time = 0;
+	  time = 0;
         setTime = false;
     };
 

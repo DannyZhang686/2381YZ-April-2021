@@ -56,13 +56,11 @@ using namespace TaskLambdas;
 
 AutoSequence *Auton::AT_Test_Ultras = AutoSequence::FromTasks(
     vector<AutoTask>{
-        //     each tile is 24 inches, (0,0) at center of field, width of bot is 18, length is 14, tracked at center of bot, max distance is 3 tiles (72).
-        // autopath(AUTO_DRIVE.CPP) drives to a certain point P {0, -72}, and it will have the angle 0, and reach that point of 127
 
-        // PurePursuitTask({36, 0}, 0, 127).AddInit(IntakeF(200)),
+      DriveProfileTask(80),
         TurnToPointTask({-50, 50}, 0.07), // Changed from {25, 78} to 26, 77  because getting stuck at second tower on turn
 
-        Delay(100000),
+        // Delay(100000),
 
         SingleRun([](void) -> void {
           // position_tracker->Set_Position({36, 12}, PI / 2);  //UNCOMMENT TO CHANGE
