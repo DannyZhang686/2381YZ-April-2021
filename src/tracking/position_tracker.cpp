@@ -101,8 +101,6 @@ void Position_Tracker::Track_Position()
     position_change[right_] = (current_encoder_values[right_] - last_encoder_values[right_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
     position_change[back_] = (current_encoder_values[back_] - last_encoder_values[back_]) * PI * TRACKING_WHEEL_DIAMETER / 360;
 
-    s__t(3, "en: " + t__s(current_encoder_values[right_]) + " " + t__s(current_encoder_values[back_]) + " ");
-
     ang_last = ang_disp;
 
     last_encoder_values = current_encoder_values;

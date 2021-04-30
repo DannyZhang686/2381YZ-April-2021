@@ -39,22 +39,7 @@
 using namespace std;
 using namespace pros;
 
-pros::Motor *leftFront = nullptr;
-pros::Motor *rightFront = nullptr;
-pros::Motor *leftBack = nullptr;
-pros::Motor *rightBack = nullptr;
 
-pros::ADIEncoder *leftTracking = nullptr;
-pros::ADIEncoder *backTracking = nullptr;
-Inertial *inertial = nullptr;
-
-DrivePidConfig Z_Bot_Drive_Config =
-    {
-        {left_back, {0.6, 0, 0}},
-        {left_front, {0.6, 0, 0}},
-        {right_back, {0.6, 0, 0}},
-        {right_front, {0.6, 0, 0}},
-};
 // Default Competition Robot Tracking Setup
 complex<double> Position_Tracker::wheel_center_offset = {2.75, 5.25};
 bool shooterOn = true, intakeOn = true, indexerOn = true;

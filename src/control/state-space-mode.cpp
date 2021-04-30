@@ -4,11 +4,11 @@
 
 #include "Eigen/Dense"
 #include <tuple>
-#include "riccati_solver.h"
+#include "legacy/legacy_linalg/riccati_solver.h"
 #include "opcontrol.h"
 #include "motors.h"
 
-#include "matrix.h"
+#include "legacy/legacy_linalg/matrix.h"
 
 
 using namespace std;
@@ -40,7 +40,6 @@ double mInverse = 1, rbSquaredOverJ = 1, C1 = 1, C2 = 1, C3 = 1, C4 = 1;
 //     }
 //     return yeetle;
 // }
-
 
 string toString(double a)
     {

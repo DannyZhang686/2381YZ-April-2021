@@ -1,6 +1,5 @@
 #include "main.h"
 #include "autonomous/pathing.hpp"
-#include "autonomous/auto_drive.hpp"
 #include "autonomous/auto_task.hpp"
 #include "autonomous/position_tracker.hpp"
 #include "autonomous/auto_timer.hpp"
