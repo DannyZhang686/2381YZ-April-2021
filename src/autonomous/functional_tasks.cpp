@@ -34,7 +34,7 @@ AutoTask DriveProfileTask(double speed, double time)
 
 	auto run = [&, speed](void) -> void
 	{
-		Set_Drive_Direct(speed, speed, speed, speed);
+		Set_Drive_Direct(speed, speed, -speed, -speed);
 		double currentSpeed = abs(position_tracker->Get_Velocity());
 		double currentAngVel = position_tracker->Get_Ang_Vel() * 180 / M_PI;
 
@@ -117,9 +117,98 @@ double calcSlopeExponent(double maxSpeed, double currentSpeed, double exponent, 
 	return (currentSpeed - yIntercept) / maxSpeed;
 }
 
-const double MAX_SPEED = 11 * M_PI / 180; // 0.191986217719
-const double MAX_ACCEL = 0.5 * M_PI / 180; // 0.00872664625997
+const double MAX_SPEED = 12 * M_PI / 180; // 0.191986217719
+const double MAX_ACCEL = 1 * M_PI / 180; // 0.00872664625997
 const double EXPONENT = -0.1135;
+
+double calcSquareRoot(double currentDistance, double currentVelocity, double accel = 1.0)
+{
+	double expectedVelocity = -sqrt(abs(MAX_ACCEL * accel * currentDistance)) * getSignOf(currentDistance);
+	return currentVelocity / expectedVelocity;
+}
+
+double calcAccelTarget(double currentDistance, double currentVelocity, double errorTolerance, double maxAccel)
+{
+	double accelCoeff;
+	if (currentVelocity > 0 && currentDistance > 0) // Quadrant 1 Exclusive
+	{
+		accelCoeff = -1;
+	}
+	else if (currentVelocity >= 0 && currentDistance <= 0) //Quadrant 2 Inclusive
+	{
+		double expectedDeaccelVelocity = sqrt(-maxAccel * (currentDistance));
+		// Maximum deaccel curve that goes into (0,0), if the current phase is between max deaccel curve and y-axis.
+		if (currentVelocity >= expectedDeaccelVelocity)
+		{
+			accelCoeff = -1;
+		}
+		else
+		{
+			// Under max deaccel curve
+			if (abs(currentDistance) < errorTolerance)
+			{
+				// inside error tolerance zone, between max deacell curve and x-axis.
+				accelCoeff = 0;
+			}
+			else {
+				double bufferDeaccelVelocity = expectedDeaccelVelocity - sqrt(abs(maxAccel*errorTolerance));
+				if (currentVelocity >= bufferDeaccelVelocity)
+				{
+					// Inside buffer zone
+					accelCoeff = 0;
+				}
+				else if (currentVelocity < bufferDeaccelVelocity)
+				{
+					// Under buffer zone, continue accelerating
+					accelCoeff = 1;
+				}
+			}
+		}
+	}
+	else if (currentVelocity < 0 && currentDistance < 0) // Quadrant 3 Exclusive
+	{
+		accelCoeff = 1;
+	}
+	else if (currentVelocity <= 0 && currentDistance >= 0) // Quadrant 4 Inclusive
+	{
+		double expectedDeaccelVelocity = -sqrt(maxAccel * (currentDistance));
+		// Maximum deaccel curve that goes into (0,0), if the current phase is between max deaccel curve and y-axis.
+		if (currentVelocity <= expectedDeaccelVelocity)
+		{
+			accelCoeff = 1;
+		}
+		else
+		{
+			// Under max deaccel curve
+			if (abs(currentDistance) < errorTolerance)
+			{
+				// inside error tolerance zone, between max deacell curve and x-axis.
+				accelCoeff = 0;
+			}
+			else {
+				double bufferDeaccelVelocity = expectedDeaccelVelocity + sqrt(abs(maxAccel*errorTolerance));
+
+				if (currentVelocity <= bufferDeaccelVelocity)
+				{
+					// Inside buffer zone
+					accelCoeff = 0;
+				}
+				else if (currentVelocity > bufferDeaccelVelocity)
+				{
+					// Under buffer zone, continue accelerating
+					accelCoeff = -1;
+				}
+			}
+		}
+	}
+	else
+	{
+		// Uhh something fucked up.
+		accelCoeff = 0;
+	}
+
+	return accelCoeff * maxAccel;
+}
 
 AutoTask TurnToPointSMOOTH(Point targetPoint, double power, double accel)
 {
@@ -141,35 +230,41 @@ AutoTask TurnToPointSMOOTH(Point targetPoint, double power, double accel)
 	{
 		targetAngle = arg(targetPoint - position_tracker->Get_Position());
 		double currentAngle = position_tracker->Get_Angle();
-		angleDiff = NormalizeAngle(targetAngle - currentAngle);
+		angleDiff = NormalizeAngle(currentAngle - targetAngle);
+
+		// currentAngle + 
 
 		currentAngVel = position_tracker->Get_Ang_Vel();
 		double travelledDistance = NormalizeAngle(currentAngle - initialAngle);
 
-		double accelTarget = 0;
+		double accelTarget = calcAccelTarget(angleDiff, currentAngVel, 0.1, accel*MAX_ACCEL);
 
-		if (abs(travelledDistance) < accelDistance)
-		{
-			accelTarget = MAX_ACCEL * accel * getSignOf(angleDiff);
-		}
-		if (abs(angleDiff) < accelDistance)
-		{
-			accelTarget = -MAX_ACCEL * accel * getSignOf(angleDiff);
-		}
+		// double accelLine = (2*(abs(travelledDistance/initialDistance) - 0.5));
+		// double atanCurve = 2*atan(accelLine * accel)/M_PI;
+		// accelTarget = -atanCurve  * MAX_ACCEL * getSignOf(angleDiff);
+
+		// if (abs(travelledDistance) < accelDistance)
+		// {
+		// 	accelTarget = MAX_ACCEL *accel * getSignOf(angleDiff);
+		// }
+		// if (abs(angleDiff) < accelDistance)
+		// {
+		// 	accelTarget = -MAX_ACCEL *accel * getSignOf(angleDiff);
+		// }
 
 		speedCoefficient = 127 * calcSlopeExponent(MAX_SPEED, currentAngVel, EXPONENT, accelTarget);
 		Set_Drive_Direct(-speedCoefficient, -speedCoefficient, speedCoefficient, speedCoefficient);
 
-		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(speedCoefficient) + "x" + t__s(angleDiff) + "\n";
+		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(accelTarget) + "x" + t__s(angleDiff) + "\n";
 
-		s__t(4, t__s(angleDiff) + " "  + t__s(accelTarget) + " " + t__s(accelDistance));
+		s__t(4, t__s(angleDiff) + " " + t__s(accelTarget) + " " + t__s(accelDistance));
 		printf(a.c_str());
 
 		(iteration)++;
 	};
 
 	auto done = [&]() -> bool {
-		return (abs(angleDiff) < abs(initialDistance)/2 && abs(currentAngVel) < 0.1 * MAX_SPEED);
+		return (abs(angleDiff) < abs(initialDistance) / 2 && abs(currentAngVel) < 0.05 * MAX_SPEED);
 	};
 
 	auto kill = [&]

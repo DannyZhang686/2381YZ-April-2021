@@ -58,11 +58,11 @@ using namespace TaskLambdas;
 AutoSequence* Auton::AT_Test_Ultras = AutoSequence::FromTasks(
   vector<AutoTask>({
 
-    TurnToPointSMOOTH({-50, 50}, 100, 1),
+    TurnToPointSMOOTH({-50, 50}, 100, 0.5),
 
 
 
-    // DriveProfileTask(80),
+    // DriveProfileTask(127),
     RestProfileTask(),
     Delay(100000),
       TurnToPointTask({-50, 50}, 0.07), // Changed from {25, 78} to 26, 77  because getting stuck at second tower on turn

@@ -23,6 +23,7 @@ const bool Inertial::IsCalibrating(void)
 
 const void Inertial::Reset(void)
 { 
+    // imu1->
     imu1->reset();
     if(mode == B)
     {
