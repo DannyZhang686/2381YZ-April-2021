@@ -133,7 +133,7 @@ double calcAccelTarget(double currentDistance, double currentVelocity, double er
 AutoTask TurnToPointSMOOTH(Point targetPoint, double power, double accel)
 {
 
-	double& angleDiff = *(new double()), currentAngVel = *(new double()), initialAngle = *(new double());
+	double& angleDiff = *(new double()), &currentAngVel = *(new double()), &initialAngle = *(new double());
 	double& initialDistance = *(new double());
 
 	int& iteration = *(new int(0));

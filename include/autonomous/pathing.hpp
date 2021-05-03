@@ -15,12 +15,12 @@ PointList DefinePath(Point startPoint, Point endPoint, double startAngle);
 PointList InjectPoints(PointList path, double spacing);
 PointList smoother(PointList path, double weight_data, double weight_smooth, double tolerance);
 const double Curvature(Point currentPos, Point targetPos, double currentOrientation);
-long GetClosest(PointList path, Point currentPoint, long previousIndex = 0);
+const long GetClosest(const PointList path, const Point currentPoint, const long previousIndex = 0);
 PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing);
 const static Point PointNotFound = Point(-100000, 100000);
-std::tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long maxLookahead, long previousIndex = 0);
+const std::tuple<long, Point> FindLookAhead(const Point currentPos, const PointList path, const double radius, const long maxLookahead, const long previousIndex = 0);
 
-Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius);
+const Point CheckIntersection(const Point circleCenter, const Point startPoint, const Point endPoint, const double radius);
 
 
 #endif  //!__PATHING__H__

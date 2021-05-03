@@ -18,7 +18,7 @@ using namespace std;
 using namespace pros;
 using namespace std::complex_literals;
 
-PointList DefinePath(Point startPoint, Point endPoint, double startAngle)
+PointList DefinePath(const Point startPoint, const Point endPoint, const double startAngle)
 {
     // disp between the 2 points
     Point disp = endPoint - startPoint;
@@ -29,7 +29,7 @@ PointList DefinePath(Point startPoint, Point endPoint, double startAngle)
     return a;
 }
 
-PointList InjectPoints(PointList path, double spacing)
+PointList InjectPoints(const PointList path, const double spacing)
 {
     // spacing is space between 2 points that r injected
     PointList newPointList = {Point(path[0])};
@@ -57,7 +57,7 @@ PointList InjectPoints(PointList path, double spacing)
     return newPointList;
 }
 
-PointList smoother(PointList path, double weight_data, double weight_smooth, double tolerance)
+PointList smoother(const PointList path, const double weight_data, const double weight_smooth, const double tolerance)
 {
     //copy array
 
@@ -82,7 +82,7 @@ PointList smoother(PointList path, double weight_data, double weight_smooth, dou
     return newPath;
 }
 
-const double Curvature(Point currentPos, Point targetPos, double currentOrientation)
+const double Curvature(const Point currentPos, const Point targetPos, const double currentOrientation)
 {
     Point disp = targetPos - currentPos;
     double arg = std::arg(disp);
@@ -101,7 +101,7 @@ const double Curvature(Point currentPos, Point targetPos, double currentOrientat
     return dist / (2 * sin(angleToTravel));
 }
 
-long GetClosest(PointList path, Point currentPoint, long previousIndex)
+const long GetClosest(const PointList path, const Point currentPoint, const long previousIndex)
 {
     auto reducedPrevIndex = previousIndex - 3;
     if (reducedPrevIndex < 0)
@@ -127,7 +127,7 @@ long GetClosest(PointList path, Point currentPoint, long previousIndex)
     return minIndex;
 }
 
-tuple<long, Point> FindLookAhead(Point currentPos, PointList path, double radius, long maxLookahead, long previousIndex)
+const tuple<long, Point> FindLookAhead(const Point currentPos, const PointList path, const double radius, const long maxLookahead, const long previousIndex)
 {
     long index = previousIndex;
     long size = path.size();
@@ -185,7 +185,7 @@ PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, doub
     return path;
 }
 
-Point CheckIntersection(Point circleCenter, Point startPoint, Point endPoint, double radius)
+const Point CheckIntersection(const Point circleCenter, const Point startPoint, const Point endPoint, const double radius)
 {
     auto lineSegmentVector = endPoint - startPoint;
     auto circleToStartVector = startPoint - circleCenter;
