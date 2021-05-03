@@ -1,25 +1,27 @@
-// #include <math.h>
-// #include <vector>
-// #include <functional>
+#include "main.h"
 
-// #include "main.h"
+#include "api.h"
+#include <math.h>
+#include "globals.hpp"
+#include <list>
+#include <functional>
+#include "autonomous.h"
+#include "opcontrol.h"
 
-// #include "api.h"
-// #include "globals.hpp"
-// #include "autonomous/auton_control.hpp"
-// #include "autonomous/auto_timer.hpp"
-// #include "autonomous/auto_sequence.hpp"
-// #include "autonomous/global_sequences.hpp"
+#include "autonomous/functional_tasks.hpp"
+#include "autonomous/task_lambdas.hpp"
 
-// using namespace std;
-// using namespace Auton;
-// using namespace pros;
+using namespace std;
+using namespace Auton;
+using namespace pros;
 
-// AutoSequence *Auton::CUS_Q1 = AutoSequence::FromTasks({
-//     // Start Position
+using namespace TaskLambdas;
 
-   
-//     SingleRun([](void) -> void { position_tracker->Set_Position({0, 0}, 0, {48, 3.5}, 0); })
+AutoSequence Auton::CUS_Q1 = AutoSequence::FromTasks(
+  list<AutoTask>({
 
-// });
-// // (.13, .19) - (45, -2.5) , (-.5, -.9) - (43, -1)
+    TurnToPointSMOOTH({-50, 50}, 100, 0.5),
+    PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
+
+    })
+);

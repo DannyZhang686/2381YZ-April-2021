@@ -73,7 +73,7 @@ void MasterController::autonomous() {
     // lcd::set_text(1, "Increment Value: " + to_string(_autonomous_increment));
     if (master.get_digital(E_CONTROLLER_DIGITAL_X)){
         STOP = false;
-        auton_control->run();
+        auton_control.run();
     } else {
         stop();
         STOP = true;
@@ -86,7 +86,7 @@ void MasterController::autonomous() {
         set_state(driver_mode);
     }
     if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-        auton_control->Reset();
+        auton_control.Reset();
     }
     // lcd::set_text(1, "Current Increment Value: " + to_string(autonomous_increment));
     // lcd::set_text(2, "Set To " + to_string(_local_increment));

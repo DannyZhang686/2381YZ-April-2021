@@ -10,7 +10,7 @@
 void autonomous() {
 	while(true)
 	{
-		auton_control->run();
+		auton_control.run();
 		pros::delay(DELAY_INTERVAL);
 	}
 }

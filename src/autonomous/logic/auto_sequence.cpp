@@ -1,51 +1,42 @@
 #include "main.h"
 #include "autonomous/auto_task.hpp"
 #include "autonomous/auto_sequence.hpp"
-#include <vector>
+#include <list>
 #include <functional>
 using namespace std;
 
-AutoSequence* AutoSequence::FromTasks(vector<AutoTask> tasks) {
-    AutoSequence* instance = new AutoSequence();
-    instance->add_tasks(tasks);
+AutoSequence AutoSequence::FromTasks(list<AutoTask> tasks) {
+    AutoSequence instance = AutoSequence(tasks);
     return instance;
 }
 
-void AutoSequence::add_tasks(vector<AutoTask> tasks){
-    taskList.reserve(taskList.size() + tasks.size());
+void AutoSequence::add_tasks(list<AutoTask> tasks) {
     taskList.insert(taskList.end(), tasks.begin(), tasks.end());
-    resetTaskList.reserve(resetTaskList.size() + tasks.size());
     resetTaskList.insert(resetTaskList.end(), tasks.begin(), tasks.end());
 }
 
-AutoSequence::AutoSequence() : AutoTask(
-    [&](void) -> void {//run
-        run_sequence();
-    },
-    [&](void)->bool {//done
-        return isSequenceFinished;
-    })
+AutoSequence::AutoSequence(list<AutoTask> tasks) : AutoTask(SequenceConstructorArgs)
 {
-
+    add_tasks(tasks);
 }
 
 void AutoSequence::Reset()
 {
     isSequenceFinished = false;
-    taskList = resetTaskList;
+    taskList = list<AutoTask>(resetTaskList);
 }
 
-void AutoSequence::run_sequence(){
+void AutoSequence::run_sequence() {
     // First check if the sequence is done.
-    if(taskList.empty()) 
-    {  
+    if (taskList.empty())
+    {
         isSequenceFinished = true;
         return;
     }
     // Otherwise begin at the first task in the list.
-    auto it = taskList.begin(); 
+    auto it = taskList.begin();
 
-    while (it!= taskList.end()){
+    while (it != taskList.end()) {
 
         // Iterate through the tasks in the list, beggining the event loop
         if (!it->_initialized)
@@ -66,10 +57,10 @@ void AutoSequence::run_sequence(){
             // The Kill() function runs once at the end of the task, in order to perform
             // all of the functions that need to be done as the task is disposed of - stopping the drive for example.
             it->kill();
-            // Erase the task from the task vector.
-            it = taskList.erase(it);   
+            // Erase the task from the task list.
+            it = taskList.erase(it);
         }
-        
+
         // If task is a synchronous task - stop the task loop here.
         // If the task is asynchronous, run this task, but continue to run the next tasks in the event loop
         // until a blocking task is reached.

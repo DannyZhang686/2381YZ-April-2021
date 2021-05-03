@@ -14,7 +14,7 @@
  */
 
 bool Competition_Env = false;
-AutonControl* auton_control = AutonControl::instance();
+AutonControl& auton_control = AutonControl::instance();
 MasterController* master_control = MasterController::instance();
 bool STOP = false;
 Position_Tracker* position_tracker = Position_Tracker::instance();
@@ -50,8 +50,8 @@ void initialize()
 	// auton_control->define_auton(AutonControl::CUS_Q3, CUS_Q3);
 	// auton_control->define_auton(AutonControl::CUS_Q4, CUS_Q4);
 
-	auton_control->define_auton(AutonControl::TestAuton, AT_Test_Ultras);
-	auton_control->select_auton(AutonControl::TestAuton);
+	auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
+	auton_control.select_auton(AutonControl::TestAuton);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over

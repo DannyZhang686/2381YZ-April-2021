@@ -3,7 +3,7 @@
 #include "api.h"
 #include <math.h>
 #include "globals.hpp"
-#include <vector>
+#include <list>
 #include <functional>
 #include "autonomous.h"
 #include "opcontrol.h"
@@ -15,11 +15,10 @@ using namespace std;
 using namespace Auton;
 using namespace pros;
 
-int TaskLambdas::runNumber = 0;
 using namespace TaskLambdas;
 
-AutoSequence* Auton::AT_Test_Ultras = AutoSequence::FromTasks(
-  vector<AutoTask>({
+AutoSequence Auton::AT_Test_Ultras = AutoSequence::FromTasks(
+  list<AutoTask>({
 
     TurnToPointSMOOTH({-50, 50}, 100, 0.5),
 

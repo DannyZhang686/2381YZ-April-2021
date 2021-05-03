@@ -16,7 +16,7 @@ extern void driver();
 extern bool Competition_Env;
 extern std::uint32_t now;
 extern MasterController* master_control;
-extern AutonControl* auton_control;
+extern AutonControl& auton_control;
 
 extern Position_Tracker* position_tracker;
 

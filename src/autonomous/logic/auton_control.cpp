@@ -1,9 +1,9 @@
 #include "main.h"
 #include "autonomous/auton_control.hpp"
 
-AutonControl* AutonControl::instance() {
-    static AutonControl control;
-    return &control;
+AutonControl& AutonControl::instance() {
+    static AutonControl& control = *(new AutonControl());
+    return control;
 }
 void AutonControl::run() {
     _auton_running->run();
@@ -20,7 +20,6 @@ void AutonControl::select_auton(Autonomous sequence){
     }
 }
 
-int AutonControl::define_auton(Autonomous sequence, AutoSequence* auton) {
-    autonomous_registry[sequence] = auton;
-    return 4;
+int AutonControl::define_auton(Autonomous sequence, AutoSequence& auton) {
+    autonomous_registry[sequence] = &auton;
 }

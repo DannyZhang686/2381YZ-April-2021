@@ -31,10 +31,10 @@ public:
     };
 
     std::map<Autonomous, AutoSequence *> autonomous_registry;
-    int define_auton(Autonomous sequence, AutoSequence *auton);
+    int define_auton(Autonomous sequence, AutoSequence &auton);
 
     void select_auton(Autonomous sequence);
-    static AutonControl *instance();
+    static AutonControl& instance();
     void run();
     void Reset();
 
