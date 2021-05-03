@@ -14,10 +14,10 @@
  */
 
 bool Competition_Env = false;
-AutonControl *auton_control = AutonControl::instance();
-MasterController *master_control = MasterController::instance();
+AutonControl* auton_control = AutonControl::instance();
+MasterController* master_control = MasterController::instance();
 bool STOP = false;
-Position_Tracker *position_tracker = Position_Tracker::instance();
+Position_Tracker* position_tracker = Position_Tracker::instance();
 DriveMode activeDriveMode = PidMode;
 
 void initialize()
@@ -37,17 +37,25 @@ void initialize()
 
 
 
+
 	using namespace Auton;
+	// AutoSequence* CUS_FULL = AutoSequence::FromTasks({*CUS_Q1,
+	// 												  *CUS_Q2,
+	// 												  *CUS_Q3,
+	// 												  *CUS_Q4});
+
+	// auton_control->define_auton(AutonControl::CUS_ALL, CUS_FULL);
+	// auton_control->define_auton(AutonControl::CUS_Q1, CUS_Q1);
+	// auton_control->define_auton(AutonControl::CUS_Q2, CUS_Q2);
+	// auton_control->define_auton(AutonControl::CUS_Q3, CUS_Q3);
+	// auton_control->define_auton(AutonControl::CUS_Q4, CUS_Q4);
+
 	auton_control->define_auton(AutonControl::TestAuton, AT_Test_Ultras);
 	auton_control->select_auton(AutonControl::TestAuton);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over
 	// pros::Task brainScreen(gui, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "GUI");
-
-	// tLineSensor.calibrate(); //Blocking, takes around 500 ms
-	// bLineSensor.calibrate();
-	// pros::delay(3000); //Let everything init properly
 }
 
 /**

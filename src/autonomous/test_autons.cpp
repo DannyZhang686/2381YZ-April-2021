@@ -7,60 +7,21 @@
 #include <functional>
 #include "autonomous.h"
 #include "opcontrol.h"
+
 #include "autonomous/functional_tasks.hpp"
+#include "autonomous/task_lambdas.hpp"
 
 using namespace std;
 using namespace Auton;
 using namespace pros;
 
-namespace TaskLambdas
-{
-
-  /**
- * @brief Intake Single Run Lambda - Previously Intake No Shoot
- * @param intakeSpeed Intake Voltage default 200
- *
- */
-  int runNumber = 0;
-  auto PrintLocation(std::string text)
-  {
-    return [&, text] {
-      std::string a = "(" + text + ") RUN: " + t__s(runNumber) + " pos: " + t__s(position_tracker->Get_Position().real()) + ", " + t__s(position_tracker->Get_Position().imag()) + " \n";
-      printf(a.c_str());
-      runNumber++;
-    };
-  }
-  auto IntakeF(double intakeSpeed = 200)
-  {
-    return [intakeSpeed] {
-      intakeNoShoot(intakeSpeed);
-    };
-  };
-
-  /**
-* @brief Lambda Sets Drive To 0 With Both Safe and PID Drive
-**/
-  auto SetDrive0 = [] {
-    setDriveSafe(0, 0);
-    Set_Drive(0, 0, 0, 0);
-  };
-
-  // Uses `SetDriveSafe(velocity, velocity)` for `time` ms duration, then SetDrive0
-  const AutoTask TimeBasedMoveTask(double velocity, double time)
-  {
-    return Delay(time).AddRun([velocity] { setDriveSafe(velocity, velocity); }).AddKill(SetDrive0).AddKill(PrintLocation(""));
-  };
-
-}
-
+int TaskLambdas::runNumber = 0;
 using namespace TaskLambdas;
 
 AutoSequence* Auton::AT_Test_Ultras = AutoSequence::FromTasks(
   vector<AutoTask>({
 
     TurnToPointSMOOTH({-50, 50}, 100, 0.5),
-
-
 
     // DriveProfileTask(127),
     RestProfileTask(),
@@ -157,93 +118,93 @@ AutoSequence* Auton::AT_Test_Ultras = AutoSequence::FromTasks(
           TurnToPointTask({76, 100}, 0.07),
           PurePursuitTask({76, 100}, 0, 127).AddInit(IntakeF(200)),
 
+    Delay(250),
+
+    TurnToPointTask({76, 133}, 0.07),
+    PurePursuitTask({76, 125}, 0, 100).AddRun([] { // 136 before
+      stopMotors();
+    }),
+
+      //Goal 4
+      TimeBasedMoveTask(40, 650),
+      IntakeShootTask(0, 1).AddKill([](void) -> void {
+        stopMotors();
+      }).TimeLimit(1000),
+      TimeBasedMoveTask(-65, 1000),
+
+        //4 to 5
+        TurnToPointTask({110, 123.5}, 0.07),
+        PurePursuitTask({110, 123.5}, 0, 127).AddInit(IntakeF(200)),
+        //No delay; keep momentum instead
+
+        TurnToPointTask({126, 134}, 0.07), // From 126 , 136
+        PurePursuitTask({126, 134}, 0, 60).AddRun([] {
+          stopMotors();
+        }),
+
+        //Goal 5
+        TimeBasedMoveTask(70, 650),
+        IntakeShootTask(0, 1).AddKill([](void) -> void {
+          stopMotors();
+        }).TimeLimit(1000),
+        TimeBasedMoveTask(-65, 650),
+
+          //5 to 6
+          TurnToPointTask({116, 77}, 0.07),                        // Pure: 120, 72
+          PurePursuitTask({116, 77}, 0, 127).AddRun(IntakeF(200)), // Pure: 120, 72
+
           Delay(250),
 
-          TurnToPointTask({76, 133}, 0.07),
-          PurePursuitTask({76, 125}, 0, 100).AddRun([] { // 136 before
+          TurnToPointTask({134, 75}, 0.07).AddKill([] { // Pure: 144, 72
             stopMotors();
           }),
 
-            //Goal 4
-            TimeBasedMoveTask(40, 650),
+          //Goal 6
+          TimeBasedMoveTask(70, 1000),
+          IntakeShootTask(0, 1).AddKill([](void) -> void {
+            stopMotors();
+          }).TimeLimit(1000),
+          TimeBasedMoveTask(-65, 650),
+
+            //6 to 7
+            TurnToPointTask({87, 81}, 0.07),
+            PurePursuitTask({87, 81}, 0, 100).AddRun(IntakeF(200)), //Pure: 72, 72
+
+            //Goal 7
+            // TimeBasedMoveTask(100, 650).AddKill([] {
+            //   stopMotors();
+            // }),
+            TimeBasedMoveTask(-70, 400),
+            TimeBasedMoveTask(0, 200),
+            TimeBasedMoveTask(127, 400),
+            TimeBasedMoveTask(-70, 400),
+            TimeBasedMoveTask(0, 200),
+            TimeBasedMoveTask(127, 400),
+            TimeBasedMoveTask(-70, 400),
+            TimeBasedMoveTask(0, 200),
+            TimeBasedMoveTask(127, 400),
+
             IntakeShootTask(0, 1).AddKill([](void) -> void {
               stopMotors();
             }).TimeLimit(1000),
-            TimeBasedMoveTask(-65, 1000),
+            TimeBasedMoveTask(-127, 650),
 
-              //4 to 5
-              TurnToPointTask({110, 123.5}, 0.07),
-              PurePursuitTask({110, 123.5}, 0, 127).AddInit(IntakeF(200)),
-              //No delay; keep momentum instead
+              //7 to 8
+              TurnToPointTask({100, 36}, 0.07),                        // Pure: 108, 24
+              PurePursuitTask({100, 36}, 0, 100).AddRun(IntakeF(200)), // Pure: 108, 24
 
-              TurnToPointTask({126, 134}, 0.07), // From 126 , 136
-              PurePursuitTask({126, 134}, 0, 60).AddRun([] {
+              Delay(250),
+
+              TurnToPointTask({123, 25}, 0.07), // Pure: 144, 0
+              PurePursuitTask({123, 25}, 0, 100).AddRun([] { // Pure: 144, 0
                 stopMotors();
               }),
 
-              //Goal 5
+              //Goal 8
               TimeBasedMoveTask(70, 650),
               IntakeShootTask(0, 1).AddKill([](void) -> void {
                 stopMotors();
               }).TimeLimit(1000),
-              TimeBasedMoveTask(-65, 650),
-
-                //5 to 6
-                TurnToPointTask({116, 77}, 0.07),                        // Pure: 120, 72
-                PurePursuitTask({116, 77}, 0, 127).AddRun(IntakeF(200)), // Pure: 120, 72
-
-                Delay(250),
-
-                TurnToPointTask({134, 75}, 0.07).AddKill([] { // Pure: 144, 72
-                  stopMotors();
-                }),
-
-                //Goal 6
-                TimeBasedMoveTask(70, 1000),
-                IntakeShootTask(0, 1).AddKill([](void) -> void {
-                  stopMotors();
-                }).TimeLimit(1000),
-                TimeBasedMoveTask(-65, 650),
-
-                  //6 to 7
-                  TurnToPointTask({87, 81}, 0.07),
-                  PurePursuitTask({87, 81}, 0, 100).AddRun(IntakeF(200)), //Pure: 72, 72
-
-                  //Goal 7
-                  // TimeBasedMoveTask(100, 650).AddKill([] {
-                  //   stopMotors();
-                  // }),
-                  TimeBasedMoveTask(-70, 400),
-                  TimeBasedMoveTask(0, 200),
-                  TimeBasedMoveTask(127, 400),
-                  TimeBasedMoveTask(-70, 400),
-                  TimeBasedMoveTask(0, 200),
-                  TimeBasedMoveTask(127, 400),
-                  TimeBasedMoveTask(-70, 400),
-                  TimeBasedMoveTask(0, 200),
-                  TimeBasedMoveTask(127, 400),
-
-                  IntakeShootTask(0, 1).AddKill([](void) -> void {
-                    stopMotors();
-                  }).TimeLimit(1000),
-                  TimeBasedMoveTask(-127, 650),
-
-                    //7 to 8
-                    TurnToPointTask({100, 36}, 0.07),                        // Pure: 108, 24
-                    PurePursuitTask({100, 36}, 0, 100).AddRun(IntakeF(200)), // Pure: 108, 24
-
-                    Delay(250),
-
-                    TurnToPointTask({123, 25}, 0.07), // Pure: 144, 0
-                    PurePursuitTask({123, 25}, 0, 100).AddRun([] { // Pure: 144, 0
-                      stopMotors();
-                    }),
-
-                    //Goal 8
-                    TimeBasedMoveTask(70, 650),
-                    IntakeShootTask(0, 1).AddKill([](void) -> void {
-                      stopMotors();
-                    }).TimeLimit(1000),
-                    TimeBasedMoveTask(-65, 1000),
+              TimeBasedMoveTask(-65, 1000),
     })
 );

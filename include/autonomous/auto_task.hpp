@@ -20,15 +20,15 @@ class AutoTask {
     std::vector<std::function<bool(void)>> doneList = {};
 
 
-    static AutoTask AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
-    static AutoTask SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
-    static AutoTask AutoDelay(int interval, bool sync = true, std::function<void(void)> task = [](void) -> void {}, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
+    static AutoTask& AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
+    static AutoTask& SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
+    static AutoTask& AutoDelay(int interval, bool sync = true);
 
-    AutoTask TimeLimit(int time);
+    AutoTask& TimeLimit(int time);
     
     bool isSync;
     bool _initialized = false;
-    AutoTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void)-> void{}, std::function<void(void)> kill = [](void)->void{}, bool sync = true);
+    AutoTask(std::function<void(void)> task, std::function<bool(void)> done, bool sync = true, std::function<void(void)> init = [](void)-> void{}, std::function<void(void)> kill = [](void)->void{});
 
     AutoTask& AddRun(std::function<void(void)> task);
     AutoTask& AddKill(std::function<void(void)> kill);

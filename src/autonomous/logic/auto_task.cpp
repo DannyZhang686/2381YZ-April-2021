@@ -2,25 +2,22 @@
 #include "autonomous/auto_task.hpp"
 #include "autonomous/auto_timer.hpp"
 
-AutoTask AutoTask::AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
+AutoTask& AutoTask::AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
 {
-    AutoTask *asyncTask = new AutoTask(task, done, init, kill, false);
-    return *asyncTask;
+    AutoTask& asyncTask = *(new AutoTask(task, done, false, init, kill));
+    return asyncTask;
 }
-AutoTask AutoTask::SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
+AutoTask& AutoTask::SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
 {
-    AutoTask syncTask = AutoTask(task, done, init, kill, true);
+    AutoTask& syncTask = *(new AutoTask(task, done, true, init, kill ));
     return syncTask;
 }
-AutoTask AutoTask::AutoDelay(int time, bool sync, std::function<void(void)> task, std::function<void(void)> init, std::function<void(void)> kill)
+AutoTask& AutoTask::AutoDelay(int time, bool sync)
 {
-    return *new AutoTimer({interval : time, sync : sync, task : task, init : init, kill : kill});
+    return *(new AutoTimer({interval : time, sync : sync}));
 }
 
-
-
-
-AutoTask::AutoTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill, bool sync)
+AutoTask::AutoTask(std::function<void(void)> task, std::function<bool(void)> done, bool sync, std::function<void(void)> init, std::function<void(void)> kill)
     : isSync(sync)
 {
     this->doneList.push_back(done);
@@ -85,25 +82,25 @@ bool AutoTask::done(void)
     }
     return isDone;
 }
-AutoTask AutoTask::TimeLimit(int time)
+AutoTask& AutoTask::TimeLimit(int time)
 {
 
-    AutoTask *timedTask = new AutoTimer(time);
+    AutoTask& timedTask = *(new AutoTimer(time));
     for (const auto &value : this->runList)
     {
-        timedTask->AddRun(value);
+        timedTask.AddRun(value);
     };
     for (const auto &value : this->killList)
     {
-        timedTask->AddKill(value);
+        timedTask.AddKill(value);
     }
     for (const auto &value : this->initList)
     {
-        timedTask->AddInit(value);
+        timedTask.AddInit(value);
     }
     for (const auto &value : this->doneList)
     {
-        timedTask->AddDone(value);
+        timedTask.AddDone(value);
     }
-    return *timedTask;
+    return timedTask;
 }

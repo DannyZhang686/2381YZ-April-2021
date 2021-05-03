@@ -10,7 +10,7 @@ AutoTimer::AutoTimer(AutoTimerArgs args)
           },
           [&](void) -> bool {
 
-            return (_time >= _duration); }, args.init, args.kill, args.sync},
+            return (_time >= _duration); }, args.sync, args.init, args.kill},
       _duration(args.interval), _run_action(args.task)
 {
 }
@@ -18,17 +18,17 @@ void AutoTimer::_run_increment()
 {
   _time += DELAY_INTERVAL;
 }
-AutoTimer::AutoTimer(int duration, bool sync, std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
+AutoTimer::AutoTimer(int duration, bool sync)
     : AutoTask{
           [&](void) -> void {
-            _run_action();
             _run_increment();
           },
-          [&](void) -> bool { return (_timer_done()); }, init, kill, sync},
-      _duration(duration), _run_action(task), _done_check(done)
+          [&](void) -> bool { return (_timer_done()); }, sync},
+      _duration(duration)
+      
 {
 }
 bool AutoTimer::_timer_done()
 {
-  return ((_time >= _duration) || _done_check());
+  return ((_time >= _duration));
 }

@@ -50,39 +50,42 @@ int getSignOf(double yeet)
 namespace PPS
 {
 
-    PointList path = {};
+    const double maxLookaheadDistance = 18;
+    const long lookAheadNumber = 40;
+    const double startDistance = 0;
+    const double PathSpacing = 1;
 
-    long mostestClosestIndex = 0;
-
-    Point startPoint = 0, endPoint = 0, currentPos = 0, prevPos = 0, lookaheadPnt = 0;
-    double startAngle = 0, endAngle = 0, currentAngle = 0;
-
-    long previousLookaheadIndex = 0;
-
-    static double maxLookaheadDistance = 18;
-    static long lookAheadNumber = 40;
-    static double startDistance = 0;
-    static double PathSpacing = 1;
-
-    array<double, 2> previousSpeeds = {0, 0};
-
-    static double deaccelStrength = 3;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
-    static double turningStrength = 0.1;  // Turning Level Coefficient - Exponential - -1 for max sensitive turning, +1 for max dampened turning 
-    static double accelDampening = 0.1; // Top Level Acceleration Control Coefficient - Exponential - Between 0 - 1
+    const double deaccelStrength = 3;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
+    const double turningStrength = 0.1;  // Turning Level Coefficient - Exponential - -1 for max sensitive turning, +1 for max dampened turning 
+    const double accelDampening = 0.1; // Top Level Acceleration Control Coefficient - Exponential - Between 0 - 1
     
+            // Remaining Distance Calculator, Range between 0 -1, set to 1 by default in `init`, don't change this.
+    const double actualTurningCoeff = exp(turningStrength);
 
-    static double deaccelCoeff;         // Remaining Distance Calculator, Range between 0 -1, set to 1 by default in `init`, don't change this.
-    static double actualTurningCoeff = exp(turningStrength);
-
-    static double curvature = 1;
-    static double H_Wheel_Disp = 6.315;
+    const double curvature = 1;
+    const double H_Wheel_Disp = 6.315;
 
 }
 
 AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed, array<double, 2> errorTolerance)
 {
-    using namespace PPS;
+
+    PointList& path = *(new PointList({}));
+    
+    long& mostestClosestIndex = *(new long(0)), previousLookaheadIndex = *(new long(0));
+
+    Point& startPoint = *(new Point(0)), endPoint = *(new Point(0)), currentPos = *(new Point(0)), prevPos = *(new Point(0)), 
+        lookaheadPnt = *(new Point(0));
+
+    double& startAngle = *(new double(0)), endAngle = *(new double(0)), 
+        currentAngle = *(new double(0)), startDistance = *(new double(0)), deaccelCoeff = *(new double(0));
+
+
+    array<double, 2>& previousSpeeds = *(new array<double,2>({0, 0}));
     // run function
+
+    using namespace PPS;
+
     auto runFn = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> void {
         currentPos = position_tracker->Get_Position();
         currentAngle = position_tracker->Get_Angle();
@@ -177,57 +180,14 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
         return (deaccelCoeff < 0.5 && abs(previousSpeeds[0]) + abs(previousSpeeds[1]) < 40);
     };
 
-    auto kill = [](void) -> void { Set_Drive(0, 0, 0, 0); };
+    auto kill = [&](void) -> void {
+        delete (&mostestClosestIndex, &previousLookaheadIndex, &startPoint, &endPoint,
+            &currentPos, &prevPos, &lookaheadPnt, &startAngle, &endAngle, &currentAngle, 
+            &startDistance, &deaccelCoeff);
+        Set_Drive(0, 0, 0, 0); 
+    };
 
     return AutoTask::SyncTask(
         runFn, done, init, kill);
 }
-
-// namespace TurnToPoint
-// {
-//     double targetAngle;     //The desired angle, which is constantly updated
-//     double travellingAngle; //The angle (-π to π) to travel to face the final angle
-//     double tAngleInches;    //travellingAngle converted to a value in inches (for PD purposes)
-//     int time;
-//     bool setTime;
-// }
-
-// AutoTask TurnToPointTask(Point target, double maxError)
-// {
-//     using namespace TurnToPoint;
-
-//     auto init = [&](void) -> void {
-//         time = 0;
-//         setTime = false;
-//     };
-
-//     auto runFn = [&, target, maxError]() -> void {
-//         targetAngle = arg(position_tracker->Get_Position() - target);
-
-//         travellingAngle = smallestAngle(robotPos.angle, targetAngle);
-//         tAngleInches = angleToInches(travellingAngle);
-
-//         double leftOutput = 0, rightOutput = 0;                //Power output (0-200) for each side of the robot
-//         leftOutput = leftTurn.getOutput(0, 20 * tAngleInches); //Setpoint distance value for PD
-//         rightOutput = -rightTurn.getOutput(0, 20 * tAngleInches);
-//         Set_Drive(leftOutput, leftOutput, rightOutput, rightOutput);
-//         s__t(4, t__s(targetAngle) + " " + t__s(robotPos.angle) + " " + t__s(travellingAngle));
-//     };
-
-//     auto doneFn = [&, maxError]() -> bool {
-//         if ((!setTime) && (fabs(travellingAngle) < maxError))
-//         {
-//             time = pros::millis();
-//             setTime = true;
-//         }
-//         else if ((time != 0) && (pros::millis() - time > 250))
-//         {
-//             return true;
-//         }
-//         return false;
-//     };
-//     auto kill = [] {
-//         Set_Drive(0, 0, 0, 0);
-//     };
-//     return AutoTask::SyncTask(runFn, doneFn, init, kill);
-// }
+ 

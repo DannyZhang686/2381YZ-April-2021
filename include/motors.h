@@ -6,7 +6,6 @@
 #include "main.h"
 #include "control/motor_controller.hpp"
 #include "config/config_types.hpp"
-#include "config/robot.config.hpp"
 #include "inertial_module.hpp"
 
 #include <tuple>

@@ -13,92 +13,7 @@ AutoTask SingleRun(std::function<void(void)> run)
 {
 	return AutoTask(run, [](void) -> bool { return true; });
 }
-namespace DriveProfile
-{
-	double targetAngle;  //The desired angle, which is constantly updated
-	double angleDiff;    //The angle (-π to π) to travel to face the final angle
-	double tAngleInches; //travellingAngle converted to a value in inches (for PD purposes)
-	int time;
-	bool setTime;
 
-	static double turnCoeff = 0.95;
-}
-
-AutoTask DriveProfileTask(double speed, double time)
-{
-	int* iteration;
-	auto init = [&](void)->void
-	{
-		iteration = new int(0);
-	};
-
-	auto run = [&, speed](void) -> void
-	{
-		Set_Drive_Direct(speed, speed, -speed, -speed);
-		double currentSpeed = abs(position_tracker->Get_Velocity());
-		double currentAngVel = position_tracker->Get_Ang_Vel() * 180 / M_PI;
-
-		double currentWheelSpeed = (abs(leftBack->get_actual_velocity()) + abs(rightBack->get_actual_velocity()) + abs(leftFront->get_actual_velocity()) + abs(rightFront->get_actual_velocity())) / 4;
-		s__t(3, t__s(*iteration));
-		std::string a = "" + t__s(*iteration) + "x" + t__s(currentAngVel) + "x" + t__s(currentWheelSpeed) + "x" + t__s(currentSpeed) + "\n";
-
-		printf(a.c_str());
-		(*iteration)++;
-	};
-
-	auto done = [&](void) -> bool
-	{
-		return false;
-	};
-
-	auto kill = [&](void)->void
-	{
-		printf("\n------------------\n\n");
-		delete iteration;
-	};
-
-	return AutoTask::SyncTask(run, done, init, kill).TimeLimit(time);
-}
-
-
-AutoTask RestProfileTask()
-{
-	int* iteration;
-	double* wheelSpeed;
-
-	auto init = [&](void)->void
-	{
-		iteration = new int(0);
-		wheelSpeed = new double(0);
-	};
-
-	auto run = [&](void) -> void
-	{
-		Set_Drive_Direct(0, 0, 0, 0);
-		double currentSpeed = abs(position_tracker->Get_Velocity());
-		double currentAngVel = position_tracker->Get_Ang_Vel() * 180 / M_PI;
-
-		(*wheelSpeed) = (abs(leftBack->get_actual_velocity()) + abs(rightBack->get_actual_velocity()) + abs(leftFront->get_actual_velocity()) + abs(rightFront->get_actual_velocity())) / 4;
-		s__t(3, t__s(*iteration));
-		std::string a = "" + t__s(*iteration) + "x" + t__s(currentAngVel) + "x" + t__s(*wheelSpeed) + "x" + t__s(currentSpeed) + "\n";
-
-		printf(a.c_str());
-		(*iteration)++;
-	};
-
-	auto done = [&](void) -> bool
-	{
-		return (*wheelSpeed) < 1;
-	};
-
-	auto kill = [&](void)->void
-	{
-		printf("\n------------------\n\n");
-		delete iteration, wheelSpeed;
-	};
-
-	return AutoTask::SyncTask(run, done, init, kill);
-}
 namespace TurnToPoint
 {
 	double targetAngle;  //The desired angle, which is constantly updated
@@ -110,10 +25,15 @@ namespace TurnToPoint
 	static double turnCoeff = 0.95;
 }
 
+double calcVoltageCoefficient(double maxSpeed, double currentSpeed, double decayExponent, double targetAcceleration)
+// Solves for voltage given the differential equation x`` = a * V - b x`,
+// where x`` is target accel, x` is current velocity, V is voltage and b = e ^ decayExponent.
+// `maxSpeed` is the steady state velocity of the system when the motors are set to maximum voltage.
 
-double calcSlopeExponent(double maxSpeed, double currentSpeed, double exponent, double slope)
+// Returns a value from -1 to 1, which is proportional to the voltage input of the system.
+// Specifically, the calculated motor voltage = MAX_VOLTAGE * voltageCoefficient.
 {
-	double yIntercept = slope / exponent;
+	double yIntercept = targetAcceleration / decayExponent;
 	return (currentSpeed - yIntercept) / maxSpeed;
 }
 
@@ -151,7 +71,7 @@ double calcAccelTarget(double currentDistance, double currentVelocity, double er
 				accelCoeff = 0;
 			}
 			else {
-				double bufferDeaccelVelocity = expectedDeaccelVelocity - sqrt(abs(maxAccel*errorTolerance));
+				double bufferDeaccelVelocity = expectedDeaccelVelocity - sqrt(abs(maxAccel * errorTolerance));
 				if (currentVelocity >= bufferDeaccelVelocity)
 				{
 					// Inside buffer zone
@@ -186,7 +106,7 @@ double calcAccelTarget(double currentDistance, double currentVelocity, double er
 				accelCoeff = 0;
 			}
 			else {
-				double bufferDeaccelVelocity = expectedDeaccelVelocity + sqrt(abs(maxAccel*errorTolerance));
+				double bufferDeaccelVelocity = expectedDeaccelVelocity + sqrt(abs(maxAccel * errorTolerance));
 
 				if (currentVelocity <= bufferDeaccelVelocity)
 				{
@@ -213,53 +133,38 @@ double calcAccelTarget(double currentDistance, double currentVelocity, double er
 AutoTask TurnToPointSMOOTH(Point targetPoint, double power, double accel)
 {
 
-	double& targetAngle = *(new double()), angleDiff = *(new double()), currentAngVel = *(new double()), accelDistance = *(new double()), initialAngle = *(new double()), speedCoefficient = *(new double());
+	double& angleDiff = *(new double()), currentAngVel = *(new double()), initialAngle = *(new double());
 	double& initialDistance = *(new double());
 
 	int& iteration = *(new int(0));
 
-	auto init = [&, power, accel]
+	auto init = [&, power, accel, targetPoint]
 	{
-		accelDistance = pow(power * MAX_SPEED / 127, 2) / (2 * accel * MAX_ACCEL);
+		double targetAngle = arg(targetPoint - position_tracker->Get_Position());
 		initialAngle = position_tracker->Get_Angle();
-		targetAngle = arg(targetPoint - position_tracker->Get_Position());
 		initialDistance = NormalizeAngle(targetAngle - initialAngle);
 	};
 
 	auto run = [&, targetPoint, power, accel](void) -> void
 	{
-		targetAngle = arg(targetPoint - position_tracker->Get_Position());
+		double targetAngle = arg(targetPoint - position_tracker->Get_Position());
 		double currentAngle = position_tracker->Get_Angle();
 		angleDiff = NormalizeAngle(currentAngle - targetAngle);
-
-		// currentAngle + 
 
 		currentAngVel = position_tracker->Get_Ang_Vel();
 		double travelledDistance = NormalizeAngle(currentAngle - initialAngle);
 
-		double accelTarget = calcAccelTarget(angleDiff, currentAngVel, 0.1, accel*MAX_ACCEL);
+		double accelTarget = calcAccelTarget(angleDiff, currentAngVel, 0.1, accel * MAX_ACCEL);
 
-		// double accelLine = (2*(abs(travelledDistance/initialDistance) - 0.5));
-		// double atanCurve = 2*atan(accelLine * accel)/M_PI;
-		// accelTarget = -atanCurve  * MAX_ACCEL * getSignOf(angleDiff);
-
-		// if (abs(travelledDistance) < accelDistance)
-		// {
-		// 	accelTarget = MAX_ACCEL *accel * getSignOf(angleDiff);
-		// }
-		// if (abs(angleDiff) < accelDistance)
-		// {
-		// 	accelTarget = -MAX_ACCEL *accel * getSignOf(angleDiff);
-		// }
-
-		speedCoefficient = 127 * calcSlopeExponent(MAX_SPEED, currentAngVel, EXPONENT, accelTarget);
-		Set_Drive_Direct(-speedCoefficient, -speedCoefficient, speedCoefficient, speedCoefficient);
-
+		double motorPower = 127 * calcVoltageCoefficient(MAX_SPEED, currentAngVel, EXPONENT, accelTarget);
+		Set_Drive_Direct(-motorPower, -motorPower, motorPower, motorPower);
+		
+#define DEBUG
+#ifdef DEBUG
 		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(accelTarget) + "x" + t__s(angleDiff) + "\n";
-
-		s__t(4, t__s(angleDiff) + " " + t__s(accelTarget) + " " + t__s(accelDistance));
 		printf(a.c_str());
-
+#undef DEBUG
+#endif
 		(iteration)++;
 	};
 
@@ -270,7 +175,7 @@ AutoTask TurnToPointSMOOTH(Point targetPoint, double power, double accel)
 	auto kill = [&]
 	{
 		Set_Drive_Direct(0, 0, 0, 0);
-		delete (&targetAngle, &angleDiff, &currentAngVel, &accelDistance, &initialAngle, &iteration);
+		delete (&angleDiff, &currentAngVel, &initialAngle, &iteration);
 	};
 
 	return AutoTask::SyncTask(run, done, init, kill);
@@ -291,10 +196,7 @@ AutoTask TurnToPointTask(Point target, double maxError, double turnSpeed)
 
 		angleDiff = NormalizeAngle(targetAngle - position_tracker->Get_Angle());
 
-
 		auto input = (abs(angleDiff) > M_PI / 2) ? turnSpeed * getSignOf(angleDiff) : turnSpeed * (turnCoeff * sin(angleDiff) / pow(pow(sin(angleDiff), 2.0), -0.1) + (1 - turnCoeff) * abs(sin(angleDiff)) / sin(angleDiff));
-
-
 		Set_Drive(-input, -input, input, input);
 		s__t(0, "TURN:" + t__s(targetAngle) + " " + t__s(position_tracker->Get_Angle()) + " " + t__s(angleDiff));
 		s__t(1, "TURN_VEL:" + t__s(input) + " " + t__s(position_tracker->Get_Ang_Vel()));

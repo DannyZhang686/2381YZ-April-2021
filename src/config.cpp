@@ -2,6 +2,7 @@
 #include "motors.h"
 #include "autonomous/position_tracker.hpp"
 #include "opcontrol.h"
+#include "config/robot.config.hpp"
 #include <tuple>
 #include <map>
 
