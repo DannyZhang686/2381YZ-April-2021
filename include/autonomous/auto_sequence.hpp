@@ -21,7 +21,7 @@ class AutoSequence : public AutoTask {
     void add_tasks(std::list<AutoTask> tasks);
 
     static AutoSequence FromTasks(std::list<AutoTask> tasks);
-    const AutoTaskVectorArgs SequenceConstructorArgs
+    const AutoTaskVectorArgs SequenceConstructorArgs = 
     {
         runList: {[&](void) -> void {//run
             run_sequence();

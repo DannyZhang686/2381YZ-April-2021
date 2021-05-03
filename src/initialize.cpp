@@ -44,14 +44,14 @@ void initialize()
 	// 												  *CUS_Q3,
 	// 												  *CUS_Q4});
 
-	// auton_control->define_auton(AutonControl::CUS_ALL, CUS_FULL);
-	// auton_control->define_auton(AutonControl::CUS_Q1, CUS_Q1);
-	// auton_control->define_auton(AutonControl::CUS_Q2, CUS_Q2);
-	// auton_control->define_auton(AutonControl::CUS_Q3, CUS_Q3);
-	// auton_control->define_auton(AutonControl::CUS_Q4, CUS_Q4);
+	// auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
+	auton_control.define_auton(AutonControl::CUS_Q1, CUS_Q1);
+	// auton_control.define_auton(AutonControl::CUS_Q2, CUS_Q2);
+	// auton_control.define_auton(AutonControl::CUS_Q3, CUS_Q3);
+	// auton_control.define_auton(AutonControl::CUS_Q4, CUS_Q4);
 
 	auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
-	auton_control.select_auton(AutonControl::TestAuton);
+	auton_control.select_auton(AutonControl::CUS_Q1);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over

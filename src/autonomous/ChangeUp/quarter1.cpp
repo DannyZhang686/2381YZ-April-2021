@@ -19,9 +19,13 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::CUS_Q1 = AutoSequence::FromTasks(
   list<AutoTask>({
+    PurePursuitTask({20, 0}, 0 , 80), //COMMENT TO CHANGE
 
+    SingleRun([]{
+        s__t(1, "new task");
+    }),
     TurnToPointSMOOTH({-50, 50}, 100, 0.5),
-    PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
+    // PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
 
     })
 );

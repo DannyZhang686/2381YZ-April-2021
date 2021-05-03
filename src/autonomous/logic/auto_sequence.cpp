@@ -7,24 +7,33 @@ using namespace std;
 
 AutoSequence AutoSequence::FromTasks(list<AutoTask> tasks) {
     AutoSequence instance = AutoSequence(tasks);
+
     return instance;
 }
 
 void AutoSequence::add_tasks(list<AutoTask> tasks) {
     taskList.insert(taskList.end(), tasks.begin(), tasks.end());
     resetTaskList.insert(resetTaskList.end(), tasks.begin(), tasks.end());
-}
+};
 
-AutoSequence::AutoSequence(list<AutoTask> tasks) : AutoTask(SequenceConstructorArgs)
+AutoSequence::AutoSequence(list<AutoTask> tasks) : AutoTask(
+    AutoTaskVectorArgs({
+        runList: {[&](void) -> void {//run
+            run_sequence();
+        }},
+        doneList : {[&](void)->bool {//done
+            return isSequenceFinished;
+        }}})
+    )
 {
     add_tasks(tasks);
-}
+};
 
 void AutoSequence::Reset()
 {
     isSequenceFinished = false;
     taskList = list<AutoTask>(resetTaskList);
-}
+};
 
 void AutoSequence::run_sequence() {
     // First check if the sequence is done.
@@ -70,4 +79,4 @@ void AutoSequence::run_sequence() {
         }
         it++;
     }
-}
+};
