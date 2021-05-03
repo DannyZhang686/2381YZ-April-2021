@@ -10,6 +10,8 @@
 
 #include "autonomous/functional_tasks.hpp"
 #include "autonomous/task_lambdas.hpp"
+#include "autonomous/global_sequences.hpp"
+
 
 using namespace std;
 using namespace Auton;
@@ -17,9 +19,11 @@ using namespace pros;
 
 using namespace TaskLambdas;
 
-AutoSequence Auton::CUS_Q1 = AutoSequence::FromTasks(
+AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
-    PurePursuitTask({20, 0}, 0 , 80), //COMMENT TO CHANGE
+    PurePursuitTask({20, 0}, 0 , 80).AddRun([]{
+      s__t(3, "Hello");
+    }), //COMMENT TO CHANGE
 
     SingleRun([]{
         s__t(1, "new task");

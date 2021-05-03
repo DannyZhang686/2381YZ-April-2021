@@ -22,39 +22,35 @@ AutoTask::AutoTask(std::function<void(void)> task, std::function<bool(void)> don
 {
 }
 
-AutoTask::AutoTask(const AutoTaskVectorArgs args) 
+AutoTask::AutoTask(const AutoTaskVectorArgs args)
     : isSync(args.sync), doneList(args.doneList), runList(args.runList), initList(args.runList), killList(args.killList)
 {
 
 };
 
-AutoTask AutoTask::AddRun(std::function<void(void)> task)
+AutoTask& AutoTask::AddRun(std::function<void(void)> task)
 {
-    auto runList2 = runList;
-    runList2.push_back(task);
-    return AutoTask({runList: runList2, doneList : doneList, initList : initList, killList : killList, sync : isSync});
+    runList.push_back(task);
+    return *this;
 }
 
-AutoTask AutoTask::AddDone(std::function<bool(void)> done)
+AutoTask& AutoTask::AddDone(std::function<bool(void)> done)
 {
-    auto doneList2 = doneList;
-    doneList2.push_back(done);
-    return AutoTask({runList: runList, doneList : doneList2, initList : initList, killList : killList, sync : isSync});
+    doneList.push_back(done);
+    return *this;
 }
 
-AutoTask AutoTask::AddInit(std::function<void(void)> task)
+AutoTask& AutoTask::AddInit(std::function<void(void)> task)
 {
-    auto initList2 = initList;
-    initList2.push_back(task);
-    return AutoTask({runList: runList, doneList : doneList, initList : initList2, killList : killList, sync : isSync});
+    initList.push_back(task);
+    return *this;
 }
 
 
-AutoTask AutoTask::AddKill(std::function<void(void)> task)
+AutoTask& AutoTask::AddKill(std::function<void(void)> task)
 {
-    auto killList2 = killList;
-    killList2.push_back(task);
-    return AutoTask({runList: runList, doneList : doneList, initList : initList, killList : killList2, sync : isSync});
+    killList.push_back(task);
+    return *this;
 }
 
 

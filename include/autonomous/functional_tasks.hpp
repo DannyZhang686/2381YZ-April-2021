@@ -1,5 +1,6 @@
-#ifndef __AUTO_DRIVE__H__
-#define __AUTO_DRIVE__H__
+#ifndef __FUNCTIONAL_TASKS__H__
+#define __FUNCTIONAL_TASKS__H__
+
 #include <complex>
 #include <array>
 
@@ -22,4 +23,4 @@ extern AutoTask IntakeShootTask(int numBallsIn, int numBallsOut);
 extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
 extern AutoTask TurnToPointSMOOTH(Point targetPoint, double speed, double accel);
 
-#endif //!__AUTO_DRIVE__H__
+#endif //!__FUNCTIONAL_TASKS__H__

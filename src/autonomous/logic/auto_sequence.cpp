@@ -5,12 +5,6 @@
 #include <functional>
 using namespace std;
 
-AutoSequence AutoSequence::FromTasks(list<AutoTask> tasks) {
-    AutoSequence instance = AutoSequence(tasks);
-
-    return instance;
-}
-
 void AutoSequence::add_tasks(list<AutoTask> tasks) {
     taskList.insert(taskList.end(), tasks.begin(), tasks.end());
     resetTaskList.insert(resetTaskList.end(), tasks.begin(), tasks.end());

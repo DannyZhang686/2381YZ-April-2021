@@ -1,17 +1,22 @@
+#include <list>
+
 #include "main.h"
 #include "autonomous.h"
+#include "opcontrol.h"
+
 #include "gui.h"
 #include "motors.h"
 #include "globals.hpp"
-#include "autonomous/auton_control.hpp"
+
 #include "autonomous/global_sequences.hpp"
-#include "opcontrol.h"
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+using namespace std;
 
 bool Competition_Env = false;
 AutonControl& auton_control = AutonControl::instance();
@@ -39,19 +44,18 @@ void initialize()
 
 
 	using namespace Auton;
-	// AutoSequence* CUS_FULL = AutoSequence::FromTasks({*CUS_Q1,
-	// 												  *CUS_Q2,
-	// 												  *CUS_Q3,
-	// 												  *CUS_Q4});
 
-	// auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
+
 	auton_control.define_auton(AutonControl::CUS_Q1, CUS_Q1);
-	// auton_control.define_auton(AutonControl::CUS_Q2, CUS_Q2);
-	// auton_control.define_auton(AutonControl::CUS_Q3, CUS_Q3);
-	// auton_control.define_auton(AutonControl::CUS_Q4, CUS_Q4);
+	auton_control.define_auton(AutonControl::CUS_Q2, CUS_Q2);
+	auton_control.define_auton(AutonControl::CUS_Q3, CUS_Q3);
+	auton_control.define_auton(AutonControl::CUS_Q4, CUS_Q4);
+
+	AutoSequence& CUS_FULL = *(new AutoSequence({CUS_Q1, CUS_Q2, CUS_Q3, CUS_Q4}));
+	auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
 
 	auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
-	auton_control.select_auton(AutonControl::CUS_Q1);
+	auton_control.select_auton(AutonControl::CUS_ALL);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over

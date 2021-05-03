@@ -1,15 +1,16 @@
 #include "main.h"
 
-#include "api.h"
 #include <math.h>
-#include "globals.hpp"
 #include <list>
 #include <functional>
+
 #include "autonomous.h"
 #include "opcontrol.h"
+#include "globals.hpp"
 
 #include "autonomous/functional_tasks.hpp"
 #include "autonomous/task_lambdas.hpp"
+#include "autonomous/global_sequences.hpp"
 
 using namespace std;
 using namespace Auton;
@@ -17,7 +18,7 @@ using namespace pros;
 
 using namespace TaskLambdas;
 
-AutoSequence Auton::AT_Test_Ultras = AutoSequence::FromTasks(
+AutoSequence Auton::AT_Test_Ultras = AutoSequence(
   list<AutoTask>({
 
     TurnToPointSMOOTH({-50, 50}, 100, 0.5),
