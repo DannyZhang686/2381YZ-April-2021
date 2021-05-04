@@ -1,18 +1,18 @@
 
 #include "config/robot.config.hpp"
 
-DriveConfig Z_Bot_Drive = {
-    {left_back, {6, 1}},
-    {left_front, {9, 0}},
-    {right_back, {18, 0}},
-    {right_front, {19, 1}},
+DriveConfig Z_Bot_Drive =  {
+    {left_back, {9, 1}},
+    {left_front, {5, 1}},
+    {right_back, {3, 0}},
+    {right_front, {6, 0}},
 };
 
 DriveConfig Evan_Bot_Drive = {
     {left_back, {9, 1}},
-    {left_front, {5, 0}},
+    {left_front, {5, 1}},
     {right_back, {3, 0}},
-    {right_front, {6, 1}},
+    {right_front, {6, 0}},
 };
 
 

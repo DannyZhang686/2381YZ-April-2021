@@ -28,14 +28,14 @@ DriveMode activeDriveMode = PidMode;
 void initialize()
 {
 	pros::lcd::initialize();
-	InitMotors(L);
+	InitMotors(E);
 
-	position_tracker->Create();
+	// position_tracker->Create();
 
-	pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
-	// pros::Task shooter(shooterSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooter");
-	// pros::Task intake(intakeSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake");
-	// pros::Task indexer(indexerSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Indexer");
+	// pros::Task tracking(trackPosition, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Tracking");
+	pros::Task shooter(shooterSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooter");
+	pros::Task intake(intakeSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake");
+	pros::Task indexer(indexerSpin, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Indexer");
 
 	// pros::Task ballCounting(countBalls, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Count Balls");
 	pros::Task PidDrive(PID_Drive, NULL, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Drive");
@@ -43,19 +43,19 @@ void initialize()
 
 
 
-	using namespace Auton;
+	// using namespace Auton;
 
 
-	auton_control.define_auton(AutonControl::CUS_Q1, CUS_Q1);
-	auton_control.define_auton(AutonControl::CUS_Q2, CUS_Q2);
-	auton_control.define_auton(AutonControl::CUS_Q3, CUS_Q3);
-	auton_control.define_auton(AutonControl::CUS_Q4, CUS_Q4);
+	// auton_control.define_auton(AutonControl::CUS_Q1, CUS_Q1);
+	// auton_control.define_auton(AutonControl::CUS_Q2, CUS_Q2);
+	// auton_control.define_auton(AutonControl::CUS_Q3, CUS_Q3);
+	// auton_control.define_auton(AutonControl::CUS_Q4, CUS_Q4);
 
-	AutoSequence& CUS_FULL = *(new AutoSequence({CUS_Q1, CUS_Q2, CUS_Q3, CUS_Q4}));
-	auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
+	// AutoSequence& CUS_FULL = *(new AutoSequence({CUS_Q1, CUS_Q2, CUS_Q3, CUS_Q4}));
+	// auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
 
-	auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
-	auton_control.select_auton(AutonControl::CUS_ALL);
+	// auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
+	// auton_control.select_auton(AutonControl::CUS_ALL);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over

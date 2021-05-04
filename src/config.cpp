@@ -7,10 +7,7 @@
 #include <map>
 
 //Motor ports
-#define LF_PORT 9
-#define RF_PORT 19
-#define LB_PORT 6
-#define RB_PORT 18
+
 #define LI_PORT 10
 #define RI_PORT 20
 #define INDEXER_PORT 4
@@ -77,8 +74,8 @@ const void InitMotors(ConfigOptions config)
     case E:
         InitDrive(Evan_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
-        InitEncoders(E_Track_C);
-        SetTrackingOffsets(L_Tracking_Offsets);
+        // InitEncoders(E_Track_C);
+        // SetTrackingOffsets(L_Tracking_Offsets);
         break;
     case L:
         InitDrive(L_Bot_Drive);
@@ -88,15 +85,16 @@ const void InitMotors(ConfigOptions config)
         indexerOn = false;
         intakeOn = false;
         shooterOn = false;
+        inertial->Reset();
         break;
     default:
         InitDrive(Z_Bot_Drive);
         InitMotorControllers(Z_Bot_Drive_Config);
         InitEncoders(Z_Track_C);
         SetTrackingOffsets(L_Tracking_Offsets);
+        inertial->Reset();
         break;
     }
-    inertial->Reset();
 }
 
 //Intakes
@@ -104,7 +102,7 @@ pros::Motor leftIntake(LI_PORT, false);
 pros::Motor rightIntake(RI_PORT, true);
 
 //Other
-pros::Motor indexer(INDEXER_PORT, false);
+pros::Motor indexer(INDEXER_PORT, true);
 pros::Motor shooter(SHOOTER_PORT, false);
 
 //IMUs
