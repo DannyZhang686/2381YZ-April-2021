@@ -79,7 +79,7 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
     {
 
-    lcd::set_text(4, "HELLO");
+    // lcd::set_text(4, "HELLO motor value:" + t__s(leftBack->get_actual_velocity()));
     activeDriveMode = PidMode;
     _motor_value_average = (abs(_left_back_motor_value) + abs(_left_front_motor_value) + abs(_right_back_motor_value) + abs(_right_front_motor_value)) / 4;
     //motor_value_average is what the actual motors are currently set at

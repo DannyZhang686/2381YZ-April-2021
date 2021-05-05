@@ -55,7 +55,7 @@ void initialize()
 	auton_control.define_auton(AutonControl::CUS_ALL, CUS_FULL);
 
 	auton_control.define_auton(AutonControl::TestAuton, AT_Test_Ultras);
-	auton_control.select_auton(AutonControl::TestAuton);
+	auton_control.select_auton(AutonControl::CUS_ALL);
 
 	//initialize GUI task (for refreshes)
 	//need to test this to see if it carries over

@@ -14,7 +14,7 @@ AutoTask AutoTask::SyncTask(std::function<void(void)> task, std::function<bool(v
 }
 AutoTask AutoTask::AutoDelay(int time, bool sync)
 {
-    return AutoTimer({interval: time, sync : sync});
+    return AutoTimer(AutoTimerArgs({interval: time, sync : sync}));
 }
 
 AutoTask::AutoTask(std::function<void(void)> task, std::function<bool(void)> done, bool sync, std::function<void(void)> init, std::function<void(void)> kill)

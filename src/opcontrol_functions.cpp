@@ -36,7 +36,7 @@ const void controllerShooterSpin(void)
     }
   }
 
-PID shooterPID = PID(1, 0, 0);
+PID shooterPID = PID(0.1, 0, 0);
 
 void shooterSpin(void*)
   {
@@ -102,11 +102,11 @@ void intakeSpin(void*)
 
 const void controllerIndexerSpin(void)
   {
-  if (master.get_digital(DIGITAL_Y) || master.get_digital(DIGITAL_R2))
+  if (master.get_digital(DIGITAL_Y) || master.get_digital(DIGITAL_R2) || (master.get_digital(DIGITAL_L1)))
     {
     indexerSetpoint = (INDEXER_SPEED);
     }
-  else if (master.get_digital(DIGITAL_A) || master.get_digital(DIGITAL_L1))
+  else if (master.get_digital(DIGITAL_A) )
     {
     indexerSetpoint = (-INDEXER_SPEED);
     }
@@ -132,15 +132,15 @@ void indexerSpin(void*)
         }
 
 
-      if (indexerSetpoint == 0)
-        {
-        double indexerVoltage = indexerPID.Update(0, indexer.get_actual_velocity());
-        indexer.move(indexerVoltage);
-        }
-      else
-        {
+      // if (indexerSetpoint == 0)
+      //   {
+      //   double indexerVoltage = indexerPID.Update(0, indexer.get_actual_velocity());
+      //   indexer.move(indexerVoltage);
+      //   }
+      // else
+        // {
         indexer.move_voltage(indexerSetpoint);
-        }
+        // }
       }
     pros::delay(DELAY_INTERVAL);
     }
