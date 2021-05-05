@@ -1,5 +1,5 @@
 #include "globals.hpp"
-#include "pathing.hpp"
+#include "autonomous/pathing.hpp"
 #include "autonomous.h"
 #include "pid.h"
 #include "opcontrol.h"
