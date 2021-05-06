@@ -21,6 +21,17 @@ extern AutoTask RestProfileTask();
 
 extern AutoTask IntakeShootTask(int numBallsIn, int numBallsOut);
 extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
-extern AutoTask TurnToPointSMOOTH(Point targetPoint, double speed, double accel);
+
+extern AutoTask TurnToPointSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
+extern AutoTask PurePursuitSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
+
+// Calculates Voltage Needed To Reach Given Acceleration Target given the Current Speed and shape of Velocity Exponential Curve.
+// @returns Relative Voltage double from -1 to 1. Multiply output by maximum voltage of system.
+extern double calcVoltageSetpoint(double targetAcceleration, double decayExponent, double currentSpeed, double maxSpeed);
+
+
+
+// Calculates Instantaneous Acceleration Given Coordinates in Phase Space of Position and Velocity
+extern double calcAccelSetpoint(double currentDistance, double currentVelocity, double errorTolerance, double maxAccel);
 
 #endif //!__FUNCTIONAL_TASKS__H__

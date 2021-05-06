@@ -28,7 +28,7 @@ AutoSequence Auton::CUS_Q1 = AutoSequence(
     SingleRun([]{
         s__t(1, "new task");
     }),
-    TurnToPointSMOOTH({-50, 50}, 100, 0.5),
+    // TurnToPointSMOOTH({-50, 50}, 100, 0.5),
     // PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
 
     })

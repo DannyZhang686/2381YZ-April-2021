@@ -5,6 +5,12 @@
 
 #include "task_lambdas.hpp"
 
+#include "main.h"
+#include "api.h"
+#include "globals.hpp"
+#include "autonomous.h"
+#include "autonomous/functional_tasks.hpp"
+#include "opcontrol.h"
 
 namespace TaskLambdas
 {
