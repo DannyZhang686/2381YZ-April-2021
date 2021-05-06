@@ -22,12 +22,14 @@ double prevNumBalls = 0;
 const void controllerShooterSpin(void)
   {
 
-  if (((master.get_digital(DIGITAL_R1)) || (master.get_digital(DIGITAL_A))) && (shooterToggle))
+  if (master.get_digital(DIGITAL_R2))
     {
+      // Poop / Backwards
     shooterSetpoint = (SHOOTER_SPEED);
     }
-  else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_Y)))
+  else if ((master.get_digital(DIGITAL_R1)))
     {
+      // Forwards
     shooterSetpoint = (-SHOOTER_SPEED);
     }
   else
@@ -50,15 +52,15 @@ void shooterSpin(void*)
         shooterSetpoint = 0;
         }
 
-      if (shooterSetpoint == 0)
-        {
-        double shooterVoltage = shooterPID.Update(0, shooter.get_actual_velocity());
-        shooter.move(shooterVoltage);
-        }
-      else
-        {
+      // if (shooterSetpoint == 0)
+      //   {
+      //   double shooterVoltage = shooterPID.Update(0, shooter.get_actual_velocity());
+      //   shooter.move(shooterVoltage);
+      //   }
+      // else
+        // {
         shooter.move_voltage(shooterSetpoint);
-        }
+        // }
       }
     pros::delay(DELAY_INTERVAL);
     }
@@ -68,11 +70,12 @@ const void controllerIntakeSpin(void)
   {
   if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y)))
     {
+      // Out
     intakeSetpoint = (-INTAKE_SPEED);
     }
-  else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_A)) || (master.get_digital(DIGITAL_X)))
+  else if ((master.get_digital(DIGITAL_L1)))
     {
-    //Forwards
+    // Up
     intakeSetpoint = (INTAKE_SPEED);
     }
   else
@@ -102,12 +105,15 @@ void intakeSpin(void*)
 
 const void controllerIndexerSpin(void)
   {
-  if (master.get_digital(DIGITAL_Y) || master.get_digital(DIGITAL_R2) || (master.get_digital(DIGITAL_L1)))
+  if ((master.get_digital(DIGITAL_L1)))
     {
+      // up
     indexerSetpoint = (INDEXER_SPEED);
     }
-  else if (master.get_digital(DIGITAL_A) )
+  else if (master.get_digital(DIGITAL_L2) || master.get_digital(DIGITAL_RIGHT))
     {
+
+      //down
     indexerSetpoint = (-INDEXER_SPEED);
     }
   else
