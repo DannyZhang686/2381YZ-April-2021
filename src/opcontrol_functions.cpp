@@ -105,7 +105,7 @@ void intakeSpin(void*)
 
 const void controllerIndexerSpin(void)
   {
-  if ((master.get_digital(DIGITAL_L1)))
+  if ((master.get_digital(DIGITAL_L1) || master.get_digital(DIGITAL_DOWN)))
     {
       // up
     indexerSetpoint = (INDEXER_SPEED);
