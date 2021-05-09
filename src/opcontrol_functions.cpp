@@ -36,7 +36,7 @@ const void controllerShooterSpin(void)
     }
   }
 
-PID shooterPID = PID(0.1, 0, 0);
+PID shooterPID = PID(1, 0, 0);
 
 void shooterSpin(void*)
   {

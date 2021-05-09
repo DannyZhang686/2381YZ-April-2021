@@ -35,7 +35,7 @@ double powCalc(double x, double power)
     return pow(abs(x), power) * getSignOf(x);
 }
 
-double inner_product(Point a, Point b)
+const double Inner_Product(const Point a, const Point b)
 {
     return a.real() * b.real() + a.imag() * b.imag();
 }
@@ -54,7 +54,6 @@ namespace PPS
 
     const double maxLookaheadDistance = 18;
     const long lookAheadNumber = 40;
-    const double startDistance = 0;
     const double PathSpacing = 1;
 
     const double deaccelStrength = 3;  // Deacelleration Power - Exponential - 0 for steeper curve at the end, + infinity for steeper curve at the beginning 
@@ -123,9 +122,9 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
                 lookaheadPnt = get<1>(lookaheadCheck);
                 previousLookaheadIndex = get<0>(lookaheadCheck);
             }
-            Point currentHeading = exp<double>(1i * currentAngle);
+            Point currentHeading = position_tracker->Get_Heading_Vec();
 
-            double innerProduct = inner_product(currentHeading, lookaheadPnt - currentPos);
+            double innerProduct = Inner_Product(currentHeading, lookaheadPnt - currentPos);
             auto realLookaheadDist = abs(lookaheadPnt - currentPos);
 
             deaccelCoeff = pow(min(realLookaheadDist / min(lookAheadDistance, startDistance / 2), 1.0), deaccelStrength);
@@ -215,17 +214,17 @@ AutoTask PurePursuitTask(complex<double> EndPoint, double EndAngle, double speed
 
 
 #ifdef ROBOT_L
-const double MAX_MOVE_SPEED_CONST = 12 * M_PI / 180; // 0.191986217719
-const double MAX_MOVE_ACCEL_CONST = 1 * M_PI / 180; // 0.00872664625997
-const double MOVE_EXPONENT_CONST = -0.1135;
+const double MAX_MOVE_SPEED_CONST = 1.6; //
+const double MOVE_EXPONENT_CONST = -0.105;
+const double MAX_MOVE_ACCEL_CONST = -MOVE_EXPONENT_CONST * MAX_MOVE_SPEED_CONST; //
 #undef ROBOT_L
 #endif
 
 
 #ifdef ROBOT_Z
-const double MAX_MOVE_SPEED_CONST = 12 * M_PI / 180; // 0.191986217719
-const double MAX_MOVE_ACCEL_CONST = 1 * M_PI / 180; // 0.00872664625997
-const double MOVE_EXPONENT_CONST = -0.1135;
+const double MAX_MOVE_SPEED_CONST = 1.6; //
+const double MOVE_EXPONENT_CONST = -0.105;
+const double MAX_MOVE_ACCEL_CONST = -MOVE_EXPONENT_CONST * MAX_MOVE_SPEED_CONST; //
 #undef ROBOT_Z
 #endif
 
@@ -233,7 +232,7 @@ AutoTask PurePursuitSmooth(Point endPoint, double accel, double errorTolerance)
 {
     PointList* path;
 
-    Point* startPoint, * currentPosition, * lookaheadPnt, *currentVelocity;
+    Point* startPoint, * currentPosition, * lookaheadPnt, * currentVelocity;
 
     double* currentAngle, * startAngle, * startDistance, * deaccelCoeff;
 
@@ -270,8 +269,8 @@ AutoTask PurePursuitSmooth(Point endPoint, double accel, double errorTolerance)
         double lookAheadDistance = maxLookaheadDistance * abs(*currentVelocity) / MAX_MOVE_SPEED_CONST;
 
         auto lookaheadCheck = FindLookAhead((*currentPosition), *path, lookAheadDistance, lookAheadNumber, *mostestClosestIndex);
-            // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
-            // theoretically should store the index of the previous lookahead point if found and use that in place of mostest closest but w/e.
+        // using mostest closest index as the previous check just to make sure it isn't skipping anything, in case robot is moving like away for example
+        // theoretically should store the index of the previous lookahead point if found and use that in place of mostest closest but w/e.
 
         if (get<1>(lookaheadCheck) != PointNotFound)
         {
@@ -280,48 +279,48 @@ AutoTask PurePursuitSmooth(Point endPoint, double accel, double errorTolerance)
         }
         Point currentHeading = exp<double>(1i * (*currentAngle));
 
-            double innerProduct = inner_product(currentHeading, (*lookaheadPnt) - (*currentPosition));
-            auto realLookaheadDist = abs((*lookaheadPnt) - (*currentPosition));
+        double innerProduct = Inner_Product(currentHeading, (*lookaheadPnt) - (*currentPosition));
+        auto realLookaheadDist = abs((*lookaheadPnt) - (*currentPosition));
 
-            // deaccelCoeff = pow(min(realLookaheadDist / min(lookAheadDistance, startDistance / 2), 1.0), deaccelStrength);
+        // deaccelCoeff = pow(min(realLookaheadDist / min(lookAheadDistance, startDistance / 2), 1.0), deaccelStrength);
 
-            array<double, 2> speeds = {getSignOf(innerProduct), getSignOf(innerProduct)};
+        array<double, 2> speeds = {getSignOf(innerProduct), getSignOf(innerProduct)};
 
-            double arcRadius = Curvature((*currentPosition), (*lookaheadPnt), (*currentAngle));
+        double arcRadius = Curvature((*currentPosition), (*lookaheadPnt), (*currentAngle));
 
-            if (arcRadius != NAN && arcRadius != INFINITY)
+        if (arcRadius != NAN && arcRadius != INFINITY)
+        {
+            double leftRadius = arcRadius + H_Wheel_Disp;
+            double rightRadius = arcRadius - H_Wheel_Disp;
+
+            if (abs(leftRadius) == 0)
             {
-                double leftRadius = arcRadius + H_Wheel_Disp;
-                double rightRadius = arcRadius - H_Wheel_Disp;
-
-                if (abs(leftRadius) == 0)
-                {
-                    speeds[0] = 0;
-                }
-                else if (abs(rightRadius) == 0)
-                {
-                    speeds[1] = 0;
-                }
-                else if (abs(leftRadius) > abs(rightRadius))
-                {
-                    speeds[1] = speeds[1] * powCalc(rightRadius / leftRadius, actualTurningCoeff);
-                }
-                else
-                {
-                    speeds[0] = speeds[0] * powCalc(leftRadius / rightRadius, actualTurningCoeff);
-                }
+                speeds[0] = 0;
             }
+            else if (abs(rightRadius) == 0)
+            {
+                speeds[1] = 0;
+            }
+            else if (abs(leftRadius) > abs(rightRadius))
+            {
+                speeds[1] = speeds[1] * powCalc(rightRadius / leftRadius, actualTurningCoeff);
+            }
+            else
+            {
+                speeds[0] = speeds[0] * powCalc(leftRadius / rightRadius, actualTurningCoeff);
+            }
+        }
 
-            // previousSpeeds = {previousSpeeds[0] * accelDampening + (1 - accelDampening) * speeds[0], previousSpeeds[1] * accelDampening + (1 - accelDampening) * speeds[1]};
+        // previousSpeeds = {previousSpeeds[0] * accelDampening + (1 - accelDampening) * speeds[0], previousSpeeds[1] * accelDampening + (1 - accelDampening) * speeds[1]};
 
-            // s__t(4, "C: [" + t__s(mostestClosestIndex) + "] " + t__s(currentPos.real()) + ", " + t__s(currentPos.imag()));
-            // s__t(5, "EP: [" + t__s(previousLookaheadIndex) + "]  " + t__s((lookaheadPnt).real()) + ", " + t__s((lookaheadPnt).imag()));
-            // std::string a = "" + t__s(iteration) + "x" + t__s(realLookaheadDist) + "x" + t__s(previousSpeeds[0]) + "x" + t__s(currentPos.real()) + "\n";
-            // printf(a.c_str());
-            // (iteration)++;
+        // s__t(4, "C: [" + t__s(mostestClosestIndex) + "] " + t__s(currentPos.real()) + ", " + t__s(currentPos.imag()));
+        // s__t(5, "EP: [" + t__s(previousLookaheadIndex) + "]  " + t__s((lookaheadPnt).real()) + ", " + t__s((lookaheadPnt).imag()));
+        // std::string a = "" + t__s(iteration) + "x" + t__s(realLookaheadDist) + "x" + t__s(previousSpeeds[0]) + "x" + t__s(currentPos.real()) + "\n";
+        // printf(a.c_str());
+        // (iteration)++;
 
-            // s__t(6, "l: " + t__s(previousSpeeds[0]) + " r: " + t__s(previousSpeeds[1]) + " " + t__s(path.size()));
-            Set_Drive_Direct(0,0,0,0);
+        // s__t(6, "l: " + t__s(previousSpeeds[0]) + " r: " + t__s(previousSpeeds[1]) + " " + t__s(path.size()));
+        Set_Drive_Direct(0, 0, 0, 0);
 
     };
 
@@ -335,6 +334,74 @@ AutoTask PurePursuitSmooth(Point endPoint, double accel, double errorTolerance)
     auto done = [&, endPoint, accel, errorTolerance](void) -> bool
     {
 
+    };
+
+    return AutoTask::SyncTask(run, done, init, kill);
+}
+
+
+
+AutoTask PurePursuitSimple(Point endPoint, double accel, double errorTolerance)
+{
+    // PointList* path;
+
+    Point* currentPosition, * headingVector, * currentVelocity, * currentDisplacement;
+
+    int* iteration;
+
+    double* forwardsDistance, * initialForwardsDistance, * forwardsVelocity;
+
+    using namespace PPS;
+
+    auto init = [&, endPoint, accel, errorTolerance](void) -> void {
+
+        currentPosition = new Point(position_tracker->Get_Position());
+
+        // Endpoint + Displacement = Current Position.
+        // Vector starting at end point, pointint to current position.
+        currentDisplacement = new Point((*currentPosition) - endPoint);
+
+        headingVector = new Point(position_tracker->Get_Heading_Vec());
+
+        initialForwardsDistance = new double(Inner_Product(*headingVector, *currentDisplacement));
+
+        forwardsDistance = new double();
+        forwardsVelocity = new double();
+        currentVelocity = new Point();
+        iteration = new int(0);
+    };
+
+    auto run = [&, endPoint, accel, errorTolerance]
+    {
+        (*currentPosition) = position_tracker->Get_Position();
+        (*currentDisplacement) = (*currentPosition) - endPoint;
+        (*headingVector) = (position_tracker->Get_Heading_Vec());
+        (*currentVelocity) = position_tracker->Get_Velocity();
+
+        (*forwardsDistance) = Inner_Product(*headingVector, *currentDisplacement);
+        (*forwardsVelocity) = Inner_Product(*headingVector, *currentVelocity);
+
+        double accelTarget = calcAccelSetpoint(*forwardsDistance, *forwardsVelocity, errorTolerance, accel * MAX_MOVE_ACCEL_CONST);
+        double motorPower = 127 * calcVoltageSetpoint(accelTarget, MOVE_EXPONENT_CONST, *forwardsVelocity, MAX_MOVE_SPEED_CONST);
+#define DEBUG
+#ifdef DEBUG
+        std::string a = "" + t__s(*iteration) + "x" + t__s(*forwardsVelocity) + "x" + t__s(accelTarget) + "x" + t__s(*forwardsDistance) + "\n";
+        printf(a.c_str());
+#undef DEBUG
+#endif
+        (*iteration)++;
+        Set_Drive_Direct(motorPower, motorPower, motorPower, motorPower);
+    };
+
+    auto kill = [&, endPoint, accel, errorTolerance]
+    {
+        delete (currentPosition, headingVector, currentVelocity, currentDisplacement, forwardsDistance, forwardsVelocity, iteration);
+        Set_Drive_Direct(0, 0, 0, 0);
+    };
+
+    auto done = [&, endPoint, accel, errorTolerance](void) -> bool
+    {
+        return (abs(*forwardsDistance) < abs(*initialForwardsDistance) / 2 && abs(*forwardsVelocity) < 0.05 * MAX_MOVE_SPEED_CONST);
     };
 
     return AutoTask::SyncTask(run, done, init, kill);

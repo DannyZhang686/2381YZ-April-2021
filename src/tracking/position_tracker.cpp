@@ -12,12 +12,12 @@ using namespace pros;
 using namespace std;
 using namespace std::complex_literals;
 
-double NormalizeAngle(double angle, int multiplier)
+const double NormalizeAngle(double angle, int multiplier)
 {
     return remainder(angle, 2 * M_PI * multiplier);
 }
 
-Position_Tracker *Position_Tracker::instance()
+Position_Tracker* Position_Tracker::instance()
 {
     static Position_Tracker instance;
     return &instance;
@@ -33,8 +33,6 @@ void Position_Tracker::Create()
     Reset();
     // Maybe take an input or global on initial position;
     Set_Position(0, 0);
-    // Maybe take an input or global on initial position;
-    // Set_Position(0, 0);
 }
 
 void Position_Tracker::Reset()
@@ -44,41 +42,39 @@ void Position_Tracker::Reset()
     h_enc_->reset();
     current_encoder_values = last_encoder_values = position_change = {0, 0, 0};
     ang_disp = ang_last = ang_vel = ang_origin = 0;
-    h_disp = v_disp = h_vel = v_vel = origin = v_disp_n = h_disp_n = 0;
+    h_disp = v_disp = h_vel = v_vel = origin = 0;
 }
 
-const void Position_Tracker::Set_Position(complex<double> position_, double angle_, complex<double> oldPos, double oldAngle)
+void Position_Tracker::Set_Position(complex<double> position_, double angle_, complex<double> oldPos, double oldAngle)
 {
     origin = position_ - oldPos + origin;
-
     ang_origin = angle_ - oldAngle + ang_origin;
 }
 
 int calibrationStart = 0;
 
-double Position_Tracker::Get_Real_Angle()
+const double Position_Tracker::Get_Real_Angle() const
+{
+    return absolute_angle;
+}
+
+void Position_Tracker::Update_Real_Angle()
 {
     if (inertial_->IsCalibrating())
-        return 0;
-
-    angle_ = NormalizeAngle(-inertial_->Get_Angle());
-    return angle_;
+        return;
+    absolute_angle = NormalizeAngle(-inertial_->Get_Angle());
 }
-double Position_Tracker::Get_Angle()
+
+const double Position_Tracker::Get_Angle() const
 {
-    return NormalizeAngle(angle_ + ang_origin);
+    return NormalizeAngle(absolute_angle + ang_origin);
 }
 
-double Position_Tracker::Get_Ang_Vel()
+const double Position_Tracker::Get_Ang_Vel() const
 {
     return ang_vel;
 }
 
-void Position_Tracker::Track_Position_Pilons()
-{
-}
-
-complex<double> pilonsVel = 0;
 
 void Position_Tracker::Track_Position()
 {
@@ -89,11 +85,12 @@ void Position_Tracker::Track_Position()
     }
 
     // Current Angle, Angular Dispertion. This is normalized to between (-M_PI, M_PI).
+    Update_Real_Angle();
     ang_disp = this->Get_Real_Angle();
 
     // Angular Velocity
     ang_vel = NormalizeAngle(ang_disp - ang_last);
-    
+
     current_encoder_values[right_] = v_enc_->get_value();
     current_encoder_values[back_] = h_enc_->get_value();
 
@@ -130,13 +127,12 @@ void Position_Tracker::Track_Position()
 
     double currentHeading = this->Get_Angle();
     // pilonsVel = dist * exp<double>(1i *(ang_disp) ) + dist2 * exp<double>(1i* -(M_PI/2 + ang_disp)); //Original
-    pilonsVel = dist * exp<double>(1i * (currentHeading)) + dist2 * exp<double>(1i * -(M_PI / 2 - currentHeading));
-    pilons_disp += pilonsVel;
+    real_vel = dist * exp<double>(1i * (currentHeading)) + dist2 * exp<double>(1i * -(M_PI / 2 - currentHeading));
+    real_disp += real_vel;
     s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
-
 }
 
-complex<double> Position_Tracker::Get_Position()
+const complex<double> Position_Tracker::Get_Position() const
 {
     auto initial_wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * ang_origin);
     auto wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * Get_Angle());
@@ -144,20 +140,17 @@ complex<double> Position_Tracker::Get_Position()
     // return Get_Displacement() + origin - initial_wheel_displacement + wheel_displacement;
 }
 
-complex<double> Position_Tracker::Get_Position_N()
+const complex<double> Position_Tracker::Get_Displacement() const
 {
-    auto initial_wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * ang_origin);
-    auto wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * Get_Angle());
-    return v_disp_n + h_disp_n + origin - initial_wheel_displacement + wheel_displacement;
+    return real_disp;
 }
 
-complex<double> Position_Tracker::Get_Displacement()
+const complex<double> Position_Tracker::Get_Velocity() const
 {
-    return pilons_disp;
+    return real_vel;
 }
 
-complex<double> Position_Tracker::Get_Velocity()
+const complex<double> Position_Tracker::Get_Heading_Vec() const
 {
-    return pilonsVel;
+    return exp<double>(1i * Get_Angle());
 }
-// Position_Tracker::Poistion_Tra

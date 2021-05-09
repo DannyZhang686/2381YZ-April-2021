@@ -18,16 +18,15 @@ AutoTask DriveProfileTask(double speed, double time)
 		iteration = new int(0);
 	};
 
-	auto run = [&, speed](void) -> void
+	auto run = [&](void) -> void
 	{
-		Set_Drive_Direct(speed, speed, -speed, -speed);
+		Set_Drive_Direct(127, 127, 0, 0);
 		double currentSpeed = abs(position_tracker->Get_Velocity());
-		double currentAngVel = position_tracker->Get_Ang_Vel() * 180 / M_PI;
+		double currentAngVel = position_tracker->Get_Ang_Vel() * 100;
 
 		double currentWheelSpeed = (abs(leftBack->get_actual_velocity()) + abs(rightBack->get_actual_velocity()) + abs(leftFront->get_actual_velocity()) + abs(rightFront->get_actual_velocity())) / 4;
 		s__t(3, t__s(*iteration));
 		std::string a = "" + t__s(*iteration) + "x" + t__s(currentAngVel) + "x" + t__s(currentWheelSpeed) + "x" + t__s(currentSpeed) + "\n";
-
 		printf(a.c_str());
 		(*iteration)++;
 	};

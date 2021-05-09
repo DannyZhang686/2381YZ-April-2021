@@ -24,7 +24,7 @@ extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, 
 
 extern AutoTask TurnToPointSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
 extern AutoTask PurePursuitSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
-
+extern AutoTask PurePursuitSimple(const Point targetPoint, const double accel = 0.5, const double errorTolerance = 0.5);
 // Calculates Voltage Needed To Reach Given Acceleration Target given the Current Speed and shape of Velocity Exponential Curve.
 // @returns Relative Voltage double from -1 to 1. Multiply output by maximum voltage of system.
 extern double calcVoltageSetpoint(double targetAcceleration, double decayExponent, double currentSpeed, double maxSpeed);

@@ -13,16 +13,24 @@
 
 #ifdef ROBOT_L
 const double MAX_TURN_SPEED_CONST = 12 * M_PI / 180; // 0.191986217719
-const double MAX_TURN_ACCEL_CONST = 1 * M_PI / 180; // 0.00872664625997
 const double TURN_EXPONENT = -0.1135;
+// This is the slope of the graph if you set motors to 127 at time = 0.
+// v(t) = -a*e^{bx} + a
+// d/dt v(t) = -ab * e^{bx}
+// d/dt v(0) = -ab
+const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST; // 0.02377
 #undef ROBOT_L
 #endif
 
 
 #ifdef ROBOT_Z
 const double MAX_TURN_SPEED_CONST = 12 * M_PI / 180; // 0.191986217719
-const double MAX_TURN_ACCEL_CONST = 1 * M_PI / 180; // 0.00872664625997
 const double TURN_EXPONENT = -0.1135;
+// This is the slope of the graph if you set motors to 127 at time = 0.
+// v(t) = -a*e^{bx} + a
+// d/dt v(t) = -ab * e^{bx}
+// d/dt v(0) = -ab
+const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST; // 0.02377
 #undef ROBOT_Z
 #endif
 
@@ -152,7 +160,6 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 		angleDiff = NormalizeAngle(currentAngle - targetAngle);
 
 		currentAngVel = position_tracker->Get_Ang_Vel();
-		double travelledDistance = NormalizeAngle(currentAngle - initialAngle);
 
 		double accelTarget = calcAccelSetpoint(angleDiff, currentAngVel, errorTolerance, accel * MAX_TURN_ACCEL_CONST);
 

@@ -21,6 +21,7 @@ const static Point PointNotFound = Point(-100000, 100000);
 const std::tuple<long, Point> FindLookAhead(const Point currentPos, const PointList path, const double radius, const long maxLookahead, const long previousIndex = 0);
 
 const Point CheckIntersection(const Point circleCenter, const Point startPoint, const Point endPoint, const double radius);
+extern const double Inner_Product(const Point A, const Point B);
 
 
 #endif  //!__PATHING__H__
