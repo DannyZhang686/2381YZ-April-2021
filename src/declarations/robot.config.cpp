@@ -39,9 +39,9 @@ TrackingConfig L_Track_C =
 
 TrackingConfig Z_Track_C =
 {
-    {H, {5,6,1}},
-    {V, {7,8,1}},
-    {I, {4, 11, true}},
+    {H, {3,4,0}},
+    {V, {1,2,1}},
+    {I, {7, 17, true}},
 };
 
 TrackingConfig E_Track_C =
@@ -60,8 +60,8 @@ std::complex<double> L_Tracking_Offsets =
 
 std::complex<double> Z_Tracking_Offsets =
 {
- 2.75,
- 5.25
+ 1.25,
+ 5.50
 }; // Left to mid, back to mid
 
 DrivePidConfig Z_Bot_Drive_Config =

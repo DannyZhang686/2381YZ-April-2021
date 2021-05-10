@@ -130,6 +130,8 @@ void Position_Tracker::Track_Position()
     real_vel = dist * exp<double>(1i * (currentHeading)) + dist2 * exp<double>(1i * -(M_PI / 2 - currentHeading));
     real_disp += real_vel;
     s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
+    s__t(3, t__s(current_encoder_values[right_]) + " " + t__s(current_encoder_values[back_]));
+
 }
 
 const complex<double> Position_Tracker::Get_Position() const
