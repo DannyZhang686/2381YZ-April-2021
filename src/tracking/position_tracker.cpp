@@ -93,7 +93,7 @@ void Position_Tracker::Track_Position()
 
     // Angular Velocity
     ang_vel = NormalizeAngle(ang_disp - ang_last);
-    
+
     current_encoder_values[right_] = v_enc_->get_value();
     current_encoder_values[back_] = h_enc_->get_value();
 
@@ -133,6 +133,7 @@ void Position_Tracker::Track_Position()
     pilonsVel = dist * exp<double>(1i * (currentHeading)) + dist2 * exp<double>(1i * -(M_PI / 2 - currentHeading));
     pilons_disp += pilonsVel;
     s__t(2, t__s(position_tracker->Get_Position().real()) + " " + t__s(position_tracker->Get_Position().imag()) + " " + t__s(position_tracker->Get_Angle()));
+    s__t(3, t__s(current_encoder_values[right_]) + " " + t__s(current_encoder_values[back_]));
 
 }
 

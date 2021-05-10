@@ -20,7 +20,7 @@ AutoTask DriveProfileTask(double speed, double time)
 
 	auto run = [&, speed](void) -> void
 	{
-		Set_Drive_Direct(speed, speed, -speed, -speed);
+		Set_Drive_Direct(speed, speed, speed, speed);
 		double currentSpeed = abs(position_tracker->Get_Velocity());
 		double currentAngVel = position_tracker->Get_Ang_Vel() * 180 / M_PI;
 
