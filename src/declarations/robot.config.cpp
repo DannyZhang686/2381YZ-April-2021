@@ -39,8 +39,8 @@ TrackingConfig L_Track_C =
 
 TrackingConfig Z_Track_C =
 {
-    {H, {3,4,0}},
-    {V, {1,2,1}},
+    {H, {1,2,1}},
+    {V, {3,4,0}},
     {I, {7, 17, true}},
 };
 

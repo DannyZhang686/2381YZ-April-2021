@@ -516,7 +516,7 @@ void intakeNoShoot(int time, double velocity)
   int endTime = pros::millis() + time;
   setIntakesSafe(velocity);
   setIndexerSafe(velocity);
-  setShooterSafe(-velocity);
+  // setShooterSafe(-velocity);
 }
 
 void intakeNoShoot(double velocity)
@@ -525,9 +525,9 @@ void intakeNoShoot(double velocity)
   intakeNoShoot(0, velocity);
 }
 
-void discard(int time)
+void discardFront(int time)
 {
-  //Run everything backward
+  //Discards from the front
   int endTime = pros::millis() + time;
   setIntakesSafe(-AUTO_INTAKE_VEL);
   setIndexerSafe(-AUTO_INDEXER_VEL);
@@ -538,10 +538,29 @@ void discard(int time)
   }
 }
 
-void discard()
+void discardFront()
 {
-  discard(0);
+  discardFront(0);
 }
+
+void discardBack(int time)
+{
+  //Uses back ejection system
+  int endTime = pros::millis() + time;
+  setIntakesSafe(AUTO_INTAKE_VEL);
+  setIndexerSafe(AUTO_INDEXER_VEL);
+  setShooterSafe(-AUTO_SHOOTER_VEL);
+  while (pros::millis() < endTime)
+  {
+    pros::delay(10);
+  }
+}
+
+void discardBack()
+{
+  discardBack(0);
+}
+
 
 void pushAway(int time)
 {

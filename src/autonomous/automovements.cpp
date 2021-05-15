@@ -284,7 +284,7 @@ AutoTask PurePursuitSmooth(Point endPoint, double accel, double errorTolerance)
 
         // deaccelCoeff = pow(min(realLookaheadDist / min(lookAheadDistance, startDistance / 2), 1.0), deaccelStrength);
 
-        array<double, 2> speeds = {getSignOf(innerProduct), getSignOf(innerProduct)};
+        array<double, 2> speeds = {(double) (getSignOf(innerProduct)), (double) (getSignOf(innerProduct))};
 
         double arcRadius = Curvature((*currentPosition), (*lookaheadPnt), (*currentAngle));
 

@@ -38,12 +38,26 @@ namespace TaskLambdas
         };
     };
 
+    runFn_t DiscardFront()
+    {
+        return [] {
+            discardFront();
+        };
+    };
+
+    runFn_t DiscardBack()
+    {
+        return [] {
+            discardBack();
+        };
+    };
+
     /**
   * @brief Lambda Sets Drive To 0 With Both Safe and PID Drive
   **/
     runFn_t SetDrive0() {
         return [] {
-            setDriveSafe(0, 0);
+            Set_Drive_Direct(0, 0, 0, 0);
             Set_Drive(0, 0, 0, 0);
         };
     };
@@ -51,7 +65,7 @@ namespace TaskLambdas
     // Uses `SetDriveSafe(velocity, velocity)` for `time` ms duration, then SetDrive0
     AutoTask TimeBasedMoveTask(double velocity, double time)
     {
-        return Delay(time).AddRun([velocity] { setDriveSafe(velocity, velocity); }).AddKill(SetDrive0()).AddKill(PrintLocation(""));
+        return Delay(time).AddRun([velocity] { Set_Drive_Direct(velocity, velocity, velocity, velocity); }).AddKill(SetDrive0()).AddKill(PrintLocation(""));
     };
 
 

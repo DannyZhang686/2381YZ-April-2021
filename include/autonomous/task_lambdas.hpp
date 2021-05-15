@@ -25,10 +25,13 @@ namespace TaskLambdas
 
     runFn_t IntakeF(double intakeSpeed = 200);
 
+    runFn_t DiscardFront();
+    runFn_t DiscardBack();
+
     /**
   * @brief Lambda Sets Drive To 0 With Both Safe and PID Drive
   **/
-    runFn_t SetDrive0() ;
+    runFn_t SetDrive0();
 
     // Uses `SetDriveSafe(velocity, velocity)` for `time` ms duration, then SetDrive0
     AutoTask TimeBasedMoveTask(double velocity, double time);

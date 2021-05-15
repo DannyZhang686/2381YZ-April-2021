@@ -8,8 +8,8 @@
 
 //Motor ports
 
-#define LI_PORT 10
-#define RI_PORT 20
+#define LI_PORT 20
+#define RI_PORT 10
 #define INDEXER_PORT 4
 #define SHOOTER_PORT 1
 // FIXME - SHOULD BE SHOOTER PORT 1 BUT W/E
