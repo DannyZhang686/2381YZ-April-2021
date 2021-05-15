@@ -7,8 +7,8 @@
 #include "motors.h"
 #include "autonomous/functional_tasks.hpp"
 
-#define ROBOT_L
-// #define ROBOT_Z
+// #define ROBOT_L
+#define ROBOT_Z
 
 
 #ifdef ROBOT_L
@@ -24,13 +24,13 @@ const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST; // 0
 
 
 #ifdef ROBOT_Z
-const double MAX_TURN_SPEED_CONST = 12 * M_PI / 180; // 0.191986217719
+const double MAX_TURN_SPEED_CONST = 3 * M_PI / 180; // a = 3.29565
 const double TURN_EXPONENT = -0.1135;
 // This is the slope of the graph if you set motors to 127 at time = 0.
 // v(t) = -a*e^{bx} + a
 // d/dt v(t) = -ab * e^{bx}
 // d/dt v(0) = -ab
-const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST; // 0.02377
+const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST;
 #undef ROBOT_Z
 #endif
 
@@ -165,7 +165,7 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 
 		double motorPower = 127 * calcVoltageSetpoint(accelTarget, TURN_EXPONENT, currentAngVel, MAX_TURN_SPEED_CONST);
 		Set_Drive_Direct(-motorPower, -motorPower, motorPower, motorPower);
-		
+
 #define DEBUG
 #ifdef DEBUG
 		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(accelTarget) + "x" + t__s(angleDiff) + "\n";
@@ -187,4 +187,3 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 
 	return AutoTask::SyncTask(run, done, init, kill);
 }
-

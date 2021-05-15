@@ -9,13 +9,6 @@
 #include "autonomous.h"
 #include "control/pid.hpp"
 
-//For these robot functions, DIGITAL_L2 is used as a "shift" key;
-//when it is pressed along with another button, a different
-//(usually opposite) command is given.
-
-//This increases the number of different things the driver can do
-//using the four buttons on the controller that are easiest to reach.
-
 bool shooterToggle = true;
 double prevNumBalls = 0;
 
@@ -185,9 +178,9 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
     //Release the mutex
     // driveControl.give();
     return true; //success
-    }
-  return false; //Could not set value
   }
+  return false; //Could not set value
+}
 
 //Similar functions to setDriveSafe, for different parts of the robot
 bool setIntakesSafe(double velocity) {
@@ -196,9 +189,9 @@ bool setIntakesSafe(double velocity) {
     intakeSetpoint = (voltage);
     intakeControl.give();
     return true;
-    }
-  return false;
   }
+  return false;
+}
 
 bool setIndexerSafe(double velocity) {
   int voltage = (int)(velocity * 60);
@@ -206,9 +199,9 @@ bool setIndexerSafe(double velocity) {
     indexerSetpoint = voltage;
     indexerControl.give();
     return true;
-    }
-  return false;
   }
+  return false;
+}
 
 bool setShooterSafe(double velocity) {
   int voltage = (int)(velocity * 60);
@@ -216,6 +209,6 @@ bool setShooterSafe(double velocity) {
     shooterSetpoint = (voltage);
     shooterControl.give();
     return true;
-    }
-  return false;
   }
+  return false;
+}

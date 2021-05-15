@@ -45,8 +45,9 @@ pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 //   }
 //   return false; //Could not set value
 // }
-//
+// 
 // //Similar functions to setDriveSafe, for different parts of the robot
+// 
 // bool setIntakesSafe(double velocity) {
 //   int voltage = (int) (velocity * 60);
 //   if (intakeControl.take(0)) {
@@ -56,7 +57,7 @@ pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 //   }
 //   return false;
 // }
-//
+// 
 // bool setIndexerSafe(double velocity) {
 //   int voltage = (int) (velocity * 60);
 //   if (indexerControl.take(0)) {
@@ -66,7 +67,7 @@ pros::Mutex driveControl, intakeControl, indexerControl, shooterControl;
 //   }
 //   return false;
 // }
-//
+// 
 // bool setShooterSafe(double velocity) {
 //   int voltage = (int) (velocity * 60);
 //   if (shooterControl.take(0)) {

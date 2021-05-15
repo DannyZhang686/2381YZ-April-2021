@@ -21,15 +21,18 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
-    PurePursuitTask({20, 0}, 0 , 80).AddRun([]{
-      s__t(3, "Hello");
-    }), //COMMENT TO CHANGE
-
-    SingleRun([]{
-        s__t(1, "new task");
+    SingleRun([](void) -> void {
+      position_tracker->Set_Position({57.6, 14.4}, M_PI - 0.384);
     }),
-    // TurnToPointSMOOTH({-50, 50}, 100, 0.5),
+    // IntakeF(200);
+    AutoTask::AutoDelay(200),
+    PurePursuitTask({9.5, 23.5}, 0, 80),
+    // TimeBasedMoveTask(0, 200),
+    // TimeBasedMoveTask(-70, 650),
+    // TurnToPointSmooth({12, 12}, 100, 0.5).AddKill([]{
+    //   stopMotors();
+    // }),
     // PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
-
-    })
+    AutoTask::AutoDelay(10000000),
+  })
 );
