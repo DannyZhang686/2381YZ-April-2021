@@ -1,6 +1,5 @@
 #include "main.h"
 #include "autonomous/auto_task.hpp"
-#include "autonomous/auto_timer.hpp"
 
 AutoTask AutoTask::AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init, std::function<void(void)> kill)
 {
@@ -11,10 +10,6 @@ AutoTask AutoTask::SyncTask(std::function<void(void)> task, std::function<bool(v
 {
     AutoTask syncTask = AutoTask(task, done, true, init, kill);
     return syncTask;
-}
-AutoTask AutoTask::AutoDelay(int time, bool sync)
-{
-    return AutoTimer(AutoTimerArgs({interval: time, sync : sync}));
 }
 
 AutoTask::AutoTask(std::function<void(void)> task, std::function<bool(void)> done, bool sync, std::function<void(void)> init, std::function<void(void)> kill)
@@ -84,26 +79,4 @@ bool AutoTask::done(void)
         isDone = isDone || value();
     }
     return isDone;
-}
-AutoTask AutoTask::TimeLimit(int time)
-{
-
-    AutoTask timedTask = AutoTimer(time);
-    for (const auto& value : this->runList)
-    {
-        timedTask.AddRun(value);
-    };
-    for (const auto& value : this->killList)
-    {
-        timedTask.AddKill(value);
-    }
-    for (const auto& value : this->initList)
-    {
-        timedTask.AddInit(value);
-    }
-    for (const auto& value : this->doneList)
-    {
-        timedTask.AddDone(value);
-    }
-    return timedTask;
 }

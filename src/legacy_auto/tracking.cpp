@@ -5,6 +5,7 @@
 #include "pid.h"
 #include "autonomous/auto_task.hpp"
 #include "legacy/legacy_autonomous.hpp"
+#include "autonomous/task_lambdas.hpp"
 
 // namespace PPS
 // {
@@ -154,7 +155,7 @@ AutoTask TurnToPointTask(double targetX, double targetY, double maxError)
 
 AutoTask ApproachGoalTask(double vel, double t)
 {
-    return AutoTask::AutoDelay(t).AddRun([vel] {
+    return Delay(t).AddRun([vel] {
                                      s__t(2, "AG Outputs");
                                      setDriveSafe(vel, vel);
                                  })

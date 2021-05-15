@@ -9,6 +9,7 @@
 
 #include "autonomous.h"
 
+#define Delay TaskLambdas::AutoDelay
 
 namespace TaskLambdas
 {
@@ -31,6 +32,8 @@ namespace TaskLambdas
 
     // Uses `SetDriveSafe(velocity, velocity)` for `time` ms duration, then SetDrive0
     AutoTask TimeBasedMoveTask(double velocity, double time);
+
+    AutoTask AutoDelay(int time, bool isSync = true);
 
 }
 

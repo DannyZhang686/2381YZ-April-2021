@@ -2,9 +2,7 @@
 #include "autonomous/pathing.hpp"
 #include "autonomous/auto_task.hpp"
 #include "autonomous/position_tracker.hpp"
-#include "autonomous/auto_timer.hpp"
 #include "autonomous/auton_control.hpp"
-#include "autonomous/auto_timer.hpp"
 
 #ifndef _AUTONOMOUS_H_
 #define _AUTONOMOUS_H_

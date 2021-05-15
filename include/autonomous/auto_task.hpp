@@ -4,7 +4,6 @@
 #include <functional>
 #include <vector>
 
-#define Delay AutoTask::AutoDelay
 typedef std::function<void(void)> runFn_t;
 typedef std::function<bool(void)> doneFn_t;
 
@@ -43,7 +42,6 @@ class AutoTask {
 
     static AutoTask AsyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
     static AutoTask SyncTask(std::function<void(void)> task, std::function<bool(void)> done, std::function<void(void)> init = [](void) -> void {}, std::function<void(void)> kill = [](void) -> void {});
-    static AutoTask AutoDelay(int interval, bool sync = true);
 
     AutoTask TimeLimit(int time);
 
