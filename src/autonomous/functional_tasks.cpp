@@ -24,7 +24,7 @@ const double MAX_TURN_ACCEL_CONST = - TURN_EXPONENT * MAX_TURN_SPEED_CONST; // 0
 
 
 #ifdef ROBOT_Z
-const double MAX_TURN_SPEED_CONST = 3 * M_PI / 180; // a = 3.29565
+const double MAX_TURN_SPEED_CONST = 0.15875;
 const double TURN_EXPONENT = -0.1135;
 // This is the slope of the graph if you set motors to 127 at time = 0.
 // v(t) = -a*e^{bx} + a
@@ -168,7 +168,7 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 
 #define DEBUG
 #ifdef DEBUG
-		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(accelTarget) + "x" + t__s(angleDiff) + "\n";
+		std::string a = "" + t__s(iteration) + "x" + t__s(currentAngVel) + "x" + t__s(accelTarget) + "x" + t__s(angleDiff) + "x" + t__s(motorPower) + "\n";
 		printf(a.c_str());
 #undef DEBUG
 #endif
@@ -183,6 +183,100 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 	{
 		Set_Drive_Direct(0, 0, 0, 0);
 		delete (&angleDiff, &currentAngVel, &initialAngle, &iteration);
+	};
+
+	return AutoTask::SyncTask(run, done, init, kill);
+}
+
+AutoTask IntakeShootTask(int ballsScored, int ballsDescored)
+{
+	//ONLY SUPPORTS VALUES FROM 0 TO 2
+	double& initialBottom = *(new double()), &initialMiddle = *(new double()), &initialTop = *(new double());
+	bool &isDoneTop = *(new bool()), &isDoneBottom = *(new bool());
+
+	auto init = [&]
+	{
+		initialBottom = numBallsBottom;
+		initialMiddle = numBallsMiddle;
+		initialTop = numBallsTop;
+		isDoneTop = isDoneBottom = false;
+	};
+
+	auto run = [&, ballsScored, ballsDescored](void) -> void
+	{
+		double curBottom = numBallsBottom - initialBottom;
+		double curMiddle = numBallsMiddle - initialMiddle;
+		double curTop = numBallsTop - initialTop;
+
+		if (ballsScored == 0) {
+		  isDoneTop = true;
+		}
+		else if (ballsScored == 1) {
+		  if (curTop >= 1) {
+		    setShooterSafe(0);
+		    isDoneTop = true;
+		  }
+		  else {
+		    setShooterSafe(-AUTO_SHOOTER_VEL);
+		  }
+		}
+		else if (ballsScored == 2) {
+		  if (curTop >= 2) {
+		    setShooterSafe(0);
+		    setIndexerSafe(0);
+		    isDoneTop = true;
+		  }
+		  else if (curTop >= 0.5) { //TODO: can honestly probably change this to mLineSensor updating bc there's such a huge delay rn
+		    setShooterSafe(-AUTO_SHOOTER_VEL);
+		    if (curMiddle >= 1) {
+		      setIndexerSafe(0);
+		    }
+		    else {
+		      setIndexerSafe(AUTO_INDEXER_VEL);
+		    }
+		  }
+		  else {
+		    setShooterSafe(-AUTO_SHOOTER_VEL);
+		  }
+		}
+
+		if (ballsDescored == 0) {
+		  isDoneBottom = true;
+		}
+		else if (ballsDescored == 1) {
+		  if (curBottom >= 0.5) {
+		    setIntakesSafe(0);
+		    isDoneBottom = true;
+		  }
+		  else {
+		    setIntakesSafe(AUTO_INTAKE_VEL);
+		  }
+		}
+		else if (ballsDescored == 2) {
+		  if (curBottom >= 1.5) {
+		    setIntakesSafe(0);
+		    if (ballsScored != 2) {
+					setIndexerSafe(0);
+				}
+		    isDoneBottom = true;
+		  }
+		  else {
+		    setIntakesSafe(AUTO_INTAKE_VEL);
+		    if (ballsScored != 2) {
+					setIndexerSafe(1000);
+				}
+		  }
+		}
+	};
+
+	auto done = [&]() -> bool {
+		return (isDoneTop && isDoneBottom);
+	};
+
+	auto kill = [&]
+	{
+		stopMotors();
+		delete (&initialBottom, &initialMiddle, &initialTop, &isDoneTop, &isDoneBottom);
 	};
 
 	return AutoTask::SyncTask(run, done, init, kill);

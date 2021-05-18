@@ -145,6 +145,10 @@ const void stop(void)
     leftFront->move_voltage(0);
     rightFront->move_voltage(0);
     _pid_inputs = { 0, 0, 0, 0 };
+    _left_back_motor_value = 0;
+    _left_front_motor_value = 0;
+    _right_back_motor_value = 0;
+    _right_front_motor_value = 0;
     }
 
 void PID_Drive(void*)
@@ -161,6 +165,10 @@ void PID_Drive(void*)
                 rightBack->move(0);
                 leftFront->move(0);
                 _pid_inputs = { 0, 0, 0, 0 };
+                _left_back_motor_value = 0;
+                _left_front_motor_value = 0;
+                _right_back_motor_value = 0;
+                _right_front_motor_value = 0;
                 }
             else
                 {

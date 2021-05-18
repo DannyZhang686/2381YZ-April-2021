@@ -12,7 +12,7 @@
 //Position tracking struct and variable
 //Units: inches and radians
 
-extern double numBallsShot, numBallsIntaken;
+extern double numBallsBottom, numBallsMiddle, numBallsTop;
 
 //Auto function declarations
 //auto_functions.cpp

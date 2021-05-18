@@ -21,18 +21,35 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
+    IntakeShootTask(1, 2),
+    TimeBasedMoveTask(-60, 400),
+/*
     SingleRun([](void) -> void {
-      position_tracker->Set_Position({57.6, 14.4}, M_PI - 0.384);
+      position_tracker->Set_Position({57.6, 14.4}, 2.75762);
     }),
-    // IntakeF(200);
-    Delay(200),
-    PurePursuitTask({9.5, 23.5}, 0, 80),
-    // TimeBasedMoveTask(0, 200),
-    // TimeBasedMoveTask(-70, 650),
-    // TurnToPointSmooth({12, 12}, 100, 0.5).AddKill([]{
+    PurePursuitTask({8.7, 29}, 0, 127).AddInit([]{
+      IntakeF(200);
+    }),
+    TimeBasedMoveTask(0, 200),
+    TimeBasedMoveTask(-60, 400),
+    TurnToPointSmooth({10, 12}, 0.7, 0.5).AddKill([]{
+      stopMotors();
+    }),
+    PurePursuitTask({10, 12}, 0, 80),
+
+    // Goal 1
+    TimeBasedMoveTask(70, 300),
+    // TimeBasedMoveTask(0, 1000),
+    Delay(1000),
+    TimeBasedMoveTask(-70, 400),
+*/
+    // TurnToPointSmooth({39, 69}, 0.7, 0.5).AddKill([]{
     //   stopMotors();
     // }),
-    // PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
-    Delay(10000000),
+    // PurePursuitTask({39, 69}, 0, 80),
+//39, 69
+
+    // END
+    TimeBasedMoveTask(0, 10000000),
   })
 );
