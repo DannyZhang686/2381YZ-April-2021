@@ -21,7 +21,7 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
-    IntakeShootTask(1, 2),
+    IntakeShootTask(2),
     TimeBasedMoveTask(-60, 400),
 /*
     SingleRun([](void) -> void {
@@ -40,7 +40,7 @@ AutoSequence Auton::CUS_Q1 = AutoSequence(
     // Goal 1
     TimeBasedMoveTask(70, 300),
     // Delay(1000),
-    IntakeShootTask(findNumBalls(), 2), //Expecting findNumBalls() == 2
+    IntakeShootTask(2), //Expecting numBallsInRobot == 2
     TimeBasedMoveTask(-70, 400),
 */
     // TurnToPointSmooth({39, 69}, 0.7, 0.5).AddKill([]{

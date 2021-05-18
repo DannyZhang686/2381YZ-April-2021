@@ -412,7 +412,8 @@ void turnToPointOld(double targetX, double targetY, double maxError)
 //Counting the number of balls shot from and intaken by the robot
 //Starts at -0.5 due to initial addition of 0.5
 double numBallsBottom = -0.5, numBallsMiddle = -0.5, numBallsMiddleBottom = -0.5, numBallsTop = -0.5;
-bool tIsBall = false, mIsBall = false, mbIsBall = false, bIsBall = false;    //Whether or not the program believes there is a ball in front of each sensor
+bool tIsBall = false, mIsBall = false, mbIsBall = false, bIsBall = false;    //Whether or not the program believes there is a ball in front of each sensor... but false is yes and true is no :)
+int numBallsInRobot = 0;
 
 void countBalls(void *)
 {
@@ -435,10 +436,10 @@ void countBalls(void *)
   while (true)
   {
     //Update variables
-    tLastOutput.push(tLineSensor.get_value_calibrated());
-    mLastOutput.push(mLineSensor.get_value_calibrated());
-    mbLastOutput.push(mbLineSensor.get_value_calibrated());
-    bLastOutput.push(bLineSensor.get_value_calibrated());
+    tLastOutput.push(tLineSensor.get_value());
+    mLastOutput.push(mLineSensor.get_value());
+    mbLastOutput.push(mbLineSensor.get_value());
+    bLastOutput.push(bLineSensor.get_value());
     tSumOutputs += tLastOutput.back() - tLastOutput.front();
     mSumOutputs += mLastOutput.back() - mLastOutput.front();
     mbSumOutputs += mbLastOutput.back() - mbLastOutput.front();
@@ -478,6 +479,14 @@ void countBalls(void *)
       bIsBall = !bIsBall;
       numBallsBottom += 0.5;
     }
+    int ans = 0;
+    if (!mIsBall) { //Read the comment defining this variable (false == yes)
+      ++ans;
+    }
+    if (!mbIsBall) {
+      ++ans;
+    }
+    numBallsInRobot = ans;
     s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(mLineSensor.get_value()) + " " + t__s(mbLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()));
     s__t(5, t__s(numBallsTop) + " " + t__s(numBallsMiddle) + " " + t__s(numBallsMiddleBottom) + " " + t__s(numBallsBottom));
     pros::delay(10);
@@ -604,15 +613,4 @@ void stopMotors()
   setIntakesSafe(0);
   setIndexerSafe(0);
   setShooterSafe(0);
-}
-
-int findNumBalls() { //Counts the number of (properly indexed) balls in the system
-  int ans = 0;
-  if (mIsBall) {
-    ++ans;
-  }
-  if (mbIsBall) {
-    ++ans;
-  }
-  return ans;
 }

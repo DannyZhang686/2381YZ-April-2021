@@ -188,11 +188,12 @@ AutoTask TurnToPointSmooth(Point targetPoint, double accel, double errorToleranc
 	return AutoTask::SyncTask(run, done, init, kill);
 }
 
-AutoTask IntakeShootTask(int ballsScored, int ballsDescored)
+AutoTask IntakeShootTask(int ballsDescored)
 {
 	//ONLY SUPPORTS VALUES FROM 0 TO 2
 	double& initialBottom = *(new double()), &initialMiddle = *(new double()), &initialTop = *(new double());
 	bool &isDoneTop = *(new bool()), &isDoneBottom = *(new bool());
+	int &ballsScored = *(new int());
 
 	auto init = [&]
 	{
@@ -200,9 +201,11 @@ AutoTask IntakeShootTask(int ballsScored, int ballsDescored)
 		initialMiddle = numBallsMiddle;
 		initialTop = numBallsTop;
 		isDoneTop = isDoneBottom = false;
+		ballsScored = numBallsInRobot;
+    s__t(6, "set ballsScored to: " + t__s(ballsScored));
 	};
 
-	auto run = [&, ballsScored, ballsDescored](void) -> void
+	auto run = [&, ballsDescored](void) -> void
 	{
 		double curBottom = numBallsBottom - initialBottom;
 		double curMiddle = numBallsMiddle - initialMiddle;
@@ -276,7 +279,7 @@ AutoTask IntakeShootTask(int ballsScored, int ballsDescored)
 	auto kill = [&]
 	{
 		stopMotors();
-		delete (&initialBottom, &initialMiddle, &initialTop, &isDoneTop, &isDoneBottom);
+		delete (&initialBottom, &initialMiddle, &initialTop, &isDoneTop, &isDoneBottom, &ballsScored);
 	};
 
 	return AutoTask::SyncTask(run, done, init, kill);

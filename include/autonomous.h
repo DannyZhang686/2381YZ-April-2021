@@ -13,6 +13,7 @@
 //Units: inches and radians
 
 extern double numBallsBottom, numBallsMiddle, numBallsMiddleBottom, numBallsTop;
+extern int numBallsInRobot;
 extern bool tIsBall, mIsBall, mbIsBall, bIsBall;
 
 //Auto function declarations
@@ -30,8 +31,6 @@ void discardBack(void);
 void pushAway(int);
 void pushAway(void);
 void stopMotors(void);
-
-int findNumBalls(void);
 
 //auto_utilities.cpp
 bool setDriveSafe(double, double);
