@@ -12,7 +12,8 @@
 //Position tracking struct and variable
 //Units: inches and radians
 
-extern double numBallsBottom, numBallsMiddle, numBallsTop;
+extern double numBallsBottom, numBallsMiddle, numBallsMiddleBottom, numBallsTop;
+extern bool tIsBall, mIsBall, mbIsBall, bIsBall;
 
 //Auto function declarations
 //auto_functions.cpp
@@ -29,6 +30,8 @@ void discardBack(void);
 void pushAway(int);
 void pushAway(void);
 void stopMotors(void);
+
+int findNumBalls(void);
 
 //auto_utilities.cpp
 bool setDriveSafe(double, double);

@@ -30,6 +30,7 @@
 
 #define TOP_LINE 7
 #define MID_LINE 5
+#define MID_BOTTOM_LINE 6
 #define BOTTOM_LINE 8
 
 //Drive
@@ -113,6 +114,7 @@ pros::Motor shooter(SHOOTER_PORT, false);
 
 pros::ADIAnalogIn tLineSensor(TOP_LINE);
 pros::ADIAnalogIn mLineSensor(MID_LINE);
+pros::ADIAnalogIn mbLineSensor(MID_BOTTOM_LINE);
 pros::ADIAnalogIn bLineSensor(BOTTOM_LINE);
 
 pros::Controller master(CONTROLLER_MASTER);

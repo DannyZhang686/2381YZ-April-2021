@@ -39,8 +39,8 @@ AutoSequence Auton::CUS_Q1 = AutoSequence(
 
     // Goal 1
     TimeBasedMoveTask(70, 300),
-    // TimeBasedMoveTask(0, 1000),
-    Delay(1000),
+    // Delay(1000),
+    IntakeShootTask(findNumBalls(), 2), //Expecting findNumBalls() == 2
     TimeBasedMoveTask(-70, 400),
 */
     // TurnToPointSmooth({39, 69}, 0.7, 0.5).AddKill([]{
