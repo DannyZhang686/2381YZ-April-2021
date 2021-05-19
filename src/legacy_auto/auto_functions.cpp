@@ -411,7 +411,9 @@ void turnToPointOld(double targetX, double targetY, double maxError)
 
 //Counting the number of balls shot from and intaken by the robot
 //Starts at -0.5 due to initial addition of 0.5
-double numBallsShot = -0.5, numBallsIntaken = -0.5;
+double numBallsBottom = -0.5, numBallsMiddle = -0.5, numBallsMiddleBottom = -0.5, numBallsTop = -0.5;
+bool tIsBall = false, mIsBall = false, mbIsBall = false, bIsBall = false;    //Whether or not the program believes there is a ball in front of each sensor... but false is yes and true is no :)
+int numBallsInRobot = 0;
 
 void countBalls(void *)
 {
@@ -419,25 +421,30 @@ void countBalls(void *)
   //PROS API: "Line Trackers return a value between 0 and 4095, with 0 being the lightest reading and 4095 the darkest"
   //Thus larger return values indicate the presence of a ball (and vice versa)
 
-  int minOutput = 2350;                     //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
-  std::queue<int> tLastOutput, bLastOutput; //The last several outputs of each line sensor, stored in order
+  int minOutput = 2800;                     //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
+  std::queue<int> tLastOutput, mLastOutput, mbLastOutput, bLastOutput; //The last several outputs of each line sensor, stored in order
   int numOutputs = 5;                       //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
-  int tSumOutputs = 0, bSumOutputs = 0;     //The current sum of all elements in each lastOutput variable
-  bool tIsBall = false, bIsBall = false;    //Whether or not the program believes there is a ball in front of each sensor
+  int tSumOutputs = 0, mSumOutputs = 0, mbSumOutputs = 0, bSumOutputs = 0;     //The current sum of all elements in each lastOutput variable
   //Initialization of lastOutput (there is no ball at the start)
   for (int i = 0; i < numOutputs; i++)
   {
     tLastOutput.push(0);
+    mLastOutput.push(0);
+    mbLastOutput.push(0);
     bLastOutput.push(0);
   }
   while (true)
   {
     //Update variables
-    tLastOutput.push(tLineSensor.get_value_calibrated());
-    // bLastOutput.push(bLineSensor.get_value_calibrated());
+    tLastOutput.push(tLineSensor.get_value());
+    mLastOutput.push(mLineSensor.get_value());
+    mbLastOutput.push(mbLineSensor.get_value());
+    bLastOutput.push(bLineSensor.get_value());
     tSumOutputs += tLastOutput.back() - tLastOutput.front();
-    // bSumOutputs += bLastOutput.back() - bLastOutput.front();
-    tLastOutput.pop(); // bLastOutput.pop();
+    mSumOutputs += mLastOutput.back() - mLastOutput.front();
+    mbSumOutputs += mbLastOutput.back() - mbLastOutput.front();
+    bSumOutputs += bLastOutput.back() - bLastOutput.front();
+    tLastOutput.pop(); mLastOutput.pop(); mbLastOutput.pop(); bLastOutput.pop();
     if ((tSumOutputs / numOutputs > minOutput) == tIsBall) {
       //Nothing needs to be done, as the sensor output agrees with isBall
     }
@@ -445,77 +452,99 @@ void countBalls(void *)
     {
       //There is a disagreement; switch tIsBall
       tIsBall = !tIsBall;
-      numBallsShot += 0.5; //Adding 0.5 when the ball starts being shot and creating a total of 1 when the ball finishes shooting
+      numBallsTop += 0.5; //Adding 0.5 when the ball starts being shot and creating a total of 1 when the ball finishes shooting
     }
-    //Same thing with the other line sensor
+    //Same thing with the other line sensors
+    if ((mSumOutputs / numOutputs > minOutput) == mIsBall)
+    {
+    }
+    else
+    {
+      mIsBall = !mIsBall;
+      numBallsMiddle += 0.5;
+    }
+    if ((mbSumOutputs / numOutputs > minOutput) == mbIsBall)
+    {
+    }
+    else
+    {
+      mbIsBall = !mbIsBall;
+      numBallsMiddleBottom += 0.5;
+    }
     if ((bSumOutputs / numOutputs > minOutput) == bIsBall)
     {
     }
     else
     {
       bIsBall = !bIsBall;
-      numBallsIntaken += 0.5;
+      numBallsBottom += 0.5;
     }
-    // s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()) + " " + t__s(numBallsShot) + " " + t__s(numBallsIntaken));
+    int ans = 0;
+    if (!mIsBall) { //Read the comment defining this variable (false == yes)
+      ++ans;
+    }
+    if (!mbIsBall) {
+      ++ans;
+    }
+    numBallsInRobot = ans;
+    s__t(4, t__s(tLineSensor.get_value()) + " " + t__s(mLineSensor.get_value()) + " " + t__s(mbLineSensor.get_value()) + " " + t__s(bLineSensor.get_value()));
+    s__t(5, t__s(numBallsTop) + " " + t__s(numBallsMiddle) + " " + t__s(numBallsMiddleBottom) + " " + t__s(numBallsBottom));
     pros::delay(10);
   }
 }
 
-//The speed at which the motors will run
+// void intakeShoot(int numBallsIn, int numBallsOut)
+// {
+//   //Intake, index, and shoot the given number of balls (ex. cycling a tower)
+//   double initNumBallsShot = numBallsShot;       //Number of balls shot before this point
+//   double initNumBallsIntaken = numBallsIntaken; //Number of balls intaken before this point
+//   bool doneIntaking = false, doneShooting = false;
 
+//   int time = 0;
+//   bool setTime = false;
 
-void intakeShoot(int numBallsIn, int numBallsOut)
-{
-  //Intake, index, and shoot the given number of balls (ex. cycling a tower)
-  double initNumBallsShot = numBallsShot;       //Number of balls shot before this point
-  double initNumBallsIntaken = numBallsIntaken; //Number of balls intaken before this point
-  bool doneIntaking = false, doneShooting = false;
-
-  int time = 0;
-  bool setTime = false;
-
-  //Spin everything
-  setIntakesSafe(AUTO_INTAKE_VEL);
-  setIndexerSafe(AUTO_INDEXER_VEL);
-  setShooterSafe(AUTO_SHOOTER_VEL);
-  while (true)
-  {
-    //Continue delaying until the numbers update
-    if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot))
-    {
-      //Spin the shooter the other way instead, after a short delay
-      time = pros::millis();
-      setTime = true;
-      // s__t(3, "time set");
-    }
-    else if ((time != 0) && (pros::millis() - time > 100))
-    {
-      setShooterSafe(-AUTO_SHOOTER_VEL);
-      doneShooting = true;
-      // s__t(4, "");
-    }
-    if ((numBallsIn == 0) || (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken))
-    {
-      //Stop the intakes
-      setIntakesSafe(0);
-      doneIntaking = true;
-    }
-    if (doneShooting && doneIntaking)
-    {
-      break;
-    }
-    s__t(4, t__s(initNumBallsShot) + " " + t__s(numBallsOut) + " " + t__s(numBallsShot));
-    s__t(5, t__s(initNumBallsIntaken) + " " + t__s(numBallsIn) + " " + t__s(numBallsIntaken));
-    pros::delay(10);
-  }
-}
+//   //Spin everything
+//   setIntakesSafe(AUTO_INTAKE_VEL);
+//   setIndexerSafe(AUTO_INDEXER_VEL);
+//   setShooterSafe(AUTO_SHOOTER_VEL);
+//   while (true)
+//   {
+//     //Continue delaying until the numbers update
+//     if ((!setTime) && (initNumBallsShot + numBallsOut <= numBallsShot))
+//     {
+//       //Spin the shooter the other way instead, after a short delay
+//       time = pros::millis();
+//       setTime = true;
+//       // s__t(3, "time set");
+//     }
+//     else if ((time != 0) && (pros::millis() - time > 100))
+//     {
+//       setShooterSafe(-AUTO_SHOOTER_VEL);
+//       doneShooting = true;
+//       // s__t(4, "");
+//     }
+//     if ((numBallsIn == 0) || (initNumBallsIntaken + numBallsIn + 0.5 <= numBallsIntaken))
+//     {
+//       //Stop the intakes
+//       setIntakesSafe(0);
+//       doneIntaking = true;
+//     }
+//     if (doneShooting && doneIntaking)
+//     {
+//       break;
+//     }
+//     s__t(4, t__s(initNumBallsShot) + " " + t__s(numBallsOut) + " " + t__s(numBallsShot));
+//     s__t(5, t__s(initNumBallsIntaken) + " " + t__s(numBallsIn) + " " + t__s(numBallsIntaken));
+//     pros::delay(10);
+//   }
+// }
 
 void intakeNoShoot(int time, double velocity)
 {
   //Intake and index, running shooter backward to avoid shooting (ex. collecting balls)
-  int endTime = pros::millis() + time;
   setIntakesSafe(velocity);
   setIndexerSafe(velocity);
+  setShooterSafe(0);
   // setShooterSafe(-velocity);
 }
 
@@ -531,7 +560,7 @@ void discardFront(int time)
   int endTime = pros::millis() + time;
   setIntakesSafe(-AUTO_INTAKE_VEL);
   setIndexerSafe(-AUTO_INDEXER_VEL);
-  setShooterSafe(-AUTO_SHOOTER_VEL);
+  setShooterSafe(AUTO_SHOOTER_VEL);
   while (pros::millis() < endTime)
   {
     pros::delay(10);
@@ -549,7 +578,7 @@ void discardBack(int time)
   int endTime = pros::millis() + time;
   setIntakesSafe(AUTO_INTAKE_VEL);
   setIndexerSafe(AUTO_INDEXER_VEL);
-  setShooterSafe(-AUTO_SHOOTER_VEL);
+  setShooterSafe(AUTO_SHOOTER_VEL);
   while (pros::millis() < endTime)
   {
     pros::delay(10);

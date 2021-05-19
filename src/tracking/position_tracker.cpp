@@ -7,6 +7,7 @@
 #include <array>
 #include <complex>
 #include <cmath>
+#include "config/profiling.config.hpp"
 
 using namespace pros;
 using namespace std;
@@ -87,7 +88,8 @@ const Point Position_Tracker::Get_Wheel_Position(Wheel_Side side) const
     }
 }
 
-double turnModifier = 1.4;
+const double turnModifier = MAX_MOVE_SPEED_CONST / (MAX_TURN_SPEED_CONST * abs(Position_Tracker::drive_center_offset));
+
 const double Position_Tracker::Get_Wheel_Speed(Wheel_Side side) const
 {
     double forwardsSpeed = Inner_Product(Get_Velocity(), Get_Heading_Vec());

@@ -22,19 +22,30 @@ using namespace TaskLambdas;
 AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
     SingleRun([](void) -> void {
-      position_tracker->Set_Position({57.6, 14.4}, M_PI - 0.384);
+      position_tracker->Set_Position({86.4, 14.4}, 0.383972);
     }),
-    Delay(200).AddInit([]{
-      IntakeF(200);
-    }),
-    PurePursuitTask({9.5, 23.5}, 0, 80),
-    TimeBasedMoveTask(0, 200),
-    TimeBasedMoveTask(-70, 650),
-    TurnToPointSmooth({11, 7}).AddKill([]{
+    PurePursuitTask({131.5, 34}, 0, 127).AddRun(IntakeF(200)),
+    TimeBasedMoveTask(0, 150),
+    TimeBasedMoveTask(-60, 500),
+    TurnToPointSmooth({129, 15}, 0.7, 0.5).AddKill([]{ //119, 10
       stopMotors();
     }),
-    // PurePursuitTask({16, 34}, 0 , 80).AddInit(IntakeF(200)).AddKill(PrintLocation("ball on wall")), //COMMENT TO CHANGE
-    TimeBasedMoveTask(0, 100),
-    Delay(10000000),
+    PurePursuitTask({129, 15}, 0, 127),
+
+    // Goal 1
+    TimeBasedMoveTask(70, 300),
+    // Delay(1000),
+    IntakeShootTask(2).TimeLimit(1000), //Expecting numBallsInRobot == 2
+    TimeBasedMoveTask(-70, 400),
+
+    TurnToPointSmooth({101, 72}, 0.7, 0.5),
+    PurePursuitTask({101, 72}, 0, 127).AddRun([]{
+      discardBack();
+    }),
+    TurnToPointSmooth({129, 72}, 0.7, 0.5).AddRun(IntakeF(200)),
+    PurePursuitTask({129, 72}, 0, 127),
+
+    // END
+    TimeBasedMoveTask(0, 10000000),
   })
 );

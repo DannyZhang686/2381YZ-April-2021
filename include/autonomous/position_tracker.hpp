@@ -58,8 +58,8 @@ class Position_Tracker
     void Reset();
     void Create();
 
-    static std::complex<double> wheel_center_offset;
-    static std::complex<double> drive_center_offset;
+    const static std::complex<double> wheel_center_offset;
+    const static std::complex<double> drive_center_offset;
 
 
     protected:

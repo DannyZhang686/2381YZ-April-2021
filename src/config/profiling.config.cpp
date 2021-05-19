@@ -1,11 +1,11 @@
 #include "config/profiling.config.hpp"
 #include "main.h"
 
-// #define ROBOT_Z
+#define ROBOT_Z
 // TODO: Comment / uncomment above line to change config.
 
 #ifdef ROBOT_Z
-const double MAX_TURN_SPEED_CONST = 0.158; // a = 3.29565
+const double MAX_TURN_SPEED_CONST = 0.15875;
 const double TURN_EXPONENT_CONST = -0.1135;
 const double MAX_TURN_ACCEL_CONST = -TURN_EXPONENT_CONST * MAX_TURN_SPEED_CONST;
 

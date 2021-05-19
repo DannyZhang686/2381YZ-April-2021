@@ -45,17 +45,17 @@ void shooterSpin(void*)
         shooterSetpoint = 0;
         }
 
-      // if (shooterSetpoint == 0)
-      //   {
-      //   double shooterVoltage = shooterPID.Update(0, shooter.get_actual_velocity());
-      //   shooter.move(shooterVoltage);
-      //   }
-      // else
-        // {
-        shooter.move_voltage(shooterSetpoint);
-        // }
+      if (shooterSetpoint == 0)
+        {
+        double shooterVoltage = shooterPID.Update(0, shooter.get_actual_velocity());
+        shooter.move(shooterVoltage);
+        }
+      else
+        {
+           shooter.move_voltage(shooterSetpoint);
+        }
       }
-    pros::delay(DELAY_INTERVAL);
+      pros::delay(DELAY_INTERVAL);
     }
   }
 

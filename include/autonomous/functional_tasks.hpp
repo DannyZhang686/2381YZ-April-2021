@@ -20,7 +20,7 @@ extern AutoTask TurnToPointTask(Point target, double maxError = 0.07, double tur
 extern AutoTask DriveProfileTask(double speed, double time = 1000);
 extern AutoTask RestProfileTask();
 
-extern AutoTask IntakeShootTask(int numBallsIn, int numBallsOut);
+extern AutoTask IntakeShootTask(int numBallsOut);
 extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
 
 extern AutoTask TurnToPointSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
