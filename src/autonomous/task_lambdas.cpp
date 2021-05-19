@@ -58,7 +58,6 @@ namespace TaskLambdas
     runFn_t SetDrive0() {
         return [] {
             Set_Drive_Direct(0, 0, 0, 0);
-            Set_Drive(0, 0, 0, 0);
         };
     };
 

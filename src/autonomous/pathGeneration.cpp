@@ -19,57 +19,57 @@ using namespace pros;
 using namespace std::complex_literals;
 
 PointList DefinePath(const Point startPoint, const Point endPoint, const double startAngle)
-{
+    {
     // disp between the 2 points
     Point disp = endPoint - startPoint;
     double distance = abs(disp) / 4;
     Point midwayPoint = startPoint + distance * exp<double>(1i * startAngle);
 
-    PointList a = {Point(startPoint), midwayPoint, Point(endPoint)};
+    PointList a = { Point(startPoint), midwayPoint, Point(endPoint) };
     return a;
-}
+    }
 
 PointList InjectPoints(const PointList path, const double spacing)
-{
+    {
     // spacing is space between 2 points that r injected
-    PointList newPointList = {Point(path[0])};
+    PointList newPointList = { Point(path[0]) };
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
     auto Disp = path[1] - path[0];
     auto distance1 = abs(Disp);
 
     for (double i = 0; i < distance1; i += spacing)
-    {
+        {
         Point newPoint = path[0] + Disp * i / distance1;
         newPointList.push_back(newPoint);
-    }
+        }
     // additional points for line 1: solve for linear equation between both points 1 and 2
     // from there, you will get both the slope and y-intercept (which will be common for all points on this line)
     auto Disp2 = path[2] - path[1];
     auto distance2 = abs(Disp2);
 
     for (double i = 0; i < distance2; i += spacing)
-    {
+        {
         Point newPoint = path[1] + Disp2 * i / distance2;
         newPointList.push_back(newPoint);
-    }
+        }
     newPointList.push_back(Point(path[2]));
     return newPointList;
-}
+    }
 
 PointList smoother(const PointList path, const double weight_data, const double weight_smooth, const double tolerance)
-{
+    {
     //copy array
 
     PointList newPath = PointList(path);
     double change = tolerance;
 
     while (change >= tolerance)
-    {
+        {
         change = 0.0;
 
         for (int i = 1; i < path.size() - 1; i++)
-        {
+            {
             double auxR = newPath[i].real();
             newPath[i] += Point((weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).real(), 0);
             change += abs(auxR - newPath[i].real());
@@ -77,83 +77,111 @@ PointList smoother(const PointList path, const double weight_data, const double 
             double auxI = newPath[i].imag();
             newPath[i] += Point(0, (weight_data * (path[i] - newPath[i]) + weight_smooth * (newPath[i - 1] + newPath[i + 1] - (2.0 * newPath[i]))).imag());
             change += abs(auxI - newPath[i].imag());
+            }
         }
-    }
     return newPath;
-}
+    }
 
 const double Curvature(const Point currentPos, const Point targetPos, const double currentOrientation)
-{
+    {
     Point disp = targetPos - currentPos;
     double arg = std::arg(disp);
 
     double dist = abs(targetPos - currentPos);
 
     if (arg == currentOrientation)
-    {
+        {
         return NAN;
-    }
+        }
 
     double angleTargetCurrentCenter = arg;
     double angleToTravel = remainder(currentOrientation - angleTargetCurrentCenter, 2 * M_PI);
 
     //sin(angle) = dist / radius, radius = dist / sin(angle)
     return dist / (2 * sin(angleToTravel));
-}
+    }
+
+double arcLengthCalc(const double angle)
+    {
+    double normAng = NormalizeAngle(angle);
+    if (normAng == 0) return 1;
+    return normAng / sin(normAng);
+    // TODO: Optimize With Taylor Series.
+    }
+
+const double ArcLength(const Point currentPos, const Point targetPos, const double currentOrientation)
+    {
+    Point disp = targetPos - currentPos;
+    double dispArg = std::arg(disp);
+
+    double angDiff = NormalizeAngle(currentOrientation - dispArg);
+    // Normalize to between -PI/2 and PI/2.
+
+    return arcLengthCalc(NormalizeAngle(angDiff, 0.5)) * abs(disp) * (abs(angDiff) <= M_PI / 2 ? 1 : -1);
+    }
 
 const long GetClosest(const PointList path, const Point currentPoint, const long previousIndex)
-{
+    {
     auto reducedPrevIndex = previousIndex - 3;
     if (reducedPrevIndex < 0)
-    {
+        {
         reducedPrevIndex = 0;
-    }
+        }
     long minIndex = reducedPrevIndex;
     long size = path.size() - 1;
     double min = abs(path[minIndex] - currentPoint);
     for (long i = reducedPrevIndex; i < reducedPrevIndex + 30; i++)
-    {
+        {
         if (i >= size)
-        {
+            {
             break;
-        }
+            }
         if (abs(path[i] - currentPoint) < min)
-        {
+            {
             min = abs(path[i] - currentPoint);
             minIndex = i;
+            }
         }
-    }
     // s__t(0, "prev: " + t__s(reducedPrevIndex)  + " : " + t__s(minIndex) + " min: " + t__s(min));
     return minIndex;
-}
+    }
 
 const tuple<long, Point> FindLookAhead(const Point currentPos, const PointList path, const double radius, const long maxLookahead, const long previousIndex)
-{
+    {
     long index = previousIndex;
     long size = path.size();
 
     while (index < previousIndex + maxLookahead)
-    {
-        if (index >= size - 2)
         {
+        if (index >= size - 2)
+            {
             s__t(3, "end of line");
-            return {size - 1, path[size - 1]};
-        };
+            return { size - 1, path[size - 1] };
+            };
         Point lookaheadCheck = CheckIntersection(currentPos, path[index], path[index + 1], radius);
         if (lookaheadCheck != PointNotFound)
-        {
-            return {index, lookaheadCheck};
-        }
+            {
+            return { index, lookaheadCheck };
+            }
         index++;
+        }
+
+    // s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
+    return { previousIndex, PointNotFound };
     }
 
-    s__t(3, "sadge: " + t__s(size) + " " + t__s(previousIndex));
-    return {previousIndex, PointNotFound};
-}
+PointList GeneratePathCirc(const Point startpoint, const Point endpoint, const double startAngle_, const double spacing)
+    {
+    double startAngle = NormalizeAngle(startAngle_);
+    double offsetAngle = arg(endpoint - startpoint);
 
-PointList GeneratePathCirc(Point startpoint, Point endpoint, double startAngle, double spacing)
-{
-    startAngle = NormalizeAngle(startAngle);
+
+
+    if (abs(offsetAngle - startAngle) < 0.01)
+        {
+        return GeneratePath(startpoint, endpoint, startAngle, spacing);
+        }
+
     // # a0 = startAngle * math.pi
     double a0 = NormalizeAngle(startAngle - 0.5 * M_PI);
     double distSq = abs((startpoint - endpoint)) * abs((startpoint - endpoint));
@@ -167,26 +195,26 @@ PointList GeneratePathCirc(Point startpoint, Point endpoint, double startAngle, 
     auto angleDiff = NormalizeAngle(a, 2);
 
     while (abs(i / r) < abs(angleDiff))
-    {
+        {
         auto newPoint = center + r * exp<double>(1i * (a0 + i / r));
         newPointList.emplace_back(newPoint);
         i += spacing;
-    }
+        }
     return newPointList;
-}
+    }
 
-PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing)
-{
+PointList GeneratePath(const Point startpoint, const Point endpoint, double const startAngle, const double spacing)
+    {
 
     PointList path = DefinePath(startpoint, endpoint, startAngle);
     path = InjectPoints(path, spacing);
     path = smoother(path, 0.1, 0.9, 1);
     // PointList path = GeneratePathCirc(startpoint, endpoint, startAngle, spacing);
     return path;
-}
+    }
 
 const Point CheckIntersection(const Point circleCenter, const Point startPoint, const Point endPoint, const double radius)
-{
+    {
     auto lineSegmentVector = endPoint - startPoint;
     auto circleToStartVector = startPoint - circleCenter;
 
@@ -198,28 +226,28 @@ const Point CheckIntersection(const Point circleCenter, const Point startPoint, 
     double discriminant = b * b - 4 * a * c;
 
     if (discriminant >= 0)
-    {
+        {
         discriminant = sqrt(discriminant);
 
         double root1 = (-b - discriminant) / (2 * a);
         double root2 = (-b + discriminant) / (2 * a);
 
         if ((root2 >= 0) && (root2 <= 1))
-        {
+            {
             //Return immediately; root2 is further along the vector
             //and so is always a preferable return to root1
             auto a = startPoint + root2 * lineSegmentVector;
             auto dist = abs(a - circleCenter);
             // s__t(3, "root2 found: " + t__s(root2) + " dist:" + t__s(dist));
             return startPoint + root2 * lineSegmentVector;
-        }
+            }
         else if ((root1 >= 0) && (root1 <= 1))
-        {
+            {
             auto a = startPoint + root1 * lineSegmentVector;
             auto dist = abs(a - circleCenter);
             // s__t(3, "root1 found: " + t__s(root1) + " dist:" + t__s(dist));
             return startPoint + root1 * lineSegmentVector;
+            }
         }
-    }
     return PointNotFound;
-}
+    }

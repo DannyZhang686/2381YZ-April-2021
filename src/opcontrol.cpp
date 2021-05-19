@@ -2,24 +2,28 @@
 #include "opcontrol.h"
 #include "autonomous.h"
 #include "motors.h"
+#include "drive.hpp"
 #include "pid.h"
 #include "globals.hpp"
 
 void driver(void)
-{
+	{
 	Controller_Set_Drive(0, master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_X), master.get_analog(ANALOG_RIGHT_Y));
+	// double forward = master.get_analog(ANALOG_LEFT_Y), turn = master.get_analog(ANALOG_RIGHT_X);
+	// auto voltages = Calc_Drive_MPC(forward + turn, forward - turn);
+	// Set_Drive_Direct(voltages[0], voltages[0], voltages[1], voltages[1]);
 	controllerIndexerSpin();
 	controllerIntakeSpin();
 	controllerShooterSpin();
-}
+	}
 void opcontrol()
-{
-	while (true)
 	{
+	while (true)
+		{
 		master_control->run();
 		pros::delay(DELAY_INTERVAL);
+		}
 	}
-}
 
 
 

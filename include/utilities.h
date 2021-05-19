@@ -13,6 +13,13 @@ double rotatePi(double);
 double degToRad(double);
 double radToDeg(double);
 
-int getSignOf(double);
+const double getSignOf(const double);
+
+const double powCalc(const double x, const double power);
+const double minMaxMod(const double k, const double max, const double min);
+const double minMaxMod(const double k, const double max);
+
+
+
 
 #endif //_UTILITIES_H_

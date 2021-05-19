@@ -5,7 +5,9 @@
 #include "control/motor_controller.hpp"
 #include "control/pid.hpp"
 #include "globals.hpp"
-#define DELAY_INTERVAL 20
+#include "control/model_predictive_control.hpp"
+#include "drive.hpp"
+
 using namespace std;
 using namespace pros;
 // PID ARRAY
@@ -68,7 +70,7 @@ const void Controller_Set_Drive(double left_x, double left_y, double right_x, do
 
     Set_Drive(controllerSetpoints[0], controllerSetpoints[1], controllerSetpoints[2], controllerSetpoints[3]);
     }
-const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
+const std::array<double, 4> Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
     {
 
     // lcd::set_text(4, "HELLO motor value:" + t__s(leftBack->get_actual_velocity()));
@@ -104,22 +106,23 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
 
     masterDistance = (rfDistance + lfDistance + rbDistance + lbDistance) / 4;
 
-    double tuning_coefficient = _master_pid->Update(0, _master_error_average);
+    // double tuning_coefficient = 3 + _master_pid->Update(0, _master_error_average);
+    double tuning_coefficient = 3.346;
+
     if (tuning_coefficient < 0)
         {
         _master_pid->ResetError();
         tuning_coefficient = 1;
         }
 
-    _pid_inputs[left_back] = _pid_inputs[left_front] = _left_back_setpoint * ratioCalc(masterDistance, _master_offset, lbDistance, lboffset) * tuning_coefficient;
-    _pid_inputs[right_front] = _pid_inputs[right_back] = _right_front_setpoint * ratioCalc(masterDistance, _master_offset, rfDistance, rfoffset) * tuning_coefficient;
-
-
+    _pid_inputs[left_back] = _pid_inputs[left_front] = _left_back_setpoint * tuning_coefficient;
+    _pid_inputs[right_front] = _pid_inputs[right_back] = _right_front_setpoint * tuning_coefficient;
 
     double _left_back_motor_value = _left_back_motor_controller->Set_Speed(_pid_inputs[left_back]);
     double _left_front_motor_value = _left_front_motor_controller->Set_Speed(_pid_inputs[left_front]);
     double _right_back_motor_value = _right_back_motor_controller->Set_Speed(_pid_inputs[right_back]);
     double _right_front_motor_value = _right_front_motor_controller->Set_Speed(_pid_inputs[right_front]);
+
     Set_Drive_Direct(_left_back_motor_value, _left_front_motor_value, _right_back_motor_value, _right_front_motor_value);
 
     if (master.get_digital(DIGITAL_A))
@@ -128,6 +131,8 @@ const void Set_Drive(double lbSP, double lfSP, double rbSP, double rfSP)
         lcd::set_text(5, to_string((int)_left_back_setpoint) + ":" + to_string((int)_left_front_setpoint) + ":" + to_string((int)_right_back_setpoint) + ":" + to_string((int)_right_front_setpoint));
         lcd::set_text(6, to_string((int)_left_back_motor_value) + ":" + to_string((int)_left_front_motor_value) + ":" + to_string((int)_right_back_motor_value) + ":" + to_string((int)_right_front_motor_value));
         }
+
+    return { _left_back_motor_value, _left_front_motor_value, _right_back_motor_value, tuning_coefficient };
     }
 
 const void Set_Drive_Direct(double lbSP, double lfSP, double rbSP, double rfSP)
@@ -136,6 +141,7 @@ const void Set_Drive_Direct(double lbSP, double lfSP, double rbSP, double rfSP)
     _left_front_motor_value = lfSP;
     _right_back_motor_value = rbSP;
     _right_front_motor_value = rfSP;
+
     }
 
 const void stop(void)
@@ -145,6 +151,10 @@ const void stop(void)
     leftFront->move_voltage(0);
     rightFront->move_voltage(0);
     _pid_inputs = { 0, 0, 0, 0 };
+    _left_back_motor_value = 0;
+    _left_front_motor_value = 0;
+    _right_back_motor_value = 0;
+    _right_front_motor_value = 0;
     }
 
 void PID_Drive(void*)
@@ -161,6 +171,10 @@ void PID_Drive(void*)
                 rightBack->move(0);
                 leftFront->move(0);
                 _pid_inputs = { 0, 0, 0, 0 };
+                _left_back_motor_value = 0;
+                _left_front_motor_value = 0;
+                _right_back_motor_value = 0;
+                _right_front_motor_value = 0;
                 }
             else
                 {
@@ -176,6 +190,6 @@ void PID_Drive(void*)
 
 
 const void Controller_Direct_Drive()
-{
-    
-}
+    {
+
+    }

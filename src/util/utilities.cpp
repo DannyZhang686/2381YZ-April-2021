@@ -2,6 +2,34 @@
 #include "utilities.h"
 
 //Functions for convenience
+
+const double powCalc(double x, double power)
+    {
+    return pow(abs(x), power) * getSignOf(x);
+    }
+
+
+const double getSignOf(const double signedVar)
+    {
+    if (signedVar >= 0)
+        {
+        return 1;
+        }
+    return -1;
+    }
+
+const double minMaxMod(const double k, const double max, const double min)
+    {
+    if (k > max) return max;
+    if (k < min) return min;
+    return k;
+    }
+
+const double minMaxMod(const double k, const double max)
+    {
+    return minMaxMod(k, abs(max), -abs(max));
+    }
+
 int sgn(int i) {
   if (i > 0) return 1;
   else if (i == 0) return 0;

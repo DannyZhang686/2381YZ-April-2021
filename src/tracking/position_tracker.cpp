@@ -12,7 +12,7 @@ using namespace pros;
 using namespace std;
 using namespace std::complex_literals;
 
-const double NormalizeAngle(double angle, int multiplier)
+const double NormalizeAngle(double angle, double multiplier)
 {
     return remainder(angle, 2 * M_PI * multiplier);
 }
@@ -73,6 +73,32 @@ const double Position_Tracker::Get_Angle() const
 const double Position_Tracker::Get_Ang_Vel() const
 {
     return ang_vel;
+}
+
+const Point Position_Tracker::Get_Wheel_Position(Wheel_Side side) const
+{
+    switch(side)
+    {
+        case Left:
+            return Get_Position() + drive_center_offset * exp<double>(1i * Get_Angle());
+
+        case Right:
+            return Get_Position() - drive_center_offset * exp<double>(1i * Get_Angle());
+    }
+}
+
+double turnModifier = 1.4;
+const double Position_Tracker::Get_Wheel_Speed(Wheel_Side side) const
+{
+    double forwardsSpeed = Inner_Product(Get_Velocity(), Get_Heading_Vec());
+    switch(side)
+    {
+        case Left:
+            return forwardsSpeed - Get_Ang_Vel() * abs(drive_center_offset) * turnModifier;
+
+        case Right:
+            return forwardsSpeed + Get_Ang_Vel() * abs(drive_center_offset) * turnModifier;
+    }
 }
 
 
@@ -136,8 +162,8 @@ void Position_Tracker::Track_Position()
 
 const complex<double> Position_Tracker::Get_Position() const
 {
-    auto initial_wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * ang_origin);
-    auto wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * Get_Angle());
+    // auto initial_wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * ang_origin);
+    // auto wheel_displacement = Position_Tracker::wheel_center_offset * exp<double>(1i * Get_Angle());
     return Get_Displacement() + origin;
     // return Get_Displacement() + origin - initial_wheel_displacement + wheel_displacement;
 }

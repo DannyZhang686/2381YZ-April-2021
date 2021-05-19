@@ -17,11 +17,10 @@ class Position_Tracker
         back_
     };
 
-    enum Vector_Component
+    enum Wheel_Side
     {
-        XComp = 0,
-        YComp,
-        WComp,
+        Left = 0,
+        Right
     };
 
     static Position_Tracker* instance();
@@ -36,6 +35,12 @@ class Position_Tracker
     // Get the vector pointing in the current direction
     const std::complex<double> Get_Heading_Vec() const;
 
+    const std::complex<double> Get_Wheel_Position(Wheel_Side side) const;
+    const double Get_Wheel_Speed(Wheel_Side side) const;
+
+
+
+
 // Actual anglular offset from the start, excluding Set_Position adjustments to angle origin.
     double absolute_angle = 0;
 
@@ -45,6 +50,7 @@ class Position_Tracker
     const double Get_Angle() const;
     const double Get_Real_Angle() const;
 
+    std::array<double, 3> current_encoder_values = {0, 0, 0}, last_encoder_values = {0, 0, 0}, position_change = {0, 0, 0};
 
     void Reset_Position(void);
     void Set_Position(std::complex<double> newPosition = 0, double Angle = 0, std::complex<double> previousPosition = 0, double previousAngle = 0);
@@ -53,6 +59,8 @@ class Position_Tracker
     void Create();
 
     static std::complex<double> wheel_center_offset;
+    static std::complex<double> drive_center_offset;
+
 
     protected:
     //Vertical & Horizontal Encoder
@@ -71,9 +79,9 @@ class Position_Tracker
 
     std::complex<double> v_vel = 0, h_vel = 0;
 
-    std::array<double, 3> current_encoder_values = {0, 0, 0}, last_encoder_values = {0, 0, 0}, position_change = {0, 0, 0};
     unsigned int velLastChecked = 0;
 };
 
-extern const double NormalizeAngle(const double angle, const int multiplier = 1);
+extern const double NormalizeAngle(const double angle, const double multiplier = 1);
+// Returns angle between [-PI * Multiplier, + PI * Multiplier].
 #endif

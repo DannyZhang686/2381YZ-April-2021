@@ -78,3 +78,11 @@ DrivePidConfig Y_Bot_Drive_Config =
     {right_back, {0.6, 0, 0}},
     {right_front, {0.6, 0, 0 }},
 };
+
+
+
+// This is the slope of the graph if you set motors to 127 at time = 0.
+// v(t) = -a*e^{bx} + a
+// d/dt v(t) = -ab * e^{bx}
+// d/dt v(0) = -ab
+

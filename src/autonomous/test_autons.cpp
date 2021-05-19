@@ -21,10 +21,22 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::AT_Test_Ultras = AutoSequence(
   list<AutoTask>({
-  Delay(100),
-  SingleRun([]{cout << "hi";}),
-    // TurnToPointSMOOTH({-50, 50}, 100, 0.5),
-  DriveProfileTask(127),
+    // DriveProfileTask(60 , 1300),
+    // DriveProfileTask(-60 , 1300),
+    // TurnToPointSmooth({50, 0}),
+  PurePursuitTask({50,50}, 0, 127),
+    TurnToPointSmooth({0, 0}),
+
+  // PurePursuitTask({0,0}, 0, 127),
+
+  //     TurnToPointSmooth({50, 0}),
+  // PurePursuitTask({50,0}, 0, 127),
+  //   TurnToPointSmooth({0, 0}),
+
+  // PurePursuitTask({0,0}, 0, 127),
+
+
+    // TurnToPointSmooth({-50, 50}),
   RestProfileTask(),
   Delay(100000),
     // TurnToPointTask({-50, 50}, 0.07), // Changed from {25, 78} to 26, 77  because getting stuck at second tower on turn

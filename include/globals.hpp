@@ -19,6 +19,7 @@ extern MasterController* master_control;
 extern AutonControl& auton_control;
 
 extern Position_Tracker* position_tracker;
+extern Inertial* inertial;
 
 #endif
 

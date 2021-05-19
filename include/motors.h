@@ -33,7 +33,6 @@ extern pros::Motor rightIntake;
 extern pros::Motor indexer;
 extern pros::Motor shooter;
 
-extern Inertial* inertial;
 
 // extern pros::ADIEncoder rightTracking;
 extern pros::ADIEncoder* backTracking;

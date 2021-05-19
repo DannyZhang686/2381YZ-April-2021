@@ -6,6 +6,7 @@
 
 #include "auto_task.hpp"
 #include "pathing.hpp"
+#include "control/state_space_methods.hpp"
 
 extern AutoTask AutoPath(std::complex<double> EndPoint, double angle, double speed, double tolerance);
 extern AutoTask AutoPath(std::complex<double> EndPoint, double angle, double speed, std::array<double, 2> tolerance = {1, 1});
@@ -23,15 +24,8 @@ extern AutoTask IntakeShootTask(int numBallsIn, int numBallsOut);
 extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
 
 extern AutoTask TurnToPointSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
-extern AutoTask PurePursuitSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
+extern AutoTask PurePursuitSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 1);
 extern AutoTask PurePursuitSimple(const Point targetPoint, const double accel = 0.5, const double errorTolerance = 0.5);
-// Calculates Voltage Needed To Reach Given Acceleration Target given the Current Speed and shape of Velocity Exponential Curve.
-// @returns Relative Voltage double from -1 to 1. Multiply output by maximum voltage of system.
-extern double calcVoltageSetpoint(double targetAcceleration, double decayExponent, double currentSpeed, double maxSpeed);
 
-
-
-// Calculates Instantaneous Acceleration Given Coordinates in Phase Space of Position and Velocity
-extern double calcAccelSetpoint(double currentDistance, double currentVelocity, double errorTolerance, double maxAccel);
 
 #endif //!__FUNCTIONAL_TASKS__H__

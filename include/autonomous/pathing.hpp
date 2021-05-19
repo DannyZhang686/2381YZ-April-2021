@@ -15,8 +15,11 @@ PointList DefinePath(Point startPoint, Point endPoint, double startAngle);
 PointList InjectPoints(PointList path, double spacing);
 PointList smoother(PointList path, double weight_data, double weight_smooth, double tolerance);
 const double Curvature(Point currentPos, Point targetPos, double currentOrientation);
+const double ArcLength(const Point currentPos, const Point targetPos, const double currentOrientation);
 const long GetClosest(const PointList path, const Point currentPoint, const long previousIndex = 0);
-PointList GeneratePath(Point startpoint, Point endpoint, double startAngle, double spacing);
+PointList GeneratePath(const Point startpoint, const Point endpoint, const double startAngle, const double spacing);
+PointList GeneratePathCirc(const Point startpoint, const Point endpoint, const double startAngle, const double spacing);
+
 const static Point PointNotFound = Point(-100000, 100000);
 const std::tuple<long, Point> FindLookAhead(const Point currentPos, const PointList path, const double radius, const long maxLookahead, const long previousIndex = 0);
 

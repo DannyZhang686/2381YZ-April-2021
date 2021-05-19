@@ -3,6 +3,8 @@
 #include "autonomous/position_tracker.hpp"
 #include "opcontrol.h"
 #include "config/robot.config.hpp"
+#include "globals.hpp"
+
 #include <tuple>
 #include <map>
 
@@ -40,6 +42,9 @@ using namespace pros;
 
 // Default Competition Robot Tracking Setup
 complex<double> Position_Tracker::wheel_center_offset = {2.75, 5.25};
+// Real is distance to vertical track wheel, Imag is distance to horizontal track wheel
+complex<double> Position_Tracker::drive_center_offset = {0, 6};
+
 bool shooterOn = true, intakeOn = true, indexerOn = true;
 
 const void InitEncoders(TrackingConfig config)
