@@ -21,33 +21,29 @@ using namespace TaskLambdas;
 
 AutoSequence Auton::CUS_Q1 = AutoSequence(
   list<AutoTask>({
-    IntakeShootTask(2),
-    TimeBasedMoveTask(-60, 400),
-/*
     SingleRun([](void) -> void {
-      position_tracker->Set_Position({57.6, 14.4}, 2.75762);
+      position_tracker->Set_Position({86.4, 14.4}, 0.383972);
     }),
-    PurePursuitTask({8.7, 29}, 0, 127).AddInit([]{
-      IntakeF(200);
-    }),
-    TimeBasedMoveTask(0, 200),
-    TimeBasedMoveTask(-60, 400),
-    TurnToPointSmooth({10, 12}, 0.7, 0.5).AddKill([]{
+    PurePursuitTask({131.5, 34}, 0, 127).AddRun(IntakeF(200)),
+    TimeBasedMoveTask(0, 150),
+    TimeBasedMoveTask(-60, 500),
+    TurnToPointSmooth({129, 15}, 0.7, 0.5).AddKill([]{ //119, 10
       stopMotors();
     }),
-    PurePursuitTask({10, 12}, 0, 80),
+    PurePursuitTask({129, 15}, 0, 127),
 
     // Goal 1
     TimeBasedMoveTask(70, 300),
     // Delay(1000),
-    IntakeShootTask(2), //Expecting numBallsInRobot == 2
+    IntakeShootTask(2).TimeLimit(1000), //Expecting numBallsInRobot == 2
     TimeBasedMoveTask(-70, 400),
-*/
-    // TurnToPointSmooth({39, 69}, 0.7, 0.5).AddKill([]{
-    //   stopMotors();
-    // }),
-    // PurePursuitTask({39, 69}, 0, 80),
-//39, 69
+
+    TurnToPointSmooth({101, 72}, 0.7, 0.5),
+    PurePursuitTask({101, 72}, 0, 127).AddRun([]{
+      discardBack();
+    }),
+    TurnToPointSmooth({129, 72}, 0.7, 0.5).AddRun(IntakeF(200)),
+    PurePursuitTask({129, 72}, 0, 127),
 
     // END
     TimeBasedMoveTask(0, 10000000),

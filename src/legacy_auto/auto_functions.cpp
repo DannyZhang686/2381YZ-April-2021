@@ -542,9 +542,9 @@ void countBalls(void *)
 void intakeNoShoot(int time, double velocity)
 {
   //Intake and index, running shooter backward to avoid shooting (ex. collecting balls)
-  int endTime = pros::millis() + time;
   setIntakesSafe(velocity);
   setIndexerSafe(velocity);
+  setShooterSafe(0);
   // setShooterSafe(-velocity);
 }
 
@@ -560,7 +560,7 @@ void discardFront(int time)
   int endTime = pros::millis() + time;
   setIntakesSafe(-AUTO_INTAKE_VEL);
   setIndexerSafe(-AUTO_INDEXER_VEL);
-  setShooterSafe(-AUTO_SHOOTER_VEL);
+  setShooterSafe(AUTO_SHOOTER_VEL);
   while (pros::millis() < endTime)
   {
     pros::delay(10);
@@ -578,7 +578,7 @@ void discardBack(int time)
   int endTime = pros::millis() + time;
   setIntakesSafe(AUTO_INTAKE_VEL);
   setIndexerSafe(AUTO_INDEXER_VEL);
-  setShooterSafe(-AUTO_SHOOTER_VEL);
+  setShooterSafe(AUTO_SHOOTER_VEL);
   while (pros::millis() < endTime)
   {
     pros::delay(10);

@@ -33,8 +33,8 @@ namespace TaskLambdas
 
     runFn_t IntakeF(double intakeSpeed)
     {
-        intakeNoShoot(intakeSpeed);
-        return [&, intakeSpeed]() {
+        return [intakeSpeed]() {
+            intakeNoShoot(intakeSpeed);
         };
     };
 

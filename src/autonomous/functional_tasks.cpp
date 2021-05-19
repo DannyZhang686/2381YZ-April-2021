@@ -202,7 +202,6 @@ AutoTask IntakeShootTask(int ballsDescored)
 		initialTop = numBallsTop;
 		isDoneTop = isDoneBottom = false;
 		ballsScored = numBallsInRobot;
-    s__t(6, "set ballsScored to: " + t__s(ballsScored));
 	};
 
 	auto run = [&, ballsDescored](void) -> void
