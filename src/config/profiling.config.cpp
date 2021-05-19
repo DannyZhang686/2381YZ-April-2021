@@ -1,7 +1,7 @@
 #include "config/profiling.config.hpp"
 #include "main.h"
 
-#define ROBOT_Z
+// #define ROBOT_Z
 // TODO: Comment / uncomment above line to change config.
 
 #ifdef ROBOT_Z

@@ -7,7 +7,6 @@
 #ifndef _AUTONOMOUS_H_
 #define _AUTONOMOUS_H_
 
-#define TRACKING_WHEEL_DIAMETER 2.806 //inches
 
 //Position tracking struct and variable
 //Units: inches and radians

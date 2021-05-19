@@ -1,6 +1,8 @@
 #ifndef POSITION_TRACKER_HPP
 #define POSITION_TRACKER_HPP
 
+#define TRACKING_WHEEL_DIAMETER 2.806 //inches
+
 #include "api.h"
 #include <array>
 #include <map>
