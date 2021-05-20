@@ -33,8 +33,20 @@ const void Inertial::Reset(void)
 
 const double Inertial::Get_Angle(void)
 { 
-    if(mode == A) return degToRad(imu1->get_heading());
-    if(mode == B) return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
+    // if(mode == A) return degToRad(imu1->get_heading());
+    if(true) return degToRad(imu1->get_heading());
+    if(mode == B)
+    {
+        double imu1Angle = imu1->get_heading();
+        double imu2Angle = imu2->get_heading();
+        if(imu1Angle * imu2Angle < 0)
+        {
+            return degToRad(0.5*(imu1->get_heading() + imu2->get_heading())) + M_PI;
+        }
+        else {
+            return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
+        }
+    }
     return 0;
 }
 
