@@ -177,7 +177,7 @@ PointList GeneratePathCirc(const Point startpoint, const Point endpoint, const d
 
 
 
-    if (abs(offsetAngle - startAngle) < 0.01)
+    if (abs(NormalizeAngle(offsetAngle - startAngle, 0.5)) < 0.01)
         {
         return GeneratePath(startpoint, endpoint, startAngle, spacing);
         }

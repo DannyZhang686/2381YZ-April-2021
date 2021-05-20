@@ -24,7 +24,7 @@ AutoSequence Auton::AT_Test_Ultras = AutoSequence(
     // DriveProfileTask(60 , 1300),
     // DriveProfileTask(-60 , 1300),
     TurnToPointSmooth({50, 0}),
-  PurePursuitTask({3,0}, 0, 127),
+  PurePursuitTask({50,50}, 0, 127),
   // PurePursuitTask({50,50}, 0, 127),
 
     TurnToPointSmooth({0, 0}),

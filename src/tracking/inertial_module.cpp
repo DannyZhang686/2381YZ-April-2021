@@ -38,20 +38,13 @@ const double Inertial::Get_Angle(void)
 
     if(mode == B)
     {
-        // double imu1Angle = imu1->get_heading();
-        // double imu2Angle = imu2->get_heading();
-        // complex<double> imu1Heading =  exp<double>(1i * imu1Angle);
-        // complex<double> imu2Heading =  exp<double>(1i * imu2Angle);
+        double imu1Angle = degToRad(imu1->get_heading());
+        double imu2Angle = degToRad(imu2->get_heading());
 
+        double angleDiff = NormalizeAngle(imu1Angle - imu2Angle, 0.5);
+        double actualAngle = NormalizeAngle(imu2Angle + angleDiff/2);
 
-
-        // if(imu1Angle * imu2Angle < 0)
-        // {
-        //     return degToRad(0.5*(imu1->get_heading() + imu2->get_heading())) ;
-        // }
-        // else {
-        //     return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
-        // }
+        return actualAngle;
     }
     return 0;
 }
