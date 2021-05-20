@@ -63,13 +63,13 @@ namespace PPS
 
     }
 
-AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, const double speed, const array<double, 2> errorTolerance)
+AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, const double speed, const double maxAccelCoeff, const double errorTolerance)
     {
 
 
     Point* startPoint, * currentPos, * lookaheadPnt, * currentVelocity;
 
-    double* startAngle, * currentAngle, * startDistance, * deaccelCoeff, * remainingDistance;
+    double* startAngle, * currentAngle, * startDistance, * remainingDistance;
 
     int* iteration, * mostestClosestIndex, * previousLookaheadIndex;
 
@@ -81,7 +81,7 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
     using namespace PPS;
 
     // init function
-    auto init = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> void {
+    auto init = [&, EndPoint, EndAngle](void) -> void {
         startPoint = new Point(position_tracker->Get_Position());
         currentPos = new Point(position_tracker->Get_Position());
         currentVelocity = new Point(position_tracker->Get_Velocity());
@@ -90,9 +90,8 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
         startAngle = new double(position_tracker->Get_Angle());
         currentAngle = new double(position_tracker->Get_Angle());
 
-        startDistance = new double(abs(EndPoint - *startPoint));
-        remainingDistance = new double(abs(EndPoint - *startPoint));
-        deaccelCoeff = new double(1);
+        startDistance = new double(abs(EndPoint - (*startPoint)));
+        remainingDistance = new double(abs(EndPoint - (*startPoint)));
 
         path = new PointList(GeneratePath(*startPoint, EndPoint, (*startAngle), PathSpacing));
         motorSetpoints = new array<double, 2>({ 0,0 });
@@ -102,13 +101,14 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
         iteration = new int(0);
         };
 
-    auto runFn = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> void {
+    auto runFn = [&, EndPoint, EndAngle, speed, maxAccelCoeff](void) -> void {
         try {
             (*currentPos) = (position_tracker->Get_Position());
             (*currentAngle) = position_tracker->Get_Angle();
             (*mostestClosestIndex) = GetClosest((*path), (*currentPos), (*mostestClosestIndex));
+            Point currentDisplacement = EndPoint - (*currentPos);
 
-            (*remainingDistance) = abs(EndPoint - (*currentPos));
+            (*remainingDistance) = abs(currentDisplacement);
             (*currentVelocity) = (position_tracker->Get_Velocity());
 
             /**
@@ -140,12 +140,12 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
                 }
             Point currentHeading = position_tracker->Get_Heading_Vec();
 
-            double innerProduct = Inner_Product(currentHeading, (*lookaheadPnt) - (*currentPos));
-            auto realLookaheadDist = abs((*lookaheadPnt) - (*currentPos));
+            double lookaheadHeadingComponent = Inner_Product(currentHeading, (*lookaheadPnt) - (*currentPos));
 
-            (*deaccelCoeff) = pow(min(realLookaheadDist / min(lookAheadDistance, (*startDistance) / 2), 1.0), deaccelStrength);
+            double forwardsDistance = Inner_Product(currentHeading, currentDisplacement);
+            double deaccelSpeed = sqrt(abs(maxAccelCoeff * MAX_MOVE_ACCEL_CONST * forwardsDistance)) * 127 / MAX_MOVE_SPEED_CONST;
 
-            array<double, 2> speeds = { getSignOf(innerProduct) * speed * (*deaccelCoeff), getSignOf(innerProduct) * speed * (*deaccelCoeff) };
+            array<double, 2> speeds = { getSignOf(lookaheadHeadingComponent) * min(speed, deaccelSpeed), getSignOf(lookaheadHeadingComponent) * min(speed, deaccelSpeed) };
 
             double arcRadius = Curvature((*currentPos), (*lookaheadPnt), (*currentAngle));
 
@@ -178,18 +178,17 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
             *motorSetpoints = Calc_Drive_MPC(speeds[0], speeds[1], true);
             Set_Drive_Direct((*motorSetpoints)[0], (*motorSetpoints)[0], (*motorSetpoints)[1], (*motorSetpoints)[1]);
 
-            double leftVoltage = (*motorSetpoints)[0], rightVoltage = (*motorSetpoints)[1];
 
 #define DEBUG
 #ifdef DEBUG
             std::string a = "" + t__s(*iteration) + "x" + t__s((*remainingDistance)) + "x" + t__s(abs(*currentVelocity))
-                + "x" + t__s(leftVoltage) + "x"
-                + PositionString(*currentPos)
+                + "x" + t__s((*motorSetpoints)[0]) + "x" + t__s(forwardsDistance) + "x" + t__s(deaccelSpeed)
+                // + PositionString(*currentPos)
                 + "\n";
             printf(a.c_str());
+            (*iteration)++;
 #undef DEBUG
 #endif
-            (*iteration)++;
             }
         catch (const std::exception& e)
             {
@@ -202,15 +201,16 @@ AutoTask PurePursuitTask(const complex<double> EndPoint, const double EndAngle, 
 
     // done function
     auto done = [&, EndPoint, EndAngle, speed, errorTolerance](void) -> bool {
-        auto a = (abs(*remainingDistance) < abs(*startDistance) / 2 && abs(*currentVelocity) < 0.05 * MAX_MOVE_SPEED_CONST);
-        if (a) printf("finished");
-        return a;
+        bool pastHalfway = (abs(*remainingDistance) < abs(*startDistance) / 2);
+        bool withinTolerance = (abs(*remainingDistance) < abs(errorTolerance));
+        bool stoppedMoving = abs(*currentVelocity) < 0.05 * MAX_MOVE_SPEED_CONST;
+        return (stoppedMoving && (pastHalfway || withinTolerance));
         };
 
     auto kill = [&](void) -> void {
         delete (path, mostestClosestIndex, previousLookaheadIndex,
             startPoint, currentPos, lookaheadPnt,
-            startAngle, currentAngle, startDistance, deaccelCoeff, remainingDistance, currentVelocity,
+            startAngle, currentAngle, startDistance, remainingDistance, currentVelocity,
             iteration, motorSetpoints);
         Set_Drive_Direct(0, 0, 0, 0);
         };

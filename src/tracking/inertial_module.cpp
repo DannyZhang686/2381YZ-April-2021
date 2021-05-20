@@ -1,6 +1,6 @@
 #include "inertial_module.hpp"
 #include "utilities.h"
-
+#include <complex>
 using namespace std;
 using namespace pros;
 
@@ -34,7 +34,25 @@ const void Inertial::Reset(void)
 const double Inertial::Get_Angle(void)
 { 
     if(mode == A) return degToRad(imu1->get_heading());
-    if(mode == B) return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
+
+
+    if(mode == B)
+    {
+        // double imu1Angle = imu1->get_heading();
+        // double imu2Angle = imu2->get_heading();
+        // complex<double> imu1Heading =  exp<double>(1i * imu1Angle);
+        // complex<double> imu2Heading =  exp<double>(1i * imu2Angle);
+
+
+
+        // if(imu1Angle * imu2Angle < 0)
+        // {
+        //     return degToRad(0.5*(imu1->get_heading() + imu2->get_heading())) ;
+        // }
+        // else {
+        //     return degToRad(0.5*(imu1->get_heading() + imu2->get_heading()));
+        // }
+    }
     return 0;
 }
 

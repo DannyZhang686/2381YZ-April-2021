@@ -21,7 +21,8 @@ extern AutoTask DriveProfileTask(double speed, double time = 1000);
 extern AutoTask RestProfileTask();
 
 extern AutoTask IntakeShootTask(int numBallsOut);
-extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
+// extern AutoTask PurePursuitTask(std::complex<double> EndPoint, double EndAngle, double speed, std::array<double, 2> errorTolerance = {0,0});
+extern AutoTask PurePursuitTask(const std::complex<double> EndPoint, const double EndAngle, const double speed, const double maxAccelCoeff = 0.5, const double errorTolerance = 1);
 
 extern AutoTask TurnToPointSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 0.1);
 extern AutoTask PurePursuitSmooth(Point targetPoint, double accel = 0.5, double errorTolerance = 1);

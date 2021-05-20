@@ -1,0 +1,6 @@
+Kalman filter
+make sure MPC works for drive
+Circular pathing
+Small angle and small distance kill conditions for turn and pps
+Make the arguments for pps actually make sense
+drive turn ratio with the Matrix algebra and match numbers see if the veness model works
