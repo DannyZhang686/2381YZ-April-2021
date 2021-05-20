@@ -45,8 +45,8 @@ using namespace pros;
 // Default Competition Robot Tracking Setup
 const complex<double> Position_Tracker::wheel_center_offset =
     {
-     2.75,
-     5.75
+     1.25,
+     14.5
     }; // Left to mid, back to mid
     // Real is distance to vertical track wheel, Imag is distance to horizontal track wheel
 const complex<double> Position_Tracker::drive_center_offset = { 0, 6 };
