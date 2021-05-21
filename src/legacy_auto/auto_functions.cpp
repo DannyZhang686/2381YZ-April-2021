@@ -421,9 +421,9 @@ void countBalls(void *)
   //PROS API: "Line Trackers return a value between 0 and 4095, with 0 being the lightest reading and 4095 the darkest"
   //Thus larger return values indicate the presence of a ball (and vice versa)
 
-  int minOutput = 2800;                     //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
+  int minOutput = 2840;                     //Arbitrary minimum line sensor output where (it's assumed) there isn't a ball
   std::queue<int> tLastOutput, mLastOutput, mbLastOutput, bLastOutput; //The last several outputs of each line sensor, stored in order
-  int numOutputs = 5;                       //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
+  int numOutputs = 10;                       //The number of outputs to be recorded in lastOutput (bigger number filters noise better but reacts to change slower)
   int tSumOutputs = 0, mSumOutputs = 0, mbSumOutputs = 0, bSumOutputs = 0;     //The current sum of all elements in each lastOutput variable
   //Initialization of lastOutput (there is no ball at the start)
   for (int i = 0; i < numOutputs; i++)

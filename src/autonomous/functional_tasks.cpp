@@ -145,7 +145,7 @@ AutoTask IntakeShootTask(int ballsDescored)
 		  else {
 		    setIntakesSafe(AUTO_INTAKE_VEL);
 		    if (ballsScored != 2) {
-					setIndexerSafe(1000);
+					setIndexerSafe(40);
 				}
 		  }
 		}

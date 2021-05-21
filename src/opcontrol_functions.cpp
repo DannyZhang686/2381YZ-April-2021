@@ -15,15 +15,15 @@ double prevNumBalls = 0;
 const void controllerShooterSpin(void)
   {
 
-  if (master.get_digital(DIGITAL_R2))
+  if ((master.get_digital(DIGITAL_R1)))
     {
-      // Poop / Backwards
-    shooterSetpoint = (SHOOTER_SPEED);
-    }
-  else if ((master.get_digital(DIGITAL_R1)))
-    {
-      // Forwards
+    // Forwards
     shooterSetpoint = (-SHOOTER_SPEED);
+    }
+  else if (master.get_digital(DIGITAL_R2))
+    {
+    // Poop / Backwards
+    shooterSetpoint = (SHOOTER_SPEED);
     }
   else
     {
@@ -52,24 +52,28 @@ void shooterSpin(void*)
         }
       else
         {
-           shooter.move_voltage(shooterSetpoint);
+        shooter.move_voltage(shooterSetpoint);
         }
       }
-      pros::delay(DELAY_INTERVAL);
+    pros::delay(DELAY_INTERVAL);
     }
   }
 
 const void controllerIntakeSpin(void)
   {
-  if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y)))
+  if (master.get_digital(DIGITAL_R1) && master.get_digital(DIGITAL_R2))
     {
-      // Out
-    intakeSetpoint = (-INTAKE_SPEED);
+    intakeSetpoint = 0;
     }
   else if ((master.get_digital(DIGITAL_L1)))
     {
     // Up
     intakeSetpoint = (INTAKE_SPEED);
+    }
+  else if ((master.get_digital(DIGITAL_L2)) || (master.get_digital(DIGITAL_Y)))
+    {
+    // Out
+    intakeSetpoint = (-INTAKE_SPEED);
     }
   else
     {
@@ -98,15 +102,21 @@ void intakeSpin(void*)
 
 const void controllerIndexerSpin(void)
   {
-  if ((master.get_digital(DIGITAL_L1)))
+
+
+  if (master.get_digital(DIGITAL_L1) && master.get_digital(DIGITAL_L2))
     {
-      // up
+    indexerSetpoint = 0;
+    }
+  else if ((master.get_digital(DIGITAL_L1)) || (master.get_digital(DIGITAL_R1) && master.get_digital(DIGITAL_R2)) )
+    {
+    // up
     indexerSetpoint = (INDEXER_SPEED);
     }
   else if (master.get_digital(DIGITAL_L2) || master.get_digital(DIGITAL_RIGHT))
     {
 
-      //down
+    //down
     indexerSetpoint = (-INDEXER_SPEED);
     }
   else
@@ -138,8 +148,8 @@ void indexerSpin(void*)
       //   }
       // else
         // {
-        indexer.move_voltage(indexerSetpoint);
-        // }
+      indexer.move_voltage(indexerSetpoint);
+      // }
       }
     pros::delay(DELAY_INTERVAL);
     }
@@ -178,9 +188,9 @@ bool setDriveSafe(double leftVelocity, double rightVelocity) {
     //Release the mutex
     // driveControl.give();
     return true; //success
-  }
+    }
   return false; //Could not set value
-}
+  }
 
 //Similar functions to setDriveSafe, for different parts of the robot
 bool setIntakesSafe(double velocity) {
@@ -189,9 +199,9 @@ bool setIntakesSafe(double velocity) {
     intakeSetpoint = (voltage);
     intakeControl.give();
     return true;
-  }
+    }
   return false;
-}
+  }
 
 bool setIndexerSafe(double velocity) {
   int voltage = (int)(velocity * 60);
@@ -199,9 +209,9 @@ bool setIndexerSafe(double velocity) {
     indexerSetpoint = voltage;
     indexerControl.give();
     return true;
-  }
+    }
   return false;
-}
+  }
 
 bool setShooterSafe(double velocity) {
   int voltage = (int)(velocity * 60);
@@ -209,6 +219,6 @@ bool setShooterSafe(double velocity) {
     shooterSetpoint = (voltage);
     shooterControl.give();
     return true;
-  }
+    }
   return false;
-}
+  }
